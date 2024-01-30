@@ -2,6 +2,7 @@ package com.sounaks.desktime;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -388,9 +389,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	{
 		if(SwingUtilities.isRightMouseButton(mouseevent) || mouseevent.getClickCount() == 2)
 		{ //Whenever this menu appears a mouseExited event occurs calling method
-			System.out.println("Clicked 2 times!");
 			refreshNow = false; // refreshThreadransparency which forces popup to disappear. So refreshNow=false.
-			// stopRefresh();
 			ExUtils.showPopup(pMenu, this, (Component)mouseevent.getSource(), mouseevent.getPoint(), scsize);
 		}
 	}
@@ -430,8 +429,6 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			curX = 0;
 			curY = 0;
 			saveProperties(info);
-			// System.out.println("Calling re_init...");
-			System.out.println(refreshThread.getState().name());
 			refreshNow = true;
 			refreshThread.refreshThreadransparency();
 			startRefresh();
@@ -504,18 +501,18 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 
 	class Refresher extends Thread
 	{
-		private AtomicIntegerArray topRect, leftRect, bottomRect, rightRect;
+		private AtomicIntegerArray top2pixelRows, left2pixelColumns, bottom2pixelRows, right2pixelColumns;
 		private int compInt;
 		private volatile boolean running = true;
 		
 		Refresher()
 		{
 			super("BG-Refresher");
-			topRect=new AtomicIntegerArray(10);
-			leftRect=new AtomicIntegerArray(10);
-			bottomRect=new AtomicIntegerArray(10);
-			rightRect=new AtomicIntegerArray(10);
-			compInt=0;
+			top2pixelRows      = new AtomicIntegerArray(10);
+			left2pixelColumns  = new AtomicIntegerArray(10);
+			bottom2pixelRows   = new AtomicIntegerArray(10);
+			right2pixelColumns = new AtomicIntegerArray(10);
+			compInt            = 0;
 			setPriority(6);
 		}
 
@@ -529,10 +526,8 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 				try
 				{
 					long waitBeforeRefresh = Math.round(2*1000/refreshRate);
-					System.out.println(waitBeforeRefresh);
 					Thread.sleep(waitBeforeRefresh);
 					tLabel.setBackImage(robot.createScreenCapture(getBounds()));
-					System.out.println("Refreshed!");
 				}
 				catch(Exception e)
 				{
@@ -546,34 +541,17 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 
 		public void run()
 		{
-			System.out.println("Starting...");
 			while(info.hasGlassEffect() && refreshThread!=null)
 			{
-				System.out.println("Looping...");
-				if(equalsOld() || !running)
+				if(backgroundEqualsOld() || !running)
 				{
-					System.out.println("Yielding...");
 					yield();
 				}
 				else
 				{
-					System.out.println("Refreshing...");
 					refreshThreadransparency();
 				}
-				System.out.println(time);
-				try
-				{
-					Thread.sleep(1000L);
-				}
-				catch(InterruptedException iie)
-				{
-					System.out.println(iie.getMessage());
-				}
 			}
-			System.out.println("Stopping...");
-			System.out.println("info.hasGlassEffect(): " + info.hasGlassEffect());
-			System.out.println("refreshThread!=null: " + (refreshThread!=null));
-			System.out.println("running: " + running);
 		}
 		
 		public void pause()
@@ -586,26 +564,21 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			running = true;
 		}
 
-		public boolean equalsOld()
+		public boolean backgroundEqualsOld()
 		{
-			Rectangle clRect = getBounds();
+			Rectangle bound = getBounds();
+			Rectangle boundWith2pxFence = new Rectangle();
+			boundWith2pxFence.setRect(bound.getX()-2,bound.getY()-2,bound.getWidth()+4,bound.getHeight()+4);
+			BufferedImage currImage = robot.createScreenCapture(boundWith2pxFence);
 			compInt=0;
-			System.out.println("Calculating top rect...");
-			topRect=copyAndComparePixelToArray(clRect.getX()-2,clRect.getY()-2,clRect.getWidth()+4,2.0,topRect);
-			System.out.println(compInt);
-			System.out.println("Calculating left rect...");
-			leftRect=copyAndComparePixelToArray(clRect.getX()-2,clRect.getY(),2.0,clRect.getHeight(),leftRect);
-			System.out.println(compInt);
-			System.out.println("Calculating bottom rect...");
-			bottomRect=copyAndComparePixelToArray(clRect.getX()-2,clRect.getY()+clRect.getHeight(),clRect.getWidth()+4,2.0,bottomRect);
-			System.out.println(compInt);
-			System.out.println("Calculating right rect...");
-			rightRect=copyAndComparePixelToArray(clRect.getX()+clRect.getWidth(),clRect.getY(),2.0,clRect.getHeight(),rightRect);
-			System.out.println(compInt);
+			top2pixelRows=copyAndComparePixelToArray(currImage,currImage.getMinX(),currImage.getMinY(),currImage.getWidth(),2.0,top2pixelRows);
+			left2pixelColumns=copyAndComparePixelToArray(currImage,currImage.getMinX(),currImage.getMinY(),2.0,currImage.getHeight(),left2pixelColumns);
+			bottom2pixelRows=copyAndComparePixelToArray(currImage,currImage.getMinX(),currImage.getHeight()-2,currImage.getWidth(),2.0,bottom2pixelRows);
+			right2pixelColumns=copyAndComparePixelToArray(currImage,currImage.getWidth()-2,currImage.getMinY(),2.0,currImage.getHeight(),right2pixelColumns);
 			return compInt==0;
 		}
 		
-		private AtomicIntegerArray copyAndComparePixelToArray(double rectx, double recty, double rectw, double recth, AtomicIntegerArray tmpArray)
+		private AtomicIntegerArray copyAndComparePixelToArray(BufferedImage img2compare, double rectx, double recty, double rectw, double recth, AtomicIntegerArray tmpArray)
 		{
 			int x=(int)Math.round(rectx);
 			int y=(int)Math.round(recty);
@@ -619,7 +592,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 					for(int i=x;i<(x+w);i++)
 					{
 						int ov = tmpArray.get(cp);
-						int nv = robot.getPixelColor(i,j).getRGB();
+						int nv = img2compare.getRGB(i,j);
 						tmpArray.set(cp,nv);
 						if(ov!=nv) compInt += 1;
 						cp += 1;
@@ -632,7 +605,8 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 				for(int j=y;j<h;j++)
 					for(int i=x;i<w;i++)
 					{
-						tmpArray.set(cp,robot.getPixelColor(i,j).getRGB());
+						int nv = img2compare.getRGB(i,j);
+						tmpArray.set(cp,nv);
 						cp += 1;
 					}
 				compInt=1; // 0=all matching, >0=mismatch;
@@ -643,14 +617,6 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 
 	public void startRefresh()
 	{
-		ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
-		int threadCount = threadGroup.activeCount();
-		Thread threadList[] = new Thread[threadCount];
-		threadGroup.enumerate(threadList);
-		System.out.println("\nActive threads are:");
-		for (int i = 0; i < threadCount; i++)
-			System.out.println(threadList[i].getName());
-
 		if ((refreshThread == null || !refreshThread.isAlive()) && info.hasGlassEffect() && refreshNow) 
 		{
 			refreshThread = new Refresher();
@@ -665,7 +631,6 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	public void stopRefresh()
 	{
 		refreshThread.pause();
-		System.out.println(Thread.activeCount());
 	}
 
 	public static void main(String args[])

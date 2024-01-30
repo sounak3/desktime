@@ -8,7 +8,7 @@
   <void method="put">
    <string>FONT</string>
    <object class="java.awt.Font">
-    <string>Segoe Script Bold</string>
+    <string>Segoe UI Bold</string>
     <int>0</int>
     <int>16</int>
    </object>
@@ -34,23 +34,23 @@
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>664</int>
+     <int>775</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>112</int>
+     <int>139</int>
     </void>
    </void>
   </void>
   <void method="put">
    <string>FOREGROUND</string>
    <object class="java.awt.Color">
-    <int>102</int>
-    <int>255</int>
-    <int>102</int>
+    <int>51</int>
+    <int>0</int>
+    <int>204</int>
     <int>255</int>
    </object>
   </void>

@@ -329,13 +329,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 
 	public static InfoTracker showDialog(String s, int i, InitInfo initinfo, Vector <TimeBean>alarmData)
 	{
-		System.out.println("Chooser box starting...");
 		ChooserBox chooserbox = new ChooserBox(initinfo, alarmData);
 		chooserbox.setTitle(s);
 		InfoTracker infotracker = new InfoTracker(chooserbox);
 		chooserbox.setDefaultCloseOperation(2);
 		chooserbox.revalidate();
-		System.out.println("Chooser box before pack!");
 		chooserbox.pack();
 		chooserbox.setSize(430, 470);
 		chooserbox.setResizable(false);
@@ -346,15 +344,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		cancel.addActionListener(infotracker);
 		chooserbox.tabPane.setSelectedIndex(i);
 		chooserbox.setModal(true);
-		System.out.println("Triggering chooser box...");
 		chooserbox.setVisible(true);
-		System.out.println("Chooser box was visible!");
 		return infotracker;
 	}
 
 	public void initialize(InitInfo initinfo, Vector <TimeBean>alarmData) //Called by->constructor->showDialog
 	{
-		System.out.println("Initializing chooser box...");
 		setFontIn(initinfo.getFont());
 		fontPreview.setFont(initinfo.getFont());
 		Color color = initinfo.getForeground();
@@ -460,7 +455,6 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		alarmList.setListData(data);
 		setDescriptionText();
 		setOneEnabled();
-		System.out.println("Initiated!");
 	}
 
 	private void setDescriptionText()
@@ -603,7 +597,6 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		{
 			temp=((JSpinner.DateEditor)timeSpinner2.getEditor()).getModel().getDate();
 		}
-		//System.out.println("Extracted pattern: "+pttn+"\nExtracted text: "+maintmp+"\nResult date: "+temp.toString());
 		GregorianCalendar second0=new GregorianCalendar();
 		second0.setTime(temp);
 		second0.set(Calendar.SECOND,0);
