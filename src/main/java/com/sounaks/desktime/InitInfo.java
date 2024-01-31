@@ -11,24 +11,24 @@ public class InitInfo extends Hashtable
 	public InitInfo()
 	{
 		super(18,0.6f);
-		put("FONT",new Font("SansSerif",Font.BOLD,16));
-		put("BACKGROUND",Color.white);
-		put("FOREGROUND",Color.black);
-		put("LINE_COLOR",Color.black);
-		put("BORDER",BorderFactory.createEmptyBorder());
-		put("LOCATION",new Point(0,0));
-		put("DISPLAY_METHOD","CURTZ");
-		put("UPTIME_FORMAT","'Up-Time:' HH'-hour(s),'  mm'-minute(s),' ss'-second(s)'");
-		put("TTZ_FORMAT","zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy");
-		put("GMT_FORMAT","zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy");
-		put("TOOLTIP",true);
-		put("NATIVE_LOOK",false);
-		put("FIXED",false);
-		put("USING_IMAGE",false);
-		put("GLASS_EFFECT",false);
-		put("IMAGEFILE",".");
-		put("IMAGE_STYLE",16);
-		put("ON_TOP",false);
+		put("FONT", new Font("SansSerif", Font.BOLD, 16));
+		put("BACKGROUND", Color.white);
+		put("FOREGROUND", Color.black);
+		put("LINE_COLOR", Color.black);
+		put("BORDER", BorderFactory.createEmptyBorder());
+		put("LOCATION", new Point(0,0));
+		put("DISPLAY_METHOD", "CURTZ");
+		put("UPTIME_FORMAT", "'Up-Time: 'HH'-hour(s), 'mm'-minute(s), 'ss'-second(s)'");
+		put("TTZ_FORMAT", "zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy");
+		put("GMT_FORMAT", "zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy");
+		put("TOOLTIP", true);
+		put("NATIVE_LOOK", false);
+		put("FIXED", false);
+		put("USING_IMAGE", false);
+		put("GLASS_EFFECT", false);
+		put("IMAGEFILE", ".");
+		put("IMAGE_STYLE", 16);
+		put("ON_TOP", false);
 	}
 
 	public Font getFont()
@@ -40,7 +40,7 @@ public class InitInfo extends Hashtable
 	{
 		if(font != null)
 		{
-			put("FONT",font);
+			put("FONT", font);
 		}
 	}
 
@@ -52,7 +52,7 @@ public class InitInfo extends Hashtable
 	public void setBackground(Color color)
 	{
 		if(color != null)
-			put("BACKGROUND",color);
+			put("BACKGROUND", color);
 	}
 
 	public Color getForeground()
@@ -63,7 +63,7 @@ public class InitInfo extends Hashtable
 	public void setForeground(Color color)
 	{
 		if(color != null)
-			put("FOREGROUND",color);
+			put("FOREGROUND", color);
 	}
 
 	public Color getLineColor()
@@ -74,7 +74,7 @@ public class InitInfo extends Hashtable
 	public void setLineColor(Color color)
 	{
 		if(color != null)
-			put("LINE_COLOR",color);
+			put("LINE_COLOR", color);
 	}
 
 	public Border getBorder()
@@ -84,8 +84,8 @@ public class InitInfo extends Hashtable
 
 	public void setBorder(Border border)
 	{
-		if(border==null) put("BORDER",BorderFactory.createEmptyBorder());
-		else put("BORDER",border);
+		if(border == null) put("BORDER", BorderFactory.createEmptyBorder());
+		else put("BORDER", border);
 	}
 
 	public Point getLocation()
@@ -95,7 +95,7 @@ public class InitInfo extends Hashtable
 
 	public void setLocation(Point pp)
 	{
-		put("LOCATION",pp);
+		put("LOCATION", pp);
 	}
 
 	public String getDisplayMethod()
@@ -116,7 +116,7 @@ public class InitInfo extends Hashtable
 	public void setUpTimeFormat(String s)
 	{
 		if(s != null)
-			put("UPTIME_FORMAT",s);
+			put("UPTIME_FORMAT", s);
 	}
 
 	public String getThisTimeZoneFormat()
@@ -127,7 +127,7 @@ public class InitInfo extends Hashtable
 	public void setThisTimeZoneFormat(String s)
 	{
 		if(s != null)
-			put("TTZ_FORMAT",s);
+			put("TTZ_FORMAT", s);
 	}
 
 	public String getGMTZoneFormat()
@@ -138,7 +138,7 @@ public class InitInfo extends Hashtable
 	public void setGMTZoneFormat(String s)
 	{
 		if(s != null)
-			put("GMT_FORMAT",s);
+			put("GMT_FORMAT", s);
 	}
 
 	public boolean hasTooltip()
@@ -148,7 +148,7 @@ public class InitInfo extends Hashtable
 
 	public void setTooltip(boolean flag)
 	{
-		put("TOOLTIP",flag);
+		put("TOOLTIP", flag);
 	}
 	
 	public boolean getOnTop()
@@ -158,7 +158,7 @@ public class InitInfo extends Hashtable
 	
 	public void setOnTop(boolean flag)
 	{
-		put("ON_TOP",flag);
+		put("ON_TOP", flag);
 	}
 
 	public boolean hasNativeLook()
@@ -168,7 +168,7 @@ public class InitInfo extends Hashtable
 
 	public void setNativeLook(boolean flag)
 	{
-		put("NATIVE_LOOK",flag);
+		put("NATIVE_LOOK", flag);
 	}
 
 	public boolean isFixed()
@@ -178,7 +178,7 @@ public class InitInfo extends Hashtable
 
 	public void setFixed(boolean flag)
 	{
-		put("FIXED",flag);
+		put("FIXED", flag);
 	}
 
 	public boolean isUsingImage()
@@ -188,12 +188,12 @@ public class InitInfo extends Hashtable
 
 	public void setUsingImage(boolean flag)
 	{
-		put("USING_IMAGE",flag);
+		put("USING_IMAGE", flag);
 	}
 
 	public File getImageFile()
 	{
-		File ff=new File((String)get("IMAGEFILE"));
+		File ff = new File((String)get("IMAGEFILE"));
 		if(ff.exists() &&  ff.isFile())
 		{
 			return ff;
@@ -204,7 +204,7 @@ public class InitInfo extends Hashtable
 	
 	public void setGlassEffect(boolean flag)
 	{
-		put("GLASS_EFFECT",flag);
+		put("GLASS_EFFECT", flag);
 	}
 	
 	public boolean hasGlassEffect()
@@ -214,7 +214,7 @@ public class InitInfo extends Hashtable
 
 	public void setImageFile(String imageFile)
 	{
-		put("IMAGEFILE",imageFile);
+		put("IMAGEFILE", imageFile);
 	}
 
 	public int getImageStyle()
@@ -224,6 +224,6 @@ public class InitInfo extends Hashtable
 
 	public void setImageStyle(int i)
 	{
-		put("IMAGE_STYLE",i);
+		put("IMAGE_STYLE", i);
 	}
 }

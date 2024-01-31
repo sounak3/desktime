@@ -2,14 +2,13 @@ package com.sounaks.desktime;
 
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.plaf.*;
 
 public class DownArrowIcon implements Icon
 {
     public void paintIcon(Component c, Graphics g, int x, int y)
     {
-        JComponent component = (JComponent)c;
-		int iconWidth = getIconWidth();
+		JComponent component = (JComponent)c;
+		int        iconWidth = getIconWidth();
 		g.translate( x, y );
 		g.setColor( component.isEnabled() ? Color.black : Color.gray);
 		g.drawLine( 0, 0, iconWidth - 1, 0 );

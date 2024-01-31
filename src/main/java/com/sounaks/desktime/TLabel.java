@@ -11,12 +11,12 @@ public class TLabel extends JLabel
 	private int position;
 	protected boolean hasImage;
 	protected boolean useTrans;
-	public static final int V_TILE = 1;
-	public static final int H_TILE = 2;
-	public static final int CENTER = 4;
+	public static final int V_TILE  = 1;
+	public static final int H_TILE  = 2;
+	public static final int CENTER  = 4;
 	public static final int STRETCH = 8;
-	public static final int FIT = 16;
-	public static final int TILE = 32;
+	public static final int FIT     = 16;
+	public static final int TILE    = 32;
 	private int inuse;
 	private int labelWidth;
 	private int labelHeight;
@@ -32,11 +32,11 @@ public class TLabel extends JLabel
 		if(image1 == null)
 			hasImage = false;
 		else
-			hasImage = true;
+		hasImage = true;
 		useTrans = false;
-		image = image1;
+		image    = image1;
 		position = 8;
-		g2 = (Graphics2D)super.getGraphics();
+		g2       = (Graphics2D)super.getGraphics();
 		setOpaque(!hasImage);
 		setVerticalAlignment(0);
 		//setDoubleBuffered(true);
@@ -54,8 +54,8 @@ public class TLabel extends JLabel
 		else
 			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
 		useTrans = false;
-		image = image1;
-		g2 = (Graphics2D)super.getGraphics();
+		image    = image1;
+		g2       = (Graphics2D)super.getGraphics();
 		setOpaque(!hasImage);
 		setVerticalAlignment(0);
 		//setDoubleBuffered(true);
@@ -73,8 +73,8 @@ public class TLabel extends JLabel
 		else
 			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
 		this.useTrans = useTrans;
-		image = image1;
-		g2 = (Graphics2D)super.getGraphics();
+		image         = image1;
+		g2            = (Graphics2D)super.getGraphics();
 		setOpaque(!hasImage);
 		setVerticalAlignment(0);
 		//setDoubleBuffered(true);
@@ -85,7 +85,7 @@ public class TLabel extends JLabel
 		super(s, 0);
 		hasImage = false;
 		useTrans = false;
-		g2 = (Graphics2D)super.getGraphics();
+		g2       = (Graphics2D)super.getGraphics();
 		setOpaque(!hasImage);
 		setVerticalAlignment(0);
 		//setDoubleBuffered(true);
@@ -143,16 +143,14 @@ public class TLabel extends JLabel
 		g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
 		if(hasImage)
 		{
-			labelWidth = getWidth();
-			labelHeight = getHeight();
-			imgWidth = image.getWidth(this);
-			imgHeight = image.getHeight(this);
-			aspectWidth = (double)Math.max(labelWidth, imgWidth) / (double)Math.min(labelWidth, imgWidth);
+			labelWidth   = getWidth();
+			labelHeight  = getHeight();
+			imgWidth     = image.getWidth(this);
+			imgHeight    = image.getHeight(this);
+			aspectWidth  = (double)Math.max(labelWidth, imgWidth) / (double)Math.min(labelWidth, imgWidth);
 			aspectHeight = (double)Math.max(labelHeight, imgHeight) / (double)Math.min(labelHeight, imgHeight);
-			Point pp = getLocation();
+			Point pp     = getLocation();
 			SwingUtilities.convertPointToScreen(pp,this);
-			int currentX = (int)Math.ceil(pp.getX());
-			int currentY = (int)Math.ceil(pp.getY());
 			if(!useTrans)
 			{
 				switch(position)

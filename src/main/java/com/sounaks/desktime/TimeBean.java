@@ -5,14 +5,14 @@ import java.util.*;
 
 public class TimeBean implements Serializable
 {
-	public static final long serialVersionUID=913566255917L;
-	private String name="";
-	private Date runtime=new Date();
-	private Date nextRuntime=new Date();
-	private Integer interval=0;
-	private Integer runType=4;
-	private String command="";
-	private Boolean timeType=false;
+	public  static final long serialVersionUID = 913566255917L;
+	private String name                        = "";
+	private Date runtime                       = new Date();
+	private Date nextRuntime                   = new Date();
+	private Integer interval                   = 0;
+	private Integer runType                    = 4;
+	private String command                     = "";
+	private Boolean timeType                   = false;
 
 	public TimeBean()
 	{
@@ -20,7 +20,7 @@ public class TimeBean implements Serializable
 	
 	private Date oneStepPropell(Date toPropell)
 	{
-		GregorianCalendar gcal=new GregorianCalendar();
+		GregorianCalendar gcal = new GregorianCalendar();
 		gcal.setTime(toPropell);
 		switch(getInterval())
 		{
@@ -52,8 +52,8 @@ public class TimeBean implements Serializable
 			return gcal.getTime();
 			
 			case 8:
-			int w=gcal.get(Calendar.WEEK_OF_MONTH);
-			int wd=gcal.get(Calendar.DAY_OF_WEEK_IN_MONTH);
+			int w  = gcal.get(Calendar.WEEK_OF_MONTH);
+			int wd = gcal.get(Calendar.DAY_OF_WEEK_IN_MONTH);
 			gcal.add(Calendar.MONTH,1);
 			gcal.set(Calendar.WEEK_OF_MONTH,w);
 			gcal.set(Calendar.DAY_OF_WEEK_IN_MONTH,wd);
@@ -64,18 +64,18 @@ public class TimeBean implements Serializable
 	
 	public Date getNextRuntime(Date now)
 	{
-		Date temp=new Date();
-		if(runtime.before(now)) temp=oneStepPropell(runtime);
-		else temp=runtime;
+		Date temp                      = new Date();
+		if  (runtime.before(now)) temp = oneStepPropell(runtime);
+		else temp                      = runtime;
 		while(temp.before(now))
 		{
 			temp=oneStepPropell(temp);
 		}
-		GregorianCalendar gcal=new GregorianCalendar();
+		GregorianCalendar gcal = new GregorianCalendar();
 		gcal.setTime(temp);
-		gcal.add(Calendar.SECOND,-1);
+		gcal.add(Calendar.SECOND, -1);
 		temp=gcal.getTime();
-		return temp.after(nextRuntime)?temp:nextRuntime; //return the newer;
+		return temp.after(nextRuntime) ? temp : nextRuntime; //return the newer;
 	}
 	
 	public void setNextRuntime(Date nn)

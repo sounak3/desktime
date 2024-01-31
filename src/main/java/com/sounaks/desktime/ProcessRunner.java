@@ -12,36 +12,36 @@ class ProcessRunner extends Thread
 	
 	public ProcessRunner(Vector <TimeBean>alarms, Date now, Component parent)
 	{
-		this.alarms=alarms;
-		this.now=now;
-		this.parent=parent;
-		procRunner=new Thread(this,"Runner");
+		this.alarms = alarms;
+		this.now    = now;
+		this.parent = parent;
+		procRunner  = new Thread(this,"Runner");
 		procRunner.start();
 	}
 	
 	public void run()
 	{
 		runSubProcess(now);
-		procRunner=null;
+		procRunner = null;
 	}
 	
 	private void runSubProcess(Date current)
 	{
-		for(int indx=0;indx<alarms.size();indx++)
+		for (int indx = 0; indx < alarms.size(); indx++)
 		{
-			TimeBean tmpb=alarms.elementAt(indx);
-			if(ExUtils.dateCompareUptoSecond(current,tmpb.getNextRuntime(current)))
+			TimeBean tmpb = alarms.elementAt(indx);
+			if (ExUtils.dateCompareUptoSecond(current, tmpb.getNextRuntime(current)))
 			{
-				ExUtils.runProgram(tmpb,parent);
+				ExUtils.runProgram(tmpb, parent);
 			}
 		}
 	}
 	
 	protected void finalize()
 	{
-		alarms=null;
-		now=null;
-		procRunner=null;
+		alarms     = null;
+		now        = null;
+		procRunner = null;
 	}
 }
 	
