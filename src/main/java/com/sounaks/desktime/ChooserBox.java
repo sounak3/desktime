@@ -37,11 +37,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JRadioButton option1, option2;
 	private JSpinner timeSpinner1, timeSpinner2;
 	private DateChooser choosefrom;
-	private int opmode=0;
-	private int selIndex=-1;
-	static JButton ok,cancel;
-	static Vector <TimeBean>data;
-	static InitInfo information;
+	private int opmode   = 0;
+	private int selIndex = -1;
+	private JButton ok,cancel;
+	public Vector <TimeBean>data;
+	public InitInfo information;
 
 	public ChooserBox(InitInfo initinfo, Vector <TimeBean>alarmData)
 	{
@@ -51,7 +51,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		tabPane     = new JTabbedPane();
 		//All configuration for Font Panel as follows:
 		JPanel  jpanel = new JPanel(new GridBagLayout());
-		setFont    	   = new JButton("Set Selected Font");
+		setFont    	   = new JButton("Preview Font");
 		resetFont  	   = new JButton("Reset Font");
 		Integer ainteger[] = new Integer[20];
 		int     ai[]       = {6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 
@@ -341,8 +341,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
 		chooserbox.setLocation((dimension.width - chooserbox.getWidth()) / 2, (dimension.height - chooserbox.getHeight()) / 2);
 		chooserbox.addWindowListener(infotracker);
-		ok.addActionListener(infotracker);
-		cancel.addActionListener(infotracker);
+		chooserbox.ok.addActionListener(infotracker);
+		chooserbox.cancel.addActionListener(infotracker);
 		chooserbox.tabPane.setSelectedIndex(i);
 		chooserbox.setModal(true);
 		chooserbox.setVisible(true);
@@ -805,10 +805,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 
 	public void actionPerformed(ActionEvent actionevent)
 	{
-		Object     obj  = actionevent.getSource();
 		String     comm = actionevent.getActionCommand();
 		CardLayout cl   = (CardLayout)(bottomCards.getLayout());
-		if (comm.equals("Set Selected Font"))
+		if (comm.equals("Preview Font"))
 			fontPreview.setFont(setFontOut());
 		else if (comm.equals("Reset Font"))
 		{

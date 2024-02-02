@@ -10,7 +10,7 @@ import javax.swing.event.ListSelectionListener;
 class ListChooser extends JPanel implements ListSelectionListener, KeyListener
 {
 	private	JTextField jtf;
-	private	JList jl;
+	private	JList<Object> jl;
 	private	JScrollPane	jsp;
 	Object listDataFinal[];
 
@@ -18,7 +18,7 @@ class ListChooser extends JPanel implements ListSelectionListener, KeyListener
 	{
 		setLayout(new BorderLayout());
 		listDataFinal =	aobj;
-		jl = new JList(aobj);
+		jl = new JList<Object>(aobj);
 		jl.setSelectionMode(0);
 		jl.setValueIsAdjusting(true);
 		jl.setVisibleRowCount(6);
@@ -94,7 +94,7 @@ class ListChooser extends JPanel implements ListSelectionListener, KeyListener
 
 	public void	valueChanged(ListSelectionEvent	listselectionevent)
 	{
-		JList jlist	= (JList)listselectionevent.getSource();
+		JList<?> jlist	= (JList<?>)listselectionevent.getSource();
 		if(!jlist.isSelectionEmpty())
 			jtf.setText(jlist.getSelectedValue().toString());
 	}

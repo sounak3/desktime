@@ -6,7 +6,7 @@ import java.util.*;
 import javax.swing.BorderFactory;
 import javax.swing.border.*;
 
-public class InitInfo extends Hashtable
+public class InitInfo extends Hashtable<Object, Object>
 {
 	public InitInfo()
 	{

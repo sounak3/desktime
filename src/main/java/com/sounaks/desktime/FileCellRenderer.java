@@ -12,7 +12,7 @@ class FileCellRenderer extends DefaultListCellRenderer
 	{
 	}
 
-	public Component getListCellRendererComponent(JList	jlist, Object obj, int i, boolean flag,	boolean	flag1)
+	public Component getListCellRendererComponent(JList<?> jlist, Object obj, int i, boolean flag,	boolean	flag1)
 	{
 		super.getListCellRendererComponent(jlist, obj, i, flag,	flag1);
 		setText(((File)obj).getName());

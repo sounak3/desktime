@@ -29,7 +29,7 @@ public class TLabel extends JLabel
 	public TLabel(String s, Image image1)
 	{
 		super(s, 0);
-		if(image1 == null)
+		if (image1 == null)
 			hasImage = false;
 		else
 		hasImage = true;
@@ -45,11 +45,11 @@ public class TLabel extends JLabel
 	public TLabel(String s, Image image1, int i)
 	{
 		super(s, 0);
-		if(image1 == null)
+		if (image1 == null)
 			hasImage = false;
 		else
 			hasImage = true;
-		if(i == 4 || i == 2 || i == 1 || i == 8 || i == 16 || i == 32)
+		if (i == 4 || i == 2 || i == 1 || i == 8 || i == 16 || i == 32)
 			position = i;
 		else
 			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
@@ -64,11 +64,11 @@ public class TLabel extends JLabel
 	public TLabel(String s, Image image1, int i, boolean useTrans)
 	{
 		super(s, 0);
-		if(image1 == null)
+		if (image1 == null)
 			hasImage = false;
 		else
 			hasImage = true;
-		if(i == 4 || i == 2 || i == 1 || i == 8 || i == 16 || i == 32)
+		if (i == 4 || i == 2 || i == 1 || i == 8 || i == 16 || i == 32)
 			position = i;
 		else
 			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
@@ -113,7 +113,7 @@ public class TLabel extends JLabel
 	
 	public void setBackImage(Image image1)
 	{
-		if(image1 == null)
+		if (image1 == null)
 			hasImage = false;
 		else
 			hasImage = true;
@@ -124,7 +124,7 @@ public class TLabel extends JLabel
 
 	public void setImagePosition(int i)
 	{
-		if(i == 4 || i == 2 || i == 1 || i == 8 || i == 16 || i == 32)
+		if (i == 4 || i == 2 || i == 1 || i == 8 || i == 16 || i == 32)
 			position = i;
 		else
 			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
@@ -141,7 +141,7 @@ public class TLabel extends JLabel
 		g2 = (Graphics2D)g;
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-		if(hasImage)
+		if (hasImage)
 		{
 			labelWidth   = getWidth();
 			labelHeight  = getHeight();
@@ -151,71 +151,71 @@ public class TLabel extends JLabel
 			aspectHeight = (double)Math.max(labelHeight, imgHeight) / (double)Math.min(labelHeight, imgHeight);
 			Point pp     = getLocation();
 			SwingUtilities.convertPointToScreen(pp,this);
-			if(!useTrans)
+			if (!useTrans)
 			{
-				switch(position)
+				switch (position)
 				{
 					case 8: // For image Stretch to Fit;
 						g2.drawImage(image, 0, 0, getWidth(), getHeight(), this);
 						break;
 					case 2: // For image Horizontal tiles;
-						if(labelHeight > imgHeight)
+						if (labelHeight > imgHeight)
 							newWH = new Dimension((int)Math.ceil((double)imgWidth * aspectHeight), (int)Math.ceil((double)imgHeight * aspectHeight));
 						else
 							newWH = new Dimension((int)Math.ceil((double)imgWidth / aspectHeight), (int)Math.ceil((double)imgHeight / aspectHeight));
-						if(newWH.width >= labelWidth)
+						if (newWH.width >= labelWidth)
 						{
 							g2.drawImage(image, 0, 0, newWH.width, newWH.height, this);
 						}
 						else
 						{
 							inuse = (int)Math.ceil((double)labelWidth / (double)newWH.width);
-							for(int i = 0; i <= inuse; i++)
+							for (int i = 0; i <= inuse; i++)
 								g2.drawImage(image, i * newWH.width, 0, newWH.width, newWH.height, this);
 						}
 						break;
 					case 1: // For image Vertical tiles;
-						if(labelWidth > imgWidth)
+						if (labelWidth > imgWidth)
 							newWH = new Dimension((int)Math.ceil((double)imgWidth * aspectWidth), (int)Math.ceil((double)imgHeight * aspectWidth));
 						else
 							newWH = new Dimension((int)Math.ceil((double)imgWidth / aspectWidth), (int)Math.ceil((double)imgHeight / aspectWidth));
-						if(newWH.height >= labelHeight)
+						if (newWH.height >= labelHeight)
 						{
 							g2.drawImage(image, 0, 0, newWH.width, newWH.height, this);
 						}
 						else
 						{
 							inuse = (int)Math.ceil((double)labelHeight / (double)newWH.height);
-							for(int j = 0; j <= inuse; j++)
+							for (int j = 0; j <= inuse; j++)
 								g2.drawImage(image, 0, j * newWH.height, newWH.width, newWH.height, this);
 						}
 						break;
 					case 4: // For image Center
-						if(imgWidth > labelWidth && imgHeight > labelHeight)
+						if (imgWidth > labelWidth && imgHeight > labelHeight)
 							g2.drawImage(image, 0, 0, 0 + labelWidth, 0 + labelHeight, (imgWidth - labelWidth) / 2, (imgHeight - labelHeight) / 2, (imgWidth - labelWidth) / 2 + labelWidth, (imgHeight - labelHeight) / 2 + labelHeight, this);
-						else if(imgWidth > labelWidth && imgHeight <= labelHeight)
+						else if (imgWidth > labelWidth && imgHeight <= labelHeight)
 							g2.drawImage(image, 0, (labelHeight - imgHeight) / 2, 0 + labelWidth, (labelHeight - imgHeight) / 2 + imgHeight, (imgWidth - labelWidth) / 2, 0, (imgWidth - labelWidth) / 2 + labelWidth, imgHeight, this);
-						else if(imgWidth <= labelWidth && imgHeight > labelHeight)
+						else if (imgWidth <= labelWidth && imgHeight > labelHeight)
 							g2.drawImage(image, (labelWidth - imgWidth) / 2, 0, (labelWidth - imgWidth) / 2 + imgWidth, 0 + labelHeight, 0, (imgHeight - labelHeight) / 2, imgWidth, (imgHeight - labelHeight) / 2 + labelHeight, this);
-						else if(imgWidth < labelWidth && imgHeight < labelHeight)
+						else if (imgWidth < labelWidth && imgHeight < labelHeight)
 							g2.drawImage(image, (labelWidth - imgWidth) / 2, (labelHeight - imgHeight) / 2, imgWidth, imgHeight, this);
 						break;
 					case 16: // For image Resize to Fit
-						if(imgWidth > labelWidth && imgHeight > labelHeight)
+						if (imgWidth > labelWidth && imgHeight > labelHeight)
 							g2.drawImage(image, 0, 0, labelWidth, labelHeight, this);
-						else if(imgWidth > labelWidth && imgHeight <= labelHeight)
+						else if (imgWidth > labelWidth && imgHeight <= labelHeight)
 							g2.drawImage(image, 0, (labelHeight - imgHeight) / 2, labelWidth, imgHeight, this);
-						else if(imgWidth <= labelWidth && imgHeight > labelHeight)
+						else if (imgWidth <= labelWidth && imgHeight > labelHeight)
 							g2.drawImage(image, (labelWidth - imgWidth) / 2, 0, imgWidth, labelHeight, this);
-						else if(imgWidth < labelWidth && imgHeight < labelHeight)
+						else if (imgWidth < labelWidth && imgHeight < labelHeight)
 							g2.drawImage(image, (labelWidth - imgWidth) / 2, (labelHeight - imgHeight) / 2, imgWidth, imgHeight, this);
 						break;
 					case 32: // For image Tile
 						int k = (int)Math.ceil((double)labelWidth / (double)imgWidth);
 						int l = (int)Math.ceil((double)labelHeight / (double)imgHeight);
-						for(int i1 = 0; i1 < l; i1++)
+						for (int i1 = 0; i1 < l; i1++)
 						{
-							for(int j1 = 0; j1 < k; j1++)
+							for (int j1 = 0; j1 < k; j1++)
 								g2.drawImage(image, j1 * imgWidth, i1 * imgHeight, imgWidth, imgHeight, this);
 						}
 						break;

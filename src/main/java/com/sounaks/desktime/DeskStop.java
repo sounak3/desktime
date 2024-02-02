@@ -395,7 +395,9 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 
 	public void mouseEntered(MouseEvent mouseevent)
 	{
-		refreshNow = true;
+		if (!pMenu.isShowing()) {
+			refreshNow = true;
+		}
 		startRefresh();
 	}
 

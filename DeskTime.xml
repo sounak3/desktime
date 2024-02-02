@@ -4,7 +4,7 @@
   <void method="put">
    <string>FONT</string>
    <object class="java.awt.Font">
-    <string>Georgia Bold</string>
+    <string>Courier New</string>
     <int>0</int>
     <int>16</int>
    </object>
@@ -38,23 +38,23 @@
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>657</int>
+     <int>694</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>63</int>
+     <int>112</int>
     </void>
    </void>
   </void>
   <void method="put">
    <string>FOREGROUND</string>
    <object class="java.awt.Color">
+    <int>102</int>
+    <int>102</int>
     <int>255</int>
-    <int>255</int>
-    <int>0</int>
     <int>255</int>
    </object>
   </void>

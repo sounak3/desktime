@@ -22,7 +22,7 @@ public class TimeBean implements Serializable
 	{
 		GregorianCalendar gcal = new GregorianCalendar();
 		gcal.setTime(toPropell);
-		switch(getInterval())
+		switch (getInterval())
 		{
 			case 0:
 			return gcal.getTime();
@@ -80,7 +80,7 @@ public class TimeBean implements Serializable
 	
 	public void setNextRuntime(Date nn)
 	{
-		nextRuntime=nn;
+		nextRuntime = nn;
 	}
 	
 	public String getName()
@@ -90,7 +90,7 @@ public class TimeBean implements Serializable
 
 	public void	setName(String nn)
 	{
-		name=nn;
+		name = nn;
 	}
 	
 	public Date getRuntime()
@@ -100,7 +100,7 @@ public class TimeBean implements Serializable
 
 	public void	setRuntime(Date nn)
 	{
-		runtime=nn;
+		runtime = nn;
 	}
 	
 	public Integer getInterval()
@@ -110,7 +110,7 @@ public class TimeBean implements Serializable
 
 	public void	setInterval(Integer nn)
 	{
-		interval=nn;
+		interval = nn;
 	}
 	
 	public Integer getRunType()
@@ -120,7 +120,7 @@ public class TimeBean implements Serializable
 
 	public void	setRunType(Integer nn)
 	{
-		runType=nn;
+		runType = nn;
 	}
 	
 	public Boolean getTimeType()
@@ -130,7 +130,7 @@ public class TimeBean implements Serializable
 	
 	public void setTimeType(Boolean nn)
 	{
-		timeType=nn;
+		timeType = nn;
 	}
 	
 	public String getCommand()
@@ -140,6 +140,6 @@ public class TimeBean implements Serializable
 
 	public void	setCommand(String nn)
 	{
-		command=nn;
+		command = nn;
 	}
 }

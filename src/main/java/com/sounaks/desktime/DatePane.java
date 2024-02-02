@@ -320,14 +320,4 @@ public class DatePane extends JComponent implements ActionListener
 							&& (first.get(Calendar.MONTH) == second.get(Calendar.MONTH))
 							&& (first.get(Calendar.YEAR) == second.get(Calendar.YEAR)));
 	}
-
-	public static void main(String[] args)
-	{
-		JFrame   dialog       = new JFrame("Calendar");
-		DatePane dateselector = new DatePane();
-		dialog.add(dateselector);
-		dialog.pack();
-		dialog.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		dialog.setVisible(true);
-	}
 }
