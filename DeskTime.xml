@@ -25,12 +25,14 @@
     <int>238</int>
    </object>
   </void>
-  <void id="Boolean0" method="get">
-   <string>TOOLTIP</string>
-  </void>
   <void method="put">
-   <string>GLASS_EFFECT</string>
-   <object idref="Boolean0"/>
+   <string>BACKGROUND</string>
+   <object class="java.awt.Color">
+    <int>204</int>
+    <int>153</int>
+    <int>255</int>
+    <int>255</int>
+   </object>
   </void>
   <void id="Point0" method="get">
    <string>LOCATION</string>
@@ -38,14 +40,14 @@
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>694</int>
+     <int>673</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>112</int>
+     <int>98</int>
     </void>
    </void>
   </void>
@@ -53,10 +55,13 @@
    <string>FOREGROUND</string>
    <object class="java.awt.Color">
     <int>102</int>
+    <int>0</int>
     <int>102</int>
     <int>255</int>
-    <int>255</int>
    </object>
+  </void>
+  <void id="Boolean0" method="get">
+   <string>TOOLTIP</string>
   </void>
   <void method="put">
    <string>ON_TOP</string>

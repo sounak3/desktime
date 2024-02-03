@@ -230,13 +230,13 @@ public class ExUtils
 		Runtime   nativePro = Runtime.getRuntime();
 		Dimension scsize    = Toolkit.getDefaultToolkit().getScreenSize();
 		String    almStr    = "";
-		int       type      = tmpb.getRunType();
-		if ((type%3==0) || (type==2))  //for 2 sound;
+		int       type      = tmpb.getAlarmExecutionOutputType();
+		if ((type % 3 == 0) || (type == 2))  //for 2 sound;
 		{
 			Toolkit.getDefaultToolkit().beep();
 			System.out.println("\007");
 		}
-		if (type%2 != 0)  //for 1 to run Command;
+		if (type % 2 != 0)  //for 1 to run Command;
 		{
 			try
 			{

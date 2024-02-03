@@ -12,7 +12,7 @@ class AlarmListCellRenderer extends DefaultListCellRenderer
 		TimeBean tmpb = (TimeBean)value;
 		Date     dte  = new Date();
 		setText(tmpb.getName());
-		if (tmpb.getNextRuntime(dte).before(dte)) setForeground(Color.red);
+		if (tmpb.getNextAlarmTriggerTime(dte).before(dte)) setForeground(Color.red);
 		else setForeground(Color.black);
 		return this;
 	}

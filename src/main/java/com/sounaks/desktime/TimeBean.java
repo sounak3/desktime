@@ -7,12 +7,12 @@ public class TimeBean implements Serializable
 {
 	public  static final long serialVersionUID = 913566255917L;
 	private String name                        = "";
-	private Date runtime                       = new Date();
-	private Date nextRuntime                   = new Date();
-	private Integer interval                   = 0;
-	private Integer runType                    = 4;
+	private Date alarmTriggerTime              = new Date();
+	private Date nextAlarmTriggerTime          = new Date();
+	private Integer alarmRepeatInterval        = 0;
+	private Integer alarmExecutionOutputType   = 4;
 	private String command                     = "";
-	private Boolean timeType                   = false;
+	private Boolean systemStartTimeBasedAlarm  = false;
 
 	public TimeBean()
 	{
@@ -22,7 +22,7 @@ public class TimeBean implements Serializable
 	{
 		GregorianCalendar gcal = new GregorianCalendar();
 		gcal.setTime(toPropell);
-		switch (getInterval())
+		switch (getAlarmRepeatInterval())
 		{
 			case 0:
 			return gcal.getTime();
@@ -62,11 +62,11 @@ public class TimeBean implements Serializable
 		return gcal.getTime();
 	}
 	
-	public Date getNextRuntime(Date now)
+	public Date getNextAlarmTriggerTime(Date now)
 	{
-		Date temp                      = new Date();
-		if  (runtime.before(now)) temp = oneStepPropell(runtime);
-		else temp                      = runtime;
+		Date temp                                = new Date();
+		if   (alarmTriggerTime.before(now)) temp = oneStepPropell(alarmTriggerTime);
+		else temp                                = alarmTriggerTime;
 		while(temp.before(now))
 		{
 			temp=oneStepPropell(temp);
@@ -75,12 +75,12 @@ public class TimeBean implements Serializable
 		gcal.setTime(temp);
 		gcal.add(Calendar.SECOND, -1);
 		temp=gcal.getTime();
-		return temp.after(nextRuntime) ? temp : nextRuntime; //return the newer;
+		return temp.after(nextAlarmTriggerTime) ? temp : nextAlarmTriggerTime; //return the newer;
 	}
 	
-	public void setNextRuntime(Date nn)
+	public void setNextAlarmTriggerTime(Date nextAlarmTriggerTime)
 	{
-		nextRuntime = nn;
+		this.nextAlarmTriggerTime = nextAlarmTriggerTime;
 	}
 	
 	public String getName()
@@ -88,49 +88,49 @@ public class TimeBean implements Serializable
 		return name;
 	}
 
-	public void	setName(String nn)
+	public void	setName(String name)
 	{
-		name = nn;
+		this.name = name;
 	}
 	
-	public Date getRuntime()
+	public Date getAlarmTriggerTime()
 	{
-		return runtime;
+		return alarmTriggerTime;
 	}
 
-	public void	setRuntime(Date nn)
+	public void	setAlarmTriggerTime(Date alarmTriggerTime)
 	{
-		runtime = nn;
+		this.alarmTriggerTime = alarmTriggerTime;
 	}
 	
-	public Integer getInterval()
+	public Integer getAlarmRepeatInterval()
 	{
-		return interval;
+		return alarmRepeatInterval;
 	}
 
-	public void	setInterval(Integer nn)
+	public void	setAlarmRepeatInterval(Integer alarmRepeatInterval)
 	{
-		interval = nn;
+		this.alarmRepeatInterval = alarmRepeatInterval;
 	}
 	
-	public Integer getRunType()
+	public Integer getAlarmExecutionOutputType()
 	{
-		return runType;
+		return alarmExecutionOutputType;
 	}
 
-	public void	setRunType(Integer nn)
+	public void	setAlarmExecutionOutputType(Integer alarmExecutionOutputType)
 	{
-		runType = nn;
+		this.alarmExecutionOutputType = alarmExecutionOutputType;
 	}
 	
-	public Boolean getTimeType()
+	public Boolean isSystemStartTimeBasedAlarm()
 	{
-		return timeType;
+		return systemStartTimeBasedAlarm;
 	}
 	
-	public void setTimeType(Boolean nn)
+	public void setSystemStartTimeBasedAlarm(Boolean systemStartTimeBasedAlarm)
 	{
-		timeType = nn;
+		this.systemStartTimeBasedAlarm = systemStartTimeBasedAlarm;
 	}
 	
 	public String getCommand()
@@ -138,8 +138,8 @@ public class TimeBean implements Serializable
 		return command;
 	}
 
-	public void	setCommand(String nn)
+	public void	setCommand(String command)
 	{
-		command = nn;
+		this.command = command;
 	}
 }

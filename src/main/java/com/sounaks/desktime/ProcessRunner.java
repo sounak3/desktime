@@ -30,7 +30,7 @@ class ProcessRunner extends Thread
 		for (int indx = 0; indx < alarms.size(); indx++)
 		{
 			TimeBean tmpb = alarms.elementAt(indx);
-			if (ExUtils.dateCompareUptoSecond(current, tmpb.getNextRuntime(current)))
+			if (ExUtils.dateCompareUptoSecond(current, tmpb.getNextAlarmTriggerTime(current)))
 			{
 				ExUtils.runProgram(tmpb, parent);
 			}

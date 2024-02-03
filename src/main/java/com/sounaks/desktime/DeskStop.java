@@ -222,7 +222,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		gcal.add(Calendar.SECOND,0);  // Second 0 for a match;
 		for (TimeBean tb : vec)
 		{
-			if (tb.getTimeType().booleanValue()) tb.setRuntime(gcal.getTime());
+			if (tb.isSystemStartTimeBasedAlarm().booleanValue()) tb.setAlarmTriggerTime(gcal.getTime());
 		}
 	}
 
@@ -260,11 +260,11 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	
 	private Vector<TimeBean> loadAlarms()
 	{
-		Vector <TimeBean>data=new Vector<TimeBean>();
+		Vector <TimeBean>data = new Vector<TimeBean>();
 		try
 		{
 			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream("Smrala.xml")));
-			data = (Vector<TimeBean>)decoder.readObject();
+			           data    = (Vector<TimeBean>)decoder.readObject();
 			decoder.close();
 		}
 		catch (Exception exclusive)
@@ -620,12 +620,13 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 
 	public void startRefresh()
 	{
-		if ((refreshThread == null || !refreshThread.isAlive()) && info.hasGlassEffect() && refreshNow) 
+		if (refreshThread == null || !refreshThread.isAlive())
 		{
 			refreshThread = new Refresher();
 			refreshThread.start();
 		}
-		else
+
+		if (info.hasGlassEffect() && refreshNow) 
 		{
 			refreshThread.play();
 		}
@@ -633,7 +634,9 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	
 	public void stopRefresh()
 	{
-		refreshThread.pause();
+		if (refreshThread != null && refreshThread.isAlive()) {
+			refreshThread.pause();
+		}
 	}
 
 	public static void main(String args[])

@@ -472,15 +472,15 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			String           ltext  = "<html>This alarm named \"(alarm name)\" is scheduled to start on (start time) and continue (interval).<p> Its next run will be on (next run). This alarm runs a (run type) at the scheduled time.</html>";
 			SimpleDateFormat tmp1   = choosefrom.getFormat();
 			SimpleDateFormat tmp2   = ((JSpinner.DateEditor)timeSpinner1.getEditor()).getFormat();
-			String           tmp3[] = {"never","minutely","hourly","daily","weekly","??","yearly","monthly","monthly same weekday"};
+			String           tmp3[] = {"never", "minutely", "hourly", "daily", "weekly", "??", "yearly", "monthly", "monthly same weekday"};
 			int              tmp4   = 0;
-			ltext  = ltext.replace("(alarm name)",tb.getName());
-			ltext  = ltext.replace("(start time)",tmp1.format(tb.getRuntime())+" at "+tmp2.format(tb.getRuntime()));
-			tmp4   = tb.getInterval().intValue();
-			ltext  = ltext.replace("(interval)",tmp3[tmp4]);
-			ltext  = ltext.replace("(next run)",tmp4==0?"never":tmp1.format(tb.getNextRuntime(dte))+" at "+tmp2.format(tb.getNextRuntime(dte)));
-			tmp4   = tb.getRunType().intValue();
-			ltext  = ltext.replace("(run type)",((tmp4%2 != 0)?" command,":"")+(((tmp4%3==0) || (tmp4==2))?" sound,":"")+((tmp4 > 3)?" message":""));
+			ltext  = ltext.replace("(alarm name)", tb.getName());
+			ltext  = ltext.replace("(start time)", tmp1.format(tb.getAlarmTriggerTime()) + " at " + tmp2.format(tb.getAlarmTriggerTime()));
+			tmp4   = tb.getAlarmRepeatInterval().intValue();
+			ltext  = ltext.replace("(interval)", tmp3[tmp4]);
+			ltext  = ltext.replace("(next run)", tmp4 == 0 ? "never" : tmp1.format(tb.getNextAlarmTriggerTime(dte)) + " at " + tmp2.format(tb.getNextAlarmTriggerTime(dte)));
+			tmp4   = tb.getAlarmExecutionOutputType().intValue();
+			ltext  = ltext.replace("(run type)", ((tmp4 % 2 != 0) ? " command," : "") + (((tmp4 % 3 == 0) || (tmp4 == 2)) ? " sound," : "") + ((tmp4 > 3) ? " message" : ""));
 			aboutAlarm.setText(ltext);
 		}
 	}
@@ -782,11 +782,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			throw new NullPointerException("Blank command");
 		TimeBean tb = new TimeBean();
 		tb.setName(alarmName.getText());
-		tb.setTimeType(timeTypeOut()); // must be set before setRuntime();
-		if (timeTypeOut()) tb.setNextRuntime(timeOut());//if op2 then nextRuntime
-		else tb.setRuntime(timeOut()); // should be set instead of runtime;
-		tb.setInterval(intervalOut());
-		tb.setRunType(typeOut());
+		tb.setSystemStartTimeBasedAlarm(timeTypeOut()); // must be set before setRuntime();
+		if (timeTypeOut()) tb.setNextAlarmTriggerTime(timeOut());//if op2 then nextRuntime
+		else tb.setAlarmTriggerTime(timeOut()); // should be set instead of runtime;
+		tb.setAlarmRepeatInterval(intervalOut());
+		tb.setAlarmExecutionOutputType(typeOut());
 		tb.setCommand(cmdToRun.getText());
 		if (opmode == 1)
 		{
@@ -954,10 +954,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				opmode      = 2;
 				TimeBean tb = (TimeBean)data.elementAt(selIndex);
 				alarmName.setText(tb.getName());
-				timeTypeIn(tb.getTimeType().booleanValue()); //must be called before timeIn();
-				timeIn(tb.getRuntime());
-				intervalIn(tb.getInterval());
-				typeIn(tb.getRunType().intValue());
+				timeTypeIn(tb.isSystemStartTimeBasedAlarm().booleanValue()); //must be called before timeIn();
+				timeIn(tb.getAlarmTriggerTime());
+				intervalIn(tb.getAlarmRepeatInterval());
+				typeIn(tb.getAlarmExecutionOutputType().intValue());
 				cmdToRun.setText(tb.getCommand());
 			}
 			else
