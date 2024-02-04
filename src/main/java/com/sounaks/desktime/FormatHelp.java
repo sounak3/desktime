@@ -23,7 +23,7 @@ class FormatHelp extends JDialog
 		close = new	JButton("Close");
 		close.addActionListener(this);
 		getContentPane().add(close,	"South");
-		setDefaultCloseOperation(2);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		pack();
 		Dimension dimension	= Toolkit.getDefaultToolkit().getScreenSize();
 		setLocation((dimension.width - getWidth()) / 2,	(dimension.height -	getHeight()) / 2);

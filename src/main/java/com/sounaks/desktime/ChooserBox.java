@@ -7,6 +7,7 @@ import java.text.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.text.Position;
 import javax.swing.border.*;
 
 public class ChooserBox extends JDialog implements ActionListener, ItemListener, ListSelectionListener, ChangeListener
@@ -343,7 +344,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		ChooserBox chooserbox = new ChooserBox(initinfo, alarmData);
 		chooserbox.setTitle(s);
 		InfoTracker infotracker = new InfoTracker(chooserbox);
-		chooserbox.setDefaultCloseOperation(2);
+		chooserbox.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		chooserbox.revalidate();
 		chooserbox.pack();
 		chooserbox.setSize(430, 470);
@@ -369,8 +370,13 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		selFontCol.setForeground(Math.abs(color.getRGB()) >= 0x800000 ? Color.white : Color.black);
 		useImg.setSelected(initinfo.isUsingImage());
 		useCol.setSelected(!initinfo.isUsingImage());
-		fileList.setDirectory(initinfo.getImageFile());
-		fileList.setSelectedValue(initinfo.getImageFile(), true);
+		File imgFile = initinfo.getImageFile();
+		fileList.setDirectory(imgFile);
+		int selectIndex = fileList.getNextMatch(imgFile.toString(), 0, Position.Bias.Forward);
+		if (selectIndex != -1)
+			fileList.setSelectedValue(initinfo.getImageFile(), true);
+		else
+			fileList.setSelectedIndex(0);
 		fileList.ensureIndexIsVisible(fileList.getSelectedIndex());
 		useTrans.setSelected(initinfo.hasGlassEffect());
 		if (initinfo.getImageFile().isFile())

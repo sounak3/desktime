@@ -28,7 +28,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	private JPopupMenu pMenu;
 	private JMenuItem fore,back,fmt,alm,opt,exit,about;
 	private JCheckBoxMenuItem fix1,mhelp,ontop;
-	private Point pp;
+	private Point windowLoc;
 	private Dimension scsize;
 	protected Robot robot;
 	private   boolean refreshNow  = true;
@@ -55,7 +55,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			@Override
 			 public void componentResized(ComponentEvent e)
 			 {
-				 setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 10, 10));
+				 setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 5, 5));
 			 }
 		 });
 		try
@@ -69,7 +69,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		info   = loadProperties();
 		alarms = loadAlarms();
 		setSystemStartTime(alarms);
-		pp    = new Point(0, 0);
+		windowLoc    = new Point(0, 0);
 		locX  = (int)info.getLocation().getX();
 		locY  = (int)info.getLocation().getY();
 		curX  = curY = 0;
@@ -247,7 +247,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 
 	private InitInfo loadProperties()
 	{
-		InitInfo data=new InitInfo();
+		InitInfo data = new InitInfo();
 		try
 		{
 			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream("DeskTime.xml")));
@@ -256,7 +256,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		}
 		catch (Exception exclusive)
 		{// Ignoring missing file...
-			System.out.println("File missing-\"DeskTime.xml\": "+exclusive.toString());
+			System.out.println("File missing-\"DeskTime.xml\": " + exclusive.toString());
 			exclusive.printStackTrace();
 		}
 		return data;
@@ -272,7 +272,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		}
 		catch (FileNotFoundException fne)
 		{
-			System.out.println("Exception while saving properties file-\"DeskTime.xml\": "+fne.toString());
+			System.out.println("Exception while saving properties file-\"DeskTime.xml\": " + fne.toString());
 			fne.printStackTrace();
 		}
 	}
@@ -288,7 +288,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		}
 		catch (Exception exclusive)
 		{// Ignoring missing file...
-			System.out.println("Exception while loading properties file-\"Smarla.xml\": "+exclusive.toString());
+			System.out.println("Exception while loading properties file-\"Smarla.xml\": " + exclusive.toString());
 			exclusive.printStackTrace();
 		}
 		return data;
@@ -304,7 +304,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		}
 		catch (FileNotFoundException fne)
 		{
-			System.out.println("Exception while saving alarms file \"Smarla.xml\": "+fne.toString());
+			System.out.println("Exception while saving alarms file \"Smarla.xml\": " + fne.toString());
 			fne.printStackTrace();
 		}
 	}
@@ -457,12 +457,12 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 
 	public void mouseDragged(MouseEvent mouseevent)
 	{
-		pp.setLocation(mouseevent.getPoint());
-		SwingUtilities.convertPointToScreen(pp, this);
-		if (Math.abs(pp.getX()) <= (double)scsize.width && Math.abs(pp.getY()) <= (double)scsize.height)
+		windowLoc.setLocation(mouseevent.getPoint());
+		SwingUtilities.convertPointToScreen(windowLoc, this);
+		if (Math.abs(windowLoc.getX()) <= (double)scsize.width && Math.abs(windowLoc.getY()) <= (double)scsize.height)
 		{
-			locX = Math.abs((int)pp.getX() - curX);
-			locY = Math.abs((int)pp.getY() - curY);
+			locX = Math.abs((int)windowLoc.getX() - curX);
+			locY = Math.abs((int)windowLoc.getY() - curY);
 			setLocation(locX, locY);
 		}
 		refreshNow = false;
