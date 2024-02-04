@@ -2,6 +2,7 @@ package com.sounaks.desktime;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -50,6 +51,21 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		setSize(300, 50);
 		setLocation((scsize.width - 200) / 2, (scsize.height - 200) / 2);
 		setVisible(true);
+		addComponentListener(new ComponentAdapter() {
+			@Override
+			 public void componentResized(ComponentEvent e)
+			 {
+				 setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 10, 10));
+			 }
+		 });
+		try
+		{
+			Thread.sleep(1000L);
+		} 
+		catch (InterruptedException e1)
+		{
+			e1.printStackTrace();
+		}
 		info   = loadProperties();
 		alarms = loadAlarms();
 		setSystemStartTime(alarms);
@@ -121,6 +137,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		{
 			tLabel.setText(time);
 			tLabel.setTransparency(false);
+			setOpacity(1.0f);
 			stopRefresh();
 			tLabel.setBackImage((new ImageIcon(info.getImageFile().toString())).getImage());
 			tLabel.setImagePosition(info.getImageStyle());
@@ -133,6 +150,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 				if (robot == null)
 					robot = new Robot();
 				tLabel.setTransparency(true);
+				setOpacity(1.0f);
 			}
 			catch (Exception e)
 			{
@@ -150,6 +168,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			tLabel.setText(time);
 			tLabel.setBackImage(null);
 			tLabel.setBackground(info.getBackground());
+			setOpacity(info.getOpacity());
 			stopRefresh();
 		}
 		resizingMethod();
@@ -364,7 +383,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		else if (obj.equals(about))
 		{
 			String    s1        = "<html>Created and Developed by : Sounak Choudhury<p>E-mail Address : <a href='mailto:sounak_s@rediffmail.com'>sounak_s@rediffmail.com</a><p>The software, information and documentation<p>is provided \"AS IS\" without warranty of any<p>kind, either express or implied. The Readme.txt<p>file containing EULA must be read before use.<p>Suggestions and credits are Welcomed.</html>";
-			ImageIcon imageicon = new ImageIcon("duke.gif");
+			ImageIcon imageicon = new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/duke.gif"));
 			JOptionPane.showMessageDialog(new Frame(), s1, "About DeskStop...", 1, imageicon);
 		}
 		else if (obj.equals(exit))
@@ -388,7 +407,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	{
 		if (SwingUtilities.isRightMouseButton(mouseevent) || mouseevent.getClickCount() == 2)
 		{ //Whenever this menu appears a mouseExited event occurs calling method
-			refreshNow = false; // refreshThreadransparency which forces popup to disappear. So refreshNow=false.
+			refreshNow = false; // refreshThreadTransparency which forces popup to disappear. So refreshNow=false.
 			ExUtils.showPopup(pMenu, this, (Component)mouseevent.getSource(), mouseevent.getPoint(), scsize);
 		}
 	}
@@ -431,7 +450,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			curY = 0;
 			saveProperties(info);
 			refreshNow = true;
-			refreshThread.refreshThreadransparency();
+			refreshThread.refreshThreadTransparency();
 			startRefresh();
 		}
 	}
@@ -514,10 +533,9 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			bottom2pixelRows   = new AtomicIntegerArray(10);
 			right2pixelColumns = new AtomicIntegerArray(10);
 			compInt            = 0;
-			setPriority(6);
 		}
 
-		public synchronized void refreshThreadransparency()
+		public synchronized void refreshThreadTransparency()
 		{
 			int refreshRate = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode().getRefreshRate();
 			if (info.hasGlassEffect() && refreshNow)
@@ -550,7 +568,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 				}
 				else
 				{
-					refreshThreadransparency();
+					refreshThreadTransparency();
 				}
 			}
 		}
@@ -565,7 +583,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			running = true;
 		}
 
-		public boolean backgroundEqualsOld()
+		public synchronized boolean backgroundEqualsOld()
 		{
 			Rectangle bound             = getBounds();
 			Rectangle boundWith2pxFence = new Rectangle();

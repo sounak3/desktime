@@ -14,6 +14,6 @@ class ImageFileFilter
 	public boolean accept(File file)
 	{
 		String s = file.getName();
-		return s.endsWith("jpg") ||	s.endsWith("gif") || s.endsWith("JPG") || s.endsWith("GIF")	|| s.endsWith("jpeg") || s.endsWith("JPEG")	|| s.endsWith("jpe") ||	s.endsWith("JPE");
+		return s.endsWith("jpg") ||	s.endsWith("png") || s.endsWith("JPG") || s.endsWith("PNG")	|| s.endsWith("jpeg") || s.endsWith("JPEG")	|| s.endsWith("jpe") ||	s.endsWith("JPE");
 	}
 }

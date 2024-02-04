@@ -14,8 +14,12 @@
    <string>UPTIME</string>
   </void>
   <void method="put">
+   <string>OPACITY</string>
+   <float>0.45</float>
+  </void>
+  <void method="put">
    <string>IMAGEFILE</string>
-   <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\hue.JPG</string>
+   <string>C:\Users\Sounak\Pictures\1000 Full HD Wallpapers\0001.jpg</string>
   </void>
   <void method="put">
    <string>LINE_COLOR</string>
@@ -34,20 +38,27 @@
     <int>255</int>
    </object>
   </void>
+  <void id="Boolean0" method="get">
+   <string>TOOLTIP</string>
+  </void>
+  <void method="put">
+   <string>GLASS_EFFECT</string>
+   <object idref="Boolean0"/>
+  </void>
   <void id="Point0" method="get">
    <string>LOCATION</string>
    <void class="java.awt.Point" method="getField">
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>673</int>
+     <int>748</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>98</int>
+     <int>75</int>
     </void>
    </void>
   </void>
@@ -60,16 +71,13 @@
     <int>255</int>
    </object>
   </void>
-  <void id="Boolean0" method="get">
-   <string>TOOLTIP</string>
-  </void>
   <void method="put">
    <string>ON_TOP</string>
    <object idref="Boolean0"/>
   </void>
   <void method="put">
    <string>IMAGE_STYLE</string>
-   <int>8</int>
+   <int>4</int>
   </void>
  </object>
 </java>

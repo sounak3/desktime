@@ -9,7 +9,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.*;
 
-public class ChooserBox extends JDialog implements ActionListener, ItemListener, ListSelectionListener
+public class ChooserBox extends JDialog implements ActionListener, ItemListener, ListSelectionListener, ChangeListener
 {
 	private JTabbedPane tabPane;
 	private ListChooser font,style,size;
@@ -22,6 +22,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JRadioButton curTimeZone,GMTimeZone,sysUpTime;
 	private JTextField sysDateFormat,gmtDateFormat,uSymbol,hSymbol,mSymbol,sSymbol;
 	private JButton resetDefs,helpFormat;
+	private JLabel transSlide;
+	private JSlider transLevel;
 	private JCheckBox useImg,useCol,useTrans;
 	private FileList fileList;
 	private JButton selectDir,selBackCol,resBackCol;
@@ -127,9 +129,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		jpanel2.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Time Display Configuration"));
 		//All configurations for Background Panel as follows:
 		JPanel jpanel3 = new JPanel(new GridBagLayout());
-		useImg   = new JCheckBox("Use image as background. Use image settings from the following.");
-		useCol   = new JCheckBox("Use Background Color. Use color settings from the following.");
-		useTrans = new JCheckBox("<html>Transparent background. This feature is under development and may cause flickers.</html>");
+		useImg   = new JCheckBox("<html>Use background image. Use image settings from the following:</html>");
+		useCol   = new JCheckBox("<html>Use Background Color. Use color settings from the following:</html>");
+		useTrans = new JCheckBox("<html>Use transparent background (may cause flickers)</html>");
 		ButtonGroup buttongroup2 = new ButtonGroup();
 		buttongroup2.add(useImg);
 		buttongroup2.add(useCol);
@@ -161,6 +163,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		buttongroup3.add(rbStretch);
 		selBackCol = new JButton("Choose Background Color");
 		resBackCol = new JButton("Default Color");
+		transSlide = new JLabel("Opacity [ Low \u2192 High ]");
+		transLevel = new JSlider(4, 20, 10);
+		transSlide.setLabelFor(transLevel);
+		transLevel.setMajorTickSpacing(1);
+		transLevel.setSnapToTicks(true);
+		transLevel.addChangeListener(this);
 		jpanel3.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Background Configuration"));
 		//All configuration for Alarm Panel as follows:
 		JPanel      jpanel5 = new JPanel(new GridBagLayout());
@@ -283,6 +291,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel3, useCol, 		0, 6, 4, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, selBackCol, 	1, 7, 2, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, resBackCol, 	3, 7, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, transSlide, 	1, 8, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, transLevel, 	2, 8, 3, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(topList,jsp,			0, 0, 1,	4, 1.0D, 1.0D, this);
 			ExUtils.addComponent(topList,add,			1, 0, 1,	1, 0.0D, 0.25D, this);
 			ExUtils.addComponent(topList,edit,			1, 1, 1,	1, 0.0D, 0.25D, this);
@@ -408,6 +418,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		color = initinfo.getBackground();
 		selBackCol.setBackground(color);
 		selBackCol.setForeground(Math.abs(color.getRGB()) >= 0x800000 ? Color.white : Color.black);
+		transLevel.setValue(Math.round(initinfo.getOpacity() * 20));
+		transSlide.setText("Opacity [ " + Math.round(initinfo.getOpacity() * 100) + " % ]");
 		Border border = initinfo.getBorder();
 		borderPreview.setPreview(border);
 		if (border instanceof BevelBorder)
@@ -681,6 +693,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		}
 		information.setImageStyle(picLabel.getImagePosition());
 		information.setBackground(selBackCol.getBackground());
+		information.setOpacity((float)transLevel.getValue() / 20);
 		information.setBorder(borderPreview.getPreview());
 		if (lBorder.isSelected())
 			information.setLineColor(selLineCol.getBackground());
@@ -1025,7 +1038,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				switch(chooseOpt)
 				{
 					case JFileChooser.APPROVE_OPTION:
-					cmdToRun.setText(cmdToRun.getText()+fchoose.getSelectedFile().getPath());
+					cmdToRun.setText(cmdToRun.getText() + fchoose.getSelectedFile().getPath());
 					break;
 					case JFileChooser.CANCEL_OPTION:
 					//do nothing;
@@ -1083,5 +1096,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		{
 			setDescriptionText();
 		}
+	}
+
+	public void stateChanged(ChangeEvent ce)
+	{
+		String opacityPercent = Math.round((float)transLevel.getValue() / 20 * 100) + " %";
+		transSlide.setText("Opacity [ " + opacityPercent + " ]");
+		transLevel.setToolTipText(opacityPercent);
 	}
 }

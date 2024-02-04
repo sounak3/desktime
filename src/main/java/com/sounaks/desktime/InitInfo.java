@@ -13,6 +13,7 @@ public class InitInfo extends Hashtable<Object, Object>
 		super(18,0.6f);
 		put("FONT", new Font("SansSerif", Font.BOLD, 16));
 		put("BACKGROUND", Color.white);
+		put("OPACITY", 1.0F);
 		put("FOREGROUND", Color.black);
 		put("LINE_COLOR", Color.black);
 		put("BORDER", BorderFactory.createEmptyBorder());
@@ -53,6 +54,16 @@ public class InitInfo extends Hashtable<Object, Object>
 	{
 		if(color != null)
 			put("BACKGROUND", color);
+	}
+
+	public float getOpacity()
+	{
+		return (float)get("OPACITY");
+	}
+
+	public void setOpacity(float opacity)
+	{
+		put("OPACITY", opacity);
 	}
 
 	public Color getForeground()
