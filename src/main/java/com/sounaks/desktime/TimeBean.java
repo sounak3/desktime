@@ -6,16 +6,25 @@ import java.util.*;
 public class TimeBean implements Serializable
 {
 	public  static final long serialVersionUID = 913566255917L;
-	private String name                        = "";
-	private Date alarmTriggerTime              = new Date();
-	private Date nextAlarmTriggerTime          = new Date();
-	private Integer alarmRepeatInterval        = 0;
-	private Integer alarmExecutionOutputType   = 4;
-	private String command                     = "";
-	private Boolean systemStartTimeBasedAlarm  = false;
+	private String name;
+	private Date alarmTriggerTime;
+	private Date nextAlarmTriggerTime;
+	private Integer alarmRepeatInterval;
+	private Integer repeatMultiple;
+	private Integer alarmExecutionOutputType;
+	private String command;
+	private Boolean systemStartTimeBasedAlarm;
 
 	public TimeBean()
 	{
+		this.name                      = "";
+		this.alarmTriggerTime          = new Date();
+		this.nextAlarmTriggerTime      = new Date();
+		this.alarmRepeatInterval       = 0;
+		this.repeatMultiple            = 1;
+		this.alarmExecutionOutputType  = 4;
+		this.command                   = "";
+		this.systemStartTimeBasedAlarm = false;
 	}
 	
 	private Date oneStepPropell(Date toPropell)
@@ -28,33 +37,33 @@ public class TimeBean implements Serializable
 			return gcal.getTime();
 			
 			case 1:
-			gcal.add(Calendar.MINUTE,1);
+			gcal.add(Calendar.MINUTE, repeatMultiple);
 			return gcal.getTime();
 			
 			case 2:
-			gcal.add(Calendar.HOUR_OF_DAY,1);
+			gcal.add(Calendar.HOUR_OF_DAY, repeatMultiple);
 			return gcal.getTime();
 			
 			case 3:
-			gcal.add(Calendar.DATE,1);
+			gcal.add(Calendar.DATE, repeatMultiple);
 			return gcal.getTime();
 			
 			case 4:
-			gcal.add(Calendar.WEEK_OF_MONTH,1);
+			gcal.add(Calendar.WEEK_OF_MONTH, repeatMultiple);
 			return gcal.getTime();
 			
 			case 6:
-			gcal.add(Calendar.YEAR,1);
+			gcal.add(Calendar.YEAR, repeatMultiple);
 			return gcal.getTime();
 			
 			case 7:
-			gcal.add(Calendar.MONTH,1);
+			gcal.add(Calendar.MONTH, repeatMultiple);
 			return gcal.getTime();
 			
 			case 8:
 			int w  = gcal.get(Calendar.WEEK_OF_MONTH);
 			int wd = gcal.get(Calendar.DAY_OF_WEEK_IN_MONTH);
-			gcal.add(Calendar.MONTH,1);
+			gcal.add(Calendar.MONTH, repeatMultiple);
 			gcal.set(Calendar.WEEK_OF_MONTH,w);
 			gcal.set(Calendar.DAY_OF_WEEK_IN_MONTH,wd);
 			return gcal.getTime();
@@ -62,20 +71,30 @@ public class TimeBean implements Serializable
 		return gcal.getTime();
 	}
 	
-	public Date getNextAlarmTriggerTime(Date now)
+	public Date getNextAlarmTriggerTime()
 	{
-		Date temp                                = new Date();
-		if   (alarmTriggerTime.before(now)) temp = oneStepPropell(alarmTriggerTime);
-		else temp                                = alarmTriggerTime;
-		while(temp.before(now))
+		Date temp, now = new Date();
+		if (alarmTriggerTime.before(now) && alarmRepeatInterval != 0)
+			temp = oneStepPropell(alarmTriggerTime);
+		else
+			temp = alarmTriggerTime;
+
+		if (alarmRepeatInterval == 0)
+			nextAlarmTriggerTime = alarmTriggerTime;
+
+		while(alarmTriggerTime.before(temp) && temp.before(now) && !temp.equals(alarmTriggerTime) && alarmRepeatInterval != 0)
 		{
-			temp=oneStepPropell(temp);
+			temp = oneStepPropell(temp);
 		}
 		GregorianCalendar gcal = new GregorianCalendar();
 		gcal.setTime(temp);
 		gcal.add(Calendar.SECOND, -1);
-		temp=gcal.getTime();
-		return temp.after(nextAlarmTriggerTime) ? temp : nextAlarmTriggerTime; //return the newer;
+		temp = gcal.getTime();
+		if (temp.after(nextAlarmTriggerTime)) 
+		{
+			this.nextAlarmTriggerTime = temp; //return the newer;
+		}
+		return nextAlarmTriggerTime;
 	}
 	
 	public void setNextAlarmTriggerTime(Date nextAlarmTriggerTime)
@@ -141,5 +160,20 @@ public class TimeBean implements Serializable
 	public void	setCommand(String command)
 	{
 		this.command = command;
+	}
+
+	public String toString()
+	{
+		return name + ": " + alarmTriggerTime.toString() + ", " + nextAlarmTriggerTime.toString(); 
+	}
+
+	public Integer getRepeatMultiple()
+	{
+		return repeatMultiple;
+	}
+
+	public void setRepeatMultiple(Integer repeatMultiple)
+	{
+		this.repeatMultiple = repeatMultiple;
 	}
 }

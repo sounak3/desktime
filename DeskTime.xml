@@ -15,7 +15,7 @@
   </void>
   <void method="put">
    <string>OPACITY</string>
-   <float>0.3</float>
+   <float>0.5</float>
   </void>
   <void method="put">
    <string>IMAGEFILE</string>
@@ -44,14 +44,14 @@
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>698</int>
+     <int>775</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>84</int>
+     <int>136</int>
     </void>
    </void>
   </void>

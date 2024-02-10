@@ -13,7 +13,7 @@ import javax.swing.border.*;
 public class ChooserBox extends JDialog implements ActionListener, ItemListener, ListSelectionListener, ChangeListener
 {
 	private JTabbedPane tabPane;
-	private ListChooser font,style,size;
+	private ListChooser cFontList,cFontStyleList,cFontSizeList;
 	private JButton setFont,resetFont,selFontCol,resFontCol;
 	private TLabel fontPreview;
 	private BorderPreview borderPreview;
@@ -31,14 +31,15 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private TLabel picLabel;
 	private JRadioButton rbHtile,rbTile,rbVtile,rbCenter,rbFit,rbStretch;
 	private JList alarmList;
-	private JLabel aboutAlarm;
+	private JLabel almAbout;
 	private JButton add,remove,edit,test,browse;
 	private JPanel bottomCards;
+	private JLabel label3;
 	private JComboBox<String> period, dateOrWeek;
 	private JCheckBox rept,runCom,runMsg,runSnd;
 	private JTextField cmdToRun, alarmName;
-	private JRadioButton option1, option2;
-	private JSpinner timeSpinner1, timeSpinner2;
+	private JRadioButton optStartOn, optStartAfter;
+	private JSpinner timeSpinner1, timeSpinner2, countSpinner1;
 	private DateChooser choosefrom;
 	private int opmode   = 0;
 	private int selIndex = -1;
@@ -46,7 +47,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	public Vector <TimeBean>data;
 	public InitInfo information;
 
-	public ChooserBox(InitInfo initinfo, Vector <TimeBean>alarmData)
+	public ChooserBox(InitInfo initinfo, Vector <TimeBean>alarminfo)
 	{
 		GraphicsEnvironment graphicsenvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		information = initinfo;  //Transfering information from Desktop to this;
@@ -64,11 +65,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		
 		String as1[] = {"Plain", "Bold", "Italic", "Bold Italic"};
 		String as[]  = graphicsenvironment.getAvailableFontFamilyNames();
-		font         = new ListChooser(as, "Font");
-		style        = new ListChooser(as1, "Style");
-		size         = new ListChooser(ainteger, "Size");
+		cFontList         = new ListChooser(as, "Font");
+		cFontStyleList        = new ListChooser(as1, "Style");
+		cFontSizeList         = new ListChooser(ainteger, "Size");
 		selFontCol   = new JButton("Choose Font Color");
-		resFontCol   = new JButton("Default");
+		resFontCol   = new JButton("Reset Font Color");
 		fontPreview  = new TLabel("AaBbCc...0123...!#@%&$");
 		fontPreview.setBackground(Color.white);
 		JScrollPane jscrollpane = new JScrollPane();
@@ -186,42 +187,45 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		remove      = new JButton("Remove");
 		test        = new JButton("Test >>");
 		bottomCards = new JPanel(new CardLayout());
-		aboutAlarm  = new JLabel("");
-		aboutAlarm.setBorder(BorderFactory.createEmptyBorder(10, 50, 10, 50));
+		almAbout  = new JLabel("");
+		almAbout.setBorder(BorderFactory.createEmptyBorder(10, 50, 10, 50));
 		setDescriptionText();
-		JPanel settingsPane = new JPanel(new GridBagLayout());
-		JLabel l1    = new JLabel("Alarm Name",JLabel.CENTER);
-		alarmName    = new JTextField();
+		JPanel almSet = new JPanel(new GridBagLayout());
+		JLabel nameLabel    = new JLabel("Alarm Name",JLabel.CENTER);
+		       alarmName    = new JTextField();
+		nameLabel.setLabelFor(alarmName);
 		alarmName.setToolTipText("<html>Please enter a brief description of the alarm such as:<p> &quot;John's Birthday&quot;</html>");
 		ButtonGroup bgr = new ButtonGroup();
-		option1         = new JRadioButton("Start on date");
-		bgr.add(option1);
+		optStartOn 		= new JRadioButton("Start on");
+		bgr.add(optStartOn);
 		choosefrom   = new DateChooser();
 		timeSpinner1 = new JSpinner(new SpinnerDateModel());
-		JSpinner.DateEditor dit1 = new JSpinner.DateEditor(timeSpinner1,"hh:mm a");
-		timeSpinner1.setEditor(dit1);
-		rept=new JCheckBox("and continue");
-		String pds[]=new String[]{"Never", "Minutely", "Hourly", "Daily", "Weekly", "Monthly", "Yearly"};
-		period=new JComboBox<String>(pds);
+		JSpinner.DateEditor spinModel = new JSpinner.DateEditor(timeSpinner1,"hh:mm a");
+		timeSpinner1.setEditor(spinModel);
+		       rept   = new JCheckBox("and repeat every");
+		countSpinner1 = new JSpinner(new SpinnerNumberModel(1, 1, 999, 1));
+		String pds[]  = new String[]{"Never", "Minute", "Hour", "Day", "Week", "Month", "Year"};
+		       period = new JComboBox<String>(pds);
 		period.addItemListener(this);
-		JLabel label3 = new JLabel("referring");
-		String dow[]  = new String[]{"Date", "Week"};
+		label3 = new JLabel("same");
+		String dow[]  = new String[]{"Date", "Weekday"};
 		dateOrWeek    = new JComboBox<String>(dow);
+		label3.setEnabled(false);
 		dateOrWeek.setEnabled(false);
-		option2 = new JRadioButton("Start at");
-		bgr.add(option2);
+		optStartAfter = new JRadioButton("Start after");
+		bgr.add(optStartAfter);
 		timeSpinner2             = new JSpinner(new SpinnerDateModel());
 		JSpinner.DateEditor dit2 = new JSpinner.DateEditor(timeSpinner2,"HH:mm");
 		timeSpinner2.setEditor(dit2);
-		JLabel label4 = new JLabel(" hours after program start-up");
+		JLabel label4 = new JLabel(" hours of program start-up");
 		JLabel label2 = new JLabel("On Alarm",JLabel.CENTER);
 		runCom        = new JCheckBox("Start Command");
 		runSnd        = new JCheckBox("Just Beep");
 		runMsg        = new JCheckBox("Message");
 		cmdToRun      = new JTextField(10);
 		browse        = new JButton("Browse...");
-		bottomCards.add(aboutAlarm, "FinishEdit");
-		bottomCards.add(settingsPane,  "AddEdit");
+		bottomCards.add(almAbout, "FinishEdit");
+		bottomCards.add(almSet,  "AddEdit");
 		//For bottom panel of ok/cancel buttons.
 		JPanel jpanel4 = new JPanel(new FlowLayout(2));
 		JPanel grid    = new JPanel(new GridLayout(1, 0, 20, 5));
@@ -232,9 +236,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		cancel.setActionCommand("CANCEL");
 		try
 		{
-			ExUtils.addComponent(jpanel, font, 0, 0, 1, 1, 0.33D, 0.4D, this);
-			ExUtils.addComponent(jpanel, style, 1, 0, 1, 1, 0.33D, 0.4D, this);
-			ExUtils.addComponent(jpanel, size, 2, 0, 1, 1, 0.33D, 0.4D, this);
+			ExUtils.addComponent(jpanel, cFontList, 0, 0, 1, 1, 0.33D, 0.4D, this);
+			ExUtils.addComponent(jpanel, cFontStyleList, 1, 0, 1, 1, 0.33D, 0.4D, this);
+			ExUtils.addComponent(jpanel, cFontSizeList, 2, 0, 1, 1, 0.33D, 0.4D, this);
 			ExUtils.addComponent(jpanel, setFont, 0, 1, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel, resetFont, 1, 1, 2, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel, selFontCol, 0, 2, 1, 1, 0.0D, 0.0D, this);
@@ -294,29 +298,30 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel3, resBackCol, 	3, 7, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, transSlide, 	1, 8, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, transLevel, 	2, 8, 3, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(topList,jsp,			0, 0, 1,	4, 1.0D, 1.0D, this);
+			ExUtils.addComponent(topList,jsp,			0, 0, 1,	5, 1.0D, 1.0D, this);
 			ExUtils.addComponent(topList,add,			1, 0, 1,	1, 0.0D, 0.25D, this);
 			ExUtils.addComponent(topList,edit,			1, 1, 1,	1, 0.0D, 0.25D, this);
 			ExUtils.addComponent(topList,remove,		1, 2, 1,	1, 0.0D, 0.25D, this);
 			ExUtils.addComponent(topList,test,			1, 3, 1,	1, 0.0D, 0.25D, this);
-			ExUtils.addComponent(settingsPane, l1,			0, 0, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, alarmName,	1, 0, 4,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, option1,		0, 1, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, choosefrom,	1, 1, 3,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, timeSpinner1,4, 1, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, option2,		0, 2, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, timeSpinner2,1, 2, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, label4,		2, 2, 3,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, rept,		0, 3, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, period,		1, 3, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, label3,		2, 3, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, dateOrWeek,	3, 3, 2,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, label2,		0, 4, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, runCom,		1, 4, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, runSnd,		2, 4, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, runMsg,		3, 4, 2,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, cmdToRun,	0, 5, 3,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(settingsPane, browse,		3, 5, 2,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, nameLabel,		0, 0, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, alarmName,		1, 0, 6,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, optStartOn,	0, 1, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, choosefrom,	1, 1, 5,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, timeSpinner1,	6, 1, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, optStartAfter,	0, 2, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, timeSpinner2,	1, 2, 2,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, label4,		3, 2, 4,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, rept,			0, 3, 2,	1, 0.4D, 0.0D, this);
+			ExUtils.addComponent(almSet, countSpinner1,	2, 3, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, period,		3, 3, 2,	1, 0.2D, 0.0D, this);
+			ExUtils.addComponent(almSet, label3,		5, 3, 1,	1, 0.2D, 0.0D, this);
+			ExUtils.addComponent(almSet, dateOrWeek,	6, 3, 1,	1, 0.2D, 0.0D, this);
+			ExUtils.addComponent(almSet, label2,		0, 4, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, runCom,		1, 4, 3,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, runSnd,		4, 4, 2,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, runMsg,		6, 4, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, cmdToRun,		0, 5, 6,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, browse,		6, 5, 1,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel5, topList,			0, 0, 1,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel5, bottomCards,		0, 1, 1,	1, 0.0D, 0.0D, this);
 		}
@@ -336,7 +341,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		grid.add(cancel);
 		jpanel4.add(grid);
 		getContentPane().add(jpanel4, "South");
-		initialize(information, alarmData);
+		initialize(information, alarminfo);
 	}
 
 	public static InfoTracker showDialog(String s, int i, InitInfo initinfo, Vector <TimeBean>alarmData)
@@ -347,7 +352,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		chooserbox.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		chooserbox.revalidate();
 		chooserbox.pack();
-		chooserbox.setSize(430, 470);
+		chooserbox.setSize(450, 470);
 		chooserbox.setResizable(false);
 		Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
 		chooserbox.setLocation((dimension.width - chooserbox.getWidth()) / 2, (dimension.height - chooserbox.getHeight()) / 2);
@@ -360,9 +365,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		return infotracker;
 	}
 
-	public void initialize(InitInfo initinfo, Vector <TimeBean>alarmData) //Called by->constructor->showDialog
+	public void initialize(InitInfo initinfo, Vector <TimeBean>alarmInit) //Called by->constructor->showDialog
 	{
-		setFontIn(initinfo.getFont());
+		setSelectedFont(initinfo.getFont());
 		fontPreview.setFont(initinfo.getFont());
 		Color color = initinfo.getForeground();
 		selFontCol.setBackground(color);
@@ -471,7 +476,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		hSymbol.setText(arr[3]);
 		mSymbol.setText(arr[5]);
 		sSymbol.setText(arr.length==8 ? arr[7] : " ");
-		data=alarmData;
+		data=alarmInit;
 		alarmList.setListData(data);
 		setDescriptionText();
 		setOneEnabled();
@@ -479,27 +484,30 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 
 	private void setDescriptionText()
 	{
-		Date dte=new Date();
-		if (alarmList.getSelectedIndex()==-1)
+		if (alarmList.getSelectedIndex() == -1)
 		{
-			aboutAlarm.setText("Click on an alarm list item to view its description.");
+			almAbout.setText("Click on an alarm list item to view its description.");
 		}
 		else
 		{
 			TimeBean         tb     = (TimeBean)data.elementAt(alarmList.getSelectedIndex());
-			String           ltext  = "<html>This alarm named \"(alarm name)\" is scheduled to start on (start time) and continue (interval).<p> Its next run will be on (next run). This alarm runs a (run type) at the scheduled time.</html>";
+			String           ltext  = "<html>This alarm \"(alarm name)\", is scheduled to start on (start time) and repeat (multi) (interval).<p><p>Its next run will be (next run).<p><p>A (run type) runs at the scheduled time.</html>";
 			SimpleDateFormat tmp1   = choosefrom.getFormat();
 			SimpleDateFormat tmp2   = ((JSpinner.DateEditor)timeSpinner1.getEditor()).getFormat();
-			String           tmp3[] = {"never", "minutely", "hourly", "daily", "weekly", "??", "yearly", "monthly", "monthly same weekday"};
+			GregorianCalendar ccal  = new GregorianCalendar();
+			String           tmp3[] = {"never", "minute", "hour", "day", "week", "??", "year", "month", "month same weekday"};
 			int              tmp4   = 0;
 			ltext  = ltext.replace("(alarm name)", tb.getName());
 			ltext  = ltext.replace("(start time)", tmp1.format(tb.getAlarmTriggerTime()) + " at " + tmp2.format(tb.getAlarmTriggerTime()));
 			tmp4   = tb.getAlarmRepeatInterval().intValue();
-			ltext  = ltext.replace("(interval)", tmp3[tmp4]);
-			ltext  = ltext.replace("(next run)", tmp4 == 0 ? "never" : tmp1.format(tb.getNextAlarmTriggerTime(dte)) + " at " + tmp2.format(tb.getNextAlarmTriggerTime(dte)));
+			ltext  = ltext.replace("(multi)", tmp4 == 0 ? "" : "every " + tb.getRepeatMultiple().toString());
+			ltext  = ltext.replace("(interval)", tmp4 == 0 ? tmp3[tmp4] : tmp3[tmp4] + "(s)");
+			ccal.setTime(tb.getNextAlarmTriggerTime());
+			ccal.add(Calendar.SECOND, 1);
+			ltext  = ltext.replace("(next run)", tmp4 == 0 ? "never" : "on " + tmp1.format(ccal.getTime()) + " at " + tmp2.format(ccal.getTime()));
 			tmp4   = tb.getAlarmExecutionOutputType().intValue();
 			ltext  = ltext.replace("(run type)", ((tmp4 % 2 != 0) ? " command," : "") + (((tmp4 % 3 == 0) || (tmp4 == 2)) ? " sound," : "") + ((tmp4 > 3) ? " message" : ""));
-			aboutAlarm.setText(ltext);
+			almAbout.setText(ltext);
 		}
 	}
 
@@ -532,13 +540,13 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	
 	private void enadesa()
 	{
-		if (option1.isSelected())
+		if (optStartOn.isSelected())
 		{
 			timeSpinner1.setEnabled(true);
 			timeSpinner2.setEnabled(false);
 			choosefrom.setEnabled(true);
 		}
-		else if (option2.isSelected())
+		else if (optStartAfter.isSelected())
 		{
 			timeSpinner1.setEnabled(false);
 			timeSpinner2.setEnabled(true);
@@ -557,7 +565,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		alarmList.setEnabled(ena);
 	}
 
-	private void setFontIn(Font font1)
+	private void setSelectedFont(Font font1)
 	{
 		if (font1 == null)
 			throw new NullPointerException("The Font Parameter Is Blank.");
@@ -570,36 +578,36 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			i = 2;
 		else if (ExUtils.contains(font1.getFontName(), "italic", true) && ExUtils.contains(font1.getFontName(), "bold", true))
 			i = 3;
-		font.setSelectedValue(s, true);
-		font.setText(s);
-		size.setSelectedValue(integer, true);
-		size.setText(integer.toString());
-		style.setSelectedIndex(i);
-		style.setText(style.getSelectedValue().toString());
+		cFontList.setSelectedValue(s, true);
+		cFontList.setText(s);
+		cFontSizeList.setSelectedValue(integer, true);
+		cFontSizeList.setText(integer.toString());
+		cFontStyleList.setSelectedIndex(i);
+		cFontStyleList.setText(cFontStyleList.getSelectedValue().toString());
 	}
 
-	private Font setFontOut()
+	private Font getSelectedFont()
 	{
-		String s = font.getText();
+		String s = cFontList.getText();
 		int i;
 		try
 		{
-			i = Integer.parseInt(size.getText());
+			i = Integer.parseInt(cFontSizeList.getText());
 		}
 		catch (NumberFormatException numberformatexception)
 		{
 			i = 10;
 			numberformatexception.printStackTrace();
 		}
-		int j = style.getSelectedIndex();
+		int j = cFontStyleList.getSelectedIndex();
 		Font font1 = new Font(s, j, i);
 		return new Font(font1.getFontName(), 0, font1.getSize());
 	}
 
-	public Date timeOut()
+	public Date getSelectedAlarmTime()
 	{
 		Date temp=new Date();
-		if (option1.isSelected())
+		if (optStartOn.isSelected())
 		{
 			String           pttn    = choosefrom.getFormat().toPattern()+((JSpinner.DateEditor)timeSpinner1.getEditor()).getFormat().toPattern();
 			String           maintmp = choosefrom.getFormat().format(choosefrom.getDate())+((JSpinner.DateEditor)timeSpinner1.getEditor()).getTextField().getText();
@@ -613,7 +621,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				System.out.println("Something wrong happened in date "+pe.getMessage());
 			}
 		}
-		else if (option2.isSelected())
+		else if (optStartAfter.isSelected())
 		{
 			temp = ((JSpinner.DateEditor)timeSpinner2.getEditor()).getModel().getDate();
 		}
@@ -623,20 +631,20 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		return second0.getTime();
 	}
 	
-	public void timeIn(Date date)
+	public void setSelectedAlarmTime(Date date)
 	{
-		if (option1.isSelected())
+		if (optStartOn.isSelected())
 		{
 			choosefrom.setDate(date);
 			timeSpinner1.setValue(date);
 		}
-		else if (option2.isSelected())
+		else if (optStartAfter.isSelected())
 		{
 			timeSpinner2.setValue(date);
 		}
 	}
 	
-	public void intervalIn(int inv)
+	public void setSelectedRepeatInterval(int inv, int multiple)
 	{
 		if (inv == 5) inv = 7;
 		if (inv <= 6) period.setSelectedIndex(inv);
@@ -645,9 +653,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			period.setSelectedIndex(5);
 			dateOrWeek.setSelectedIndex(inv - 7);
 		}
+		countSpinner1.setValue(multiple);
 	}
 	
-	public int intervalOut()
+	public int getSelectedRepeatInterval()
 	{
 		if (period.getSelectedIndex() == 5)
 			return dateOrWeek.getSelectedIndex() + 7;
@@ -655,20 +664,20 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			return period.getSelectedIndex();
 	}
 	
-	public void timeTypeIn(boolean flag)
+	public void selectStartAfterTimeOption(boolean flag)
 	{
-		option1.setSelected(!flag);
-		option2.setSelected(flag);
+		optStartOn.setSelected(!flag);
+		optStartAfter.setSelected(flag);
 		enadesa();
 	}
 	
-	public boolean timeTypeOut()
+	public boolean startAfterTimeIsSelected()
 	{
 		enadesa();
-		return option2.isSelected();
+		return optStartAfter.isSelected();
 	}
 	
-	public void typeIn(int type)
+	public void selectAlarmExecOutputOption(int type)
 	{
 		runCom.setSelected(type % 2 != 0); //for 1;
 		runMsg.setSelected(type > 3); //for 4;
@@ -677,7 +686,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		browse.setEnabled(type % 2 != 0);
 	}
 	
-	public int typeOut()
+	public int getSelectedAlarmExecOutputOption()
 	{
 		int totaltmp = 0;
 		if  (runCom.isSelected()) totaltmp += 1;
@@ -688,7 +697,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 
 	public InitInfo applySettings() throws Exception
 	{
-		information.setFont(setFontOut());
+		information.setFont(getSelectedFont());
 		information.setForeground(selFontCol.getBackground());
 		information.setUsingImage(useImg.isSelected());
 		information.setGlassEffect(useTrans.isSelected());
@@ -801,11 +810,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			throw new NullPointerException("Blank command");
 		TimeBean tb = new TimeBean();
 		tb.setName(alarmName.getText());
-		tb.setSystemStartTimeBasedAlarm(timeTypeOut()); // must be set before setRuntime();
-		if (timeTypeOut()) tb.setNextAlarmTriggerTime(timeOut());//if op2 then nextRuntime
-		else tb.setAlarmTriggerTime(timeOut()); // should be set instead of runtime;
-		tb.setAlarmRepeatInterval(intervalOut());
-		tb.setAlarmExecutionOutputType(typeOut());
+		tb.setSystemStartTimeBasedAlarm(startAfterTimeIsSelected()); // must be set before setRuntime();
+		if (startAfterTimeIsSelected()) tb.setNextAlarmTriggerTime(getSelectedAlarmTime());//if op2 then nextRuntime
+		else tb.setAlarmTriggerTime(getSelectedAlarmTime()); // should be set instead of runtime;
+		tb.setAlarmRepeatInterval(getSelectedRepeatInterval());
+		tb.setRepeatMultiple(rept.isSelected() ? (int)countSpinner1.getValue() : 0);
+		tb.setAlarmExecutionOutputType(getSelectedAlarmExecOutputOption());
 		tb.setCommand(cmdToRun.getText());
 		if (opmode == 1)
 		{
@@ -827,11 +837,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		String     comm = actionevent.getActionCommand();
 		CardLayout cl   = (CardLayout)(bottomCards.getLayout());
 		if (comm.equals("Preview Font"))
-			fontPreview.setFont(setFontOut());
+			fontPreview.setFont(getSelectedFont());
 		else if (comm.equals("Reset Font"))
 		{
 			fontPreview.setFont((new JLabel()).getFont());
-			setFontIn((new JLabel()).getFont());
+			setSelectedFont((new JLabel()).getFont());
 		}
 		else if (comm.equals("Choose Font Color"))
 		{
@@ -843,7 +853,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			fontPreview.setForeground(color3);
 			selFontCol.setForeground(Math.abs(color3.getRGB()) >= 0x800000 ? Color.white : Color.black);
 		}
-		else if (comm.equals("Default"))
+		else if (comm.equals("Reset Font Color"))
 		{
 			selFontCol.setBackground(Color.black);
 			fontPreview.setForeground(Color.black);
@@ -958,10 +968,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			enadesa2(false);
 			opmode = 1;
 			alarmName.setText("");
-			timeTypeIn(false); //must be called before timeIn();
-			timeIn(new Date());
-			intervalIn(0);
-			typeIn(4); // for msg;
+			selectStartAfterTimeOption(false); //must be called before timeIn();
+			setSelectedAlarmTime(new Date());
+			setSelectedRepeatInterval(0, 1);
+			selectAlarmExecOutputOption(4); // for msg;
 		}
 		else if (comm.equals("Edit"))
 		{
@@ -973,10 +983,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				opmode      = 2;
 				TimeBean tb = (TimeBean)data.elementAt(selIndex);
 				alarmName.setText(tb.getName());
-				timeTypeIn(tb.isSystemStartTimeBasedAlarm().booleanValue()); //must be called before timeIn();
-				timeIn(tb.getAlarmTriggerTime());
-				intervalIn(tb.getAlarmRepeatInterval());
-				typeIn(tb.getAlarmExecutionOutputType().intValue());
+				selectStartAfterTimeOption(tb.isSystemStartTimeBasedAlarm().booleanValue()); //must be called before timeIn();
+				setSelectedAlarmTime(tb.getAlarmTriggerTime());
+				setSelectedRepeatInterval(tb.getAlarmRepeatInterval(), tb.getRepeatMultiple());
+				selectAlarmExecOutputOption(tb.getAlarmExecutionOutputType().intValue());
 				cmdToRun.setText(tb.getCommand());
 			}
 			else
@@ -1029,7 +1039,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				ExUtils.runProgram(tb,this);
 			}
 		}
-		else if (comm.equals("and continue"))
+		else if (comm.equals("and repeat every"))
 		{
 			if (rept.isSelected()) period.setSelectedIndex(1);
 			else period.setSelectedIndex(0);
@@ -1077,8 +1087,16 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			if (ie.getItem().equals("Never")) rept.setSelected(false);
 			else rept.setSelected(true);
 			
-			if (ie.getItem().equals("Monthly")) dateOrWeek.setEnabled(true);
-			else dateOrWeek.setEnabled(false);
+			if (ie.getItem().equals("Month"))
+			{
+				label3.setEnabled(true);
+				dateOrWeek.setEnabled(true);
+			}
+			else
+			{
+				label3.setEnabled(false);
+				dateOrWeek.setEnabled(false);
+			}
 		}
 	}
 

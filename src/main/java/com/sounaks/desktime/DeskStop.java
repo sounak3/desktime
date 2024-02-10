@@ -32,6 +32,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	private Dimension scsize;
 	protected Robot robot;
 	private   boolean refreshNow  = true;
+	private Container contentPane;
 	protected final String tipGmt = "Currently Displaying: Greenwich Mean Time (GMT)\nThis time is reffered as the world standard time.";
 	protected final String tipCur = "Currently Displaying: Time of your location (Time-Zone)\nThe system time should be set correctly according\nto your time zone.";
 	protected final String tipUpt = "Currently Displaying: System Up-Time\nThis time shows for how long your computer is running\nwithout a shut-down or log-off.\n(Requires this program to be running from system startup).";
@@ -46,8 +47,9 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		tLabel.setBackground(Color.white);
 		tLabel.setForeground(Color.black);
 		tLabel.setBorder(BorderFactory.createLineBorder(Color.black, 2));
-		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(tLabel, "Center");
+		contentPane = getContentPane();
+		contentPane.setLayout(new BorderLayout());
+		contentPane.add(tLabel, "Center");
 		setSize(300, 50);
 		setLocation((scsize.width - 200) / 2, (scsize.height - 200) / 2);
 		setVisible(true);
@@ -229,19 +231,20 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	// Used for setting run time of up-time alarms;
 	private void setSystemStartTime(Vector <TimeBean>vec)
 	{
-		long nano    = Math.abs(System.nanoTime()/1000000000);
-		int  days    = -1*(int)nano/86400;
-		int  hours   = -1*(int)(nano%86400)/3600;
-		int  minutes = -1*(int)(nano%3600)/60;
+		long nano    = Math.abs(System.nanoTime() / 1000000000);
+		int  days    = -1 * (int)nano / 86400;
+		int  hours   = -1 * (int)(nano % 86400) / 3600;
+		int  minutes = -1 * (int)(nano % 3600) / 60;
 		//int seconds=-1*(int)(nano%3600)%60; // Not used coz we need 0;
-		GregorianCalendar gcal=new GregorianCalendar();
-		gcal.add(Calendar.DATE,days);
-		gcal.add(Calendar.HOUR_OF_DAY,hours);
-		gcal.add(Calendar.MINUTE,minutes);
-		gcal.add(Calendar.SECOND,0);  // Second 0 for a match;
+		GregorianCalendar gcal = new GregorianCalendar();
+		gcal.add(Calendar.DATE, days);
+		gcal.add(Calendar.HOUR_OF_DAY, hours);
+		gcal.add(Calendar.MINUTE, minutes);
+		gcal.add(Calendar.SECOND, 0);  // Second 0 for a match;
 		for (TimeBean tb : vec)
 		{
-			if (tb.isSystemStartTimeBasedAlarm().booleanValue()) tb.setAlarmTriggerTime(gcal.getTime());
+			if (tb.isSystemStartTimeBasedAlarm().booleanValue())
+				tb.setAlarmTriggerTime(gcal.getTime());
 		}
 	}
 
@@ -482,6 +485,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		{
 			for (Thread thread = Thread.currentThread(); clockThread == thread && timerun;)
 			{
+				date = new Date();
 				try
 				{
 					if (info.getDisplayMethod().equals("UPTIME"))
@@ -490,10 +494,10 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 					}
 					else
 					{
-						date = new Date();
 						time = sd.format(date);
 					}
 					tLabel.setText(time);
+					checkTimeAndRunAlarm(date);
 					Thread.sleep(1000L);
 				}
 				catch (Exception exception)
@@ -507,6 +511,24 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		public void terminate()
 		{
 			timerun = false;
+		}
+
+		private void checkTimeAndRunAlarm(Date current)
+		{
+			for (int indx = 0; indx < alarms.size(); indx++)
+			{
+				TimeBean tmpb = alarms.elementAt(indx);
+				if (ExUtils.dateCompareUptoSecond(current, tmpb.getNextAlarmTriggerTime()))
+				{
+					Thread newProc = new Thread("DeskTime-Alarm-" + tmpb.getName()) {
+						public void run()
+						{
+							ExUtils.runProgram(tmpb, contentPane);
+						}
+					};
+					newProc.start();
+				}
+			}
 		}
 	}
 

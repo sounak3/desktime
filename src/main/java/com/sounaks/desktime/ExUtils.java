@@ -214,8 +214,7 @@ public class ExUtils
 		GregorianCalendar gc2 = new GregorianCalendar();
 		gc1.setTime(dt1);
 		gc2.setTime(dt2);
-		return gc1.get(Calendar.ERA)  == gc2.get(Calendar.ERA)&&
-		gc1.get(Calendar.YEAR)        == gc2.get(Calendar.YEAR)&&
+		return gc1.get(Calendar.YEAR) == gc2.get(Calendar.YEAR)&&
 		gc1.get(Calendar.MONTH)       == gc2.get(Calendar.MONTH)&&
 		gc1.get(Calendar.DATE)        == gc2.get(Calendar.DATE)&&
 		gc1.get(Calendar.HOUR_OF_DAY) == gc2.get(Calendar.HOUR_OF_DAY)&&
@@ -257,7 +256,9 @@ public class ExUtils
 		{
 			try
 			{
-				almStr = "<html><font size=+3><i>Alarm! \"" + tmpb.getName() + "\"</i></font><p>This alarm was scheduled to run now: <font color=blue>" + new Date() + "</font>.</html>";
+				GregorianCalendar ccal = new GregorianCalendar();
+				ccal.add(Calendar.SECOND, 1);
+				almStr = "<html><font size=+3><i>Alarm! \"" + tmpb.getName() + "\"</i></font><p>This alarm was scheduled to run now: <font color=blue>" + ccal.getTime() + "</font>.</html>";
 				opt    = new JOptionPane(almStr,JOptionPane.INFORMATION_MESSAGE,JOptionPane.DEFAULT_OPTION, new ImageIcon("duke.gif"));
 				dlg    = opt.createDialog(parent,"Alarm...");
 				dlg.setLocation((scsize.width - dlg.getWidth()) / 2, (scsize.height - dlg.getHeight()) / 2);
