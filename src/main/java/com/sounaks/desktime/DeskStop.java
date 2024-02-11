@@ -286,8 +286,14 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		try
 		{
 			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream("Smrala.xml")));
-			           data    = (Vector<TimeBean>)decoder.readObject();
+			Object settingsObj = decoder.readObject();
 			decoder.close();
+			if (settingsObj instanceof Vector) {
+				Vector<?> tmpVec = (Vector<?>)settingsObj;
+				if (tmpVec.size() != 0 && tmpVec.get(0) instanceof TimeBean) {
+					data    = (Vector<TimeBean>)tmpVec;
+				}
+			}
 		}
 		catch (Exception exclusive)
 		{// Ignoring missing file...

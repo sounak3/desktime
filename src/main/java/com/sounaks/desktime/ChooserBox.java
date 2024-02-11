@@ -30,7 +30,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JButton selectDir,selBackCol,resBackCol;
 	private TLabel picLabel;
 	private JRadioButton rbHtile,rbTile,rbVtile,rbCenter,rbFit,rbStretch;
-	private JList alarmList;
+	private JList<TimeBean> alarmList;
 	private JLabel almAbout;
 	private JButton add,remove,edit,test,browse;
 	private JPanel bottomCards;
@@ -177,7 +177,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		JPanel      topList = new JPanel(new GridBagLayout());
 		JScrollPane jsp     = new JScrollPane();
 		data      = new Vector<TimeBean>();
-		alarmList = new JList(data);
+		alarmList = new JList<TimeBean>(data);
 		alarmList.setCellRenderer(new AlarmListCellRenderer());
 		alarmList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		jsp.setViewportView(alarmList);
