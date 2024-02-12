@@ -30,6 +30,8 @@ public class InitInfo extends Hashtable<Object, Object>
 		put("IMAGEFILE", ".");
 		put("IMAGE_STYLE", 16);
 		put("ON_TOP", false);
+		put("ROUND_CORNERS", false);
+		put("SLOW_TRANS", false);
 	}
 
 	public Font getFont()
@@ -236,5 +238,25 @@ public class InitInfo extends Hashtable<Object, Object>
 	public void setImageStyle(int i)
 	{
 		put("IMAGE_STYLE", i);
+	}
+
+	public boolean hasRoundedCorners()
+	{
+		return ((Boolean)get("ROUND_CORNERS")).booleanValue();
+	}
+
+	public void setRoundCorners(boolean roundCorners)
+	{
+		put("ROUND_CORNERS", roundCorners);
+	}
+
+	public boolean isSlowTransUpdating()
+	{
+		return ((Boolean)get("SLOW_TRANS")).booleanValue();
+	}
+
+	public void setSlowTransUpdating(boolean slowTrans)
+	{
+		put("SLOW_TRANS", slowTrans);
 	}
 }

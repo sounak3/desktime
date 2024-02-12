@@ -18,14 +18,14 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private TLabel fontPreview;
 	private BorderPreview borderPreview;
 	private JRadioButton bRaised,bLowered,eRaised,eLowered,lBorder;
-	private JCheckBox nBorder,fixPlace,enTooltip,nativeLook;
+	private JCheckBox nBorder,fixPlace,enTooltip,nativeLook,roundBdr;
 	private JButton selLineCol,resLineCol;
 	private JRadioButton curTimeZone,GMTimeZone,sysUpTime;
 	private JTextField sysDateFormat,gmtDateFormat,uSymbol,hSymbol,mSymbol,sSymbol;
 	private JButton resetDefs,helpFormat;
 	private JLabel transSlide;
 	private JSlider transLevel;
-	private JCheckBox useImg,useCol,useTrans;
+	private JCheckBox useImg,useCol,useTrans,slowUpd;
 	private FileList fileList;
 	private JButton selectDir,selBackCol,resBackCol;
 	private TLabel picLabel;
@@ -95,10 +95,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		JSeparator jseparator  = new JSeparator();
 		Component component    = Box.createHorizontalStrut(8);
 		selLineCol = new JButton("Line Border Color");
-		resLineCol = new JButton("Default Line Color");
+		resLineCol = new JButton("Reset");
+		resLineCol.setActionCommand("Default Line Color");
 		JSeparator jseparator1 = new JSeparator();
 		fixPlace   = new JCheckBox("Fix to Place");
-		enTooltip  = new JCheckBox("Enable \"Mouse-Over-Info\" Help");
+		roundBdr   = new JCheckBox("Round Corners");
+		enTooltip  = new JCheckBox("Mouse-over Time info");
 		nativeLook = new JCheckBox("Check to view this dialog box in system's look and feel");
 		jpanel1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Looks and Borders"));
 		//All configurations for Time Conf. Panel as follows:
@@ -134,6 +136,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		useImg   = new JCheckBox("<html>Use background image. Use image settings from the following:</html>");
 		useCol   = new JCheckBox("<html>Use Background Color. Use color settings from the following:</html>");
 		useTrans = new JCheckBox("<html>Use transparent background (may cause flickers)</html>");
+		useTrans.setActionCommand("Transparent background");
+		slowUpd  = new JCheckBox("<html>Reduce flicker (slower transparent background updates)</html>");
+		slowUpd.setActionCommand("Reduce flicker");
 		ButtonGroup buttongroup2 = new ButtonGroup();
 		buttongroup2.add(useImg);
 		buttongroup2.add(useCol);
@@ -147,7 +152,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		fileList.addListSelectionListener(this);
 		JScrollPane jscrollpane1 = new JScrollPane();
 		jscrollpane1.getViewport().setView(fileList);
-		selectDir = new JButton("Choose Directory");
+		Component component4 = Box.createHorizontalStrut(140);
+		selectDir = new JButton("<< Choose Image Directory");
 		picLabel  = new TLabel("No Preview", null, 16);
 		picLabel.setBorder(BorderFactory.createBevelBorder(1));
 		rbHtile      = new JRadioButton("Tile Vertically");
@@ -244,21 +250,22 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel, selFontCol, 0, 2, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel, resFontCol, 1, 2, 2, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel, jscrollpane, 0, 3, 3, 1, 1.0D, 0.6D, this);
-			ExUtils.addComponent(jpanel1, nBorder, 0, 0, 3, 1, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, nBorder, 0, 0, 4, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, bRaised, 0, 2, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, borderPreview, 2, 2, 3, 4, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, borderPreview, 2, 2, 4, 4, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, bLowered, 0, 3, 2, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, eRaised, 0, 4, 2, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, eLowered, 0, 5, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, jseparator, 0, 6, 3, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, jseparator, 0, 6, 5, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, lBorder, 0, 7, 2, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, component, 0, 8, 1, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, selLineCol, 1, 8, 1, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, resLineCol, 2, 8, 1, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, jseparator1, 0, 9, 3, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, fixPlace, 0, 10, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, enTooltip, 2, 10, 1, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, nativeLook, 0, 11, 3, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, jseparator1, 0, 9, 5, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, enTooltip, 0, 10, 2, 1, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, fixPlace, 2, 10, 1, 1, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, roundBdr, 3, 10, 2, 1, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, nativeLook, 0, 11, 5, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, curTimeZone, 0, 0, 5, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, component1, 0, 1, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, jlabel, 1, 1, 1, 1, 0.0D, 0.0D, this);
@@ -282,22 +289,24 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel2, helpFormat, 3, 10, 2, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, useImg, 		0, 0, 4, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, component2, 	0, 1, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, selectDir, 	1, 1, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, picLabel, 	2, 1, 2, 2, 0.0D, 0.8D, this);
+			ExUtils.addComponent(jpanel3, jscrollpane1, 1, 1, 1, 2, 0.0D, 0.8D, this);
+			ExUtils.addComponent(jpanel3, selectDir, 	2, 1, 2, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, component3,	0, 2, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, jscrollpane1, 1, 2, 1, 1, 0.0D, 0.8D, this);
+			ExUtils.addComponent(jpanel3, component4,	1, 2, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, picLabel, 	2, 2, 2, 1, 0.0D, 0.8D, this);
 			ExUtils.addComponent(jpanel3, rbTile, 		1, 3, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, rbHtile, 		2, 3, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, rbVtile, 		3, 3, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, rbCenter, 	1, 4, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, rbFit, 		2, 4, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, rbStretch, 	3, 4, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, useTrans, 	0, 5, 4, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, useCol, 		0, 6, 4, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, selBackCol, 	1, 7, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, resBackCol, 	3, 7, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, transSlide, 	1, 8, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, transLevel, 	2, 8, 3, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, useCol, 		0, 5, 4, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, selBackCol, 	1, 6, 2, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, resBackCol, 	3, 6, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, transSlide, 	1, 7, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, transLevel, 	2, 7, 3, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, useTrans, 	0, 8, 4, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, slowUpd,		1, 9, 7, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(topList,jsp,			0, 0, 1,	5, 1.0D, 1.0D, this);
 			ExUtils.addComponent(topList,add,			1, 0, 1,	1, 0.0D, 0.25D, this);
 			ExUtils.addComponent(topList,edit,			1, 1, 1,	1, 0.0D, 0.25D, this);
@@ -384,6 +393,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			fileList.setSelectedIndex(0);
 		fileList.ensureIndexIsVisible(fileList.getSelectedIndex());
 		useTrans.setSelected(initinfo.hasGlassEffect());
+		slowUpd.setSelected(initinfo.isSlowTransUpdating());
 		if (initinfo.getImageFile().isFile())
 		{
 			picLabel.setBackImage((new ImageIcon(initinfo.getImageFile().toString())).getImage());
@@ -459,6 +469,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			nBorder.setSelected(true);
 		}
 		fixPlace.setSelected(initinfo.isFixed());
+		roundBdr.setSelected(initinfo.hasRoundedCorners());
 		enTooltip.setSelected(initinfo.hasTooltip());
 		nativeLook.setSelected(initinfo.hasNativeLook());
 		String s = initinfo.getDisplayMethod();
@@ -701,6 +712,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		information.setForeground(selFontCol.getBackground());
 		information.setUsingImage(useImg.isSelected());
 		information.setGlassEffect(useTrans.isSelected());
+		information.setSlowTransUpdating(slowUpd.isSelected());
 		if (!fileList.isSelectionEmpty())
 		{
 			File testfile=(File)fileList.getSelectedValue();
@@ -714,6 +726,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			information.setLineColor(selLineCol.getBackground());
 		information.setTooltip(enTooltip.isSelected());
 		information.setFixed(fixPlace.isSelected());
+		information.setRoundCorners(roundBdr.isSelected());
 		information.setNativeLook(nativeLook.isSelected());
 		SimpleDateFormat simpledateformat = new SimpleDateFormat();
 		if (GMTimeZone.isSelected())
@@ -799,6 +812,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			if (useTrans.isSelected())
 				JOptionPane.showMessageDialog(this,"Error while setting transparency property. Cannot set.","System restriction",JOptionPane.ERROR_MESSAGE);
 			useTrans.setSelected(false);
+			slowUpd.setSelected(false);
 		}
 	}
 	
@@ -923,7 +937,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		}
 		else if (comm.equals("Help On Format"))
 			new FormatHelp(this);
-		else if (comm.equals("Choose Directory"))
+		else if (comm.equals("<< Choose Image Directory"))
 		{
 			JFileChooser jfilechooser = new JFileChooser(fileList.getDirectory());
 			jfilechooser.setFileSelectionMode(1);

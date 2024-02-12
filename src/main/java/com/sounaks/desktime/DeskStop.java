@@ -2,18 +2,19 @@ package com.sounaks.desktime;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.RoundRectangle2D;
-import java.awt.image.BufferedImage;
+import java.awt.geom.*;
+import java.awt.image.*;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
 import javax.swing.*;
+import javax.swing.border.*;
 import javax.swing.event.*;
 import java.beans.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-public class DeskStop extends JWindow implements MouseInputListener, ActionListener
+public class DeskStop extends JWindow implements MouseInputListener, ActionListener, ComponentListener
 {
 	protected ClockThread clockThread; 
 	protected Refresher refreshThread;
@@ -33,9 +34,9 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	protected Robot robot;
 	private   boolean refreshNow  = true;
 	private Container contentPane;
-	protected final String tipGmt = "Currently Displaying: Greenwich Mean Time (GMT)\nThis time is reffered as the world standard time.";
-	protected final String tipCur = "Currently Displaying: Time of your location (Time-Zone)\nThe system time should be set correctly according\nto your time zone.";
-	protected final String tipUpt = "Currently Displaying: System Up-Time\nThis time shows for how long your computer is running\nwithout a shut-down or log-off.\n(Requires this program to be running from system startup).";
+	protected final String tipGmt = "<html><b>Currently Displaying:</b> Greenwich Mean Time (GMT) <p>This time is reffered as the world standard time.</html>";
+	protected final String tipCur = "<html><b>Currently Displaying:</b> Time of your location (Time-Zone) <p>The system time should be set correctly according <p>to your time zone.</html>";
+	protected final String tipUpt = "<html><b>Currently Displaying:</b> System Up-Time <p>This time shows for how long your computer is running <p>without a shut-down or log-off.</html>";
 
 	public DeskStop()
 	{
@@ -53,23 +54,17 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		setSize(300, 50);
 		setLocation((scsize.width - 200) / 2, (scsize.height - 200) / 2);
 		setVisible(true);
-		addComponentListener(new ComponentAdapter() {
-			@Override
-			 public void componentResized(ComponentEvent e)
-			 {
-				 setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 5, 5));
-			 }
-		 });
+		info   = loadProperties();
+		alarms = loadAlarms();
 		try
 		{
-			Thread.sleep(1000L);
+			Thread.sleep(500L);
 		} 
 		catch (InterruptedException e1)
 		{
 			e1.printStackTrace();
 		}
-		info   = loadProperties();
-		alarms = loadAlarms();
+		addComponentListener(this);
 		setSystemStartTime(alarms);
 		windowLoc    = new Point(0, 0);
 		locX  = (int)info.getLocation().getX();
@@ -134,7 +129,12 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		metrics = tLabel.getFontMetrics(info.getFont());
 		tLabel.setForeground(info.getForeground());
 		tLabel.setBorder(info.getBorder());
-		setLocation(info.getLocation());
+		Rectangle screen = new Rectangle(scsize);
+		Point savedLocation = info.getLocation();
+		if (screen.contains(savedLocation))
+			setLocation(savedLocation);
+		else
+			setLocation(5, 5);
 		if (info.isUsingImage())
 		{
 			tLabel.setText(time);
@@ -174,6 +174,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			stopRefresh();
 		}
 		resizingMethod();
+		setRoundedCorners(info.hasRoundedCorners());
 		fix1.setSelected(info.isFixed());
 		ontop.setSelected(info.getOnTop());
 		mhelp.setSelected(info.hasTooltip());
@@ -227,7 +228,20 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		tLabel.setSize(i > k ? i : k, j);  // normal string or string of '8'
 		setSize(i > k ? i : k, j);  // whichever gr8er;
 	}
-	
+
+	private void setRoundedCorners(boolean isRound)
+	{
+		Border bdr = info.getBorder();
+		if (isRound && (!info.hasGlassEffect() || bdr instanceof EtchedBorder || bdr instanceof LineBorder || bdr instanceof BevelBorder))
+		{
+			setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 5, 5));
+		}
+		else
+		{
+			setShape(null);
+		}
+	}
+
 	// Used for setting run time of up-time alarms;
 	private void setSystemStartTime(Vector <TimeBean>vec)
 	{
@@ -459,7 +473,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			curY = 0;
 			saveProperties(info);
 			refreshNow = true;
-			refreshThread.refreshThreadTransparency();
+			refreshThread.refreshTransparency();
 			startRefresh();
 		}
 	}
@@ -477,7 +491,29 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		refreshNow = false;
 		stopRefresh();
 	}
-	
+
+	@Override
+	public void componentResized(ComponentEvent e)
+	{
+		setRoundedCorners(info.hasRoundedCorners());
+	}
+
+	@Override
+	public void componentShown(ComponentEvent e)
+	{
+		setRoundedCorners(info.hasRoundedCorners());
+	}
+
+	@Override
+	public void componentMoved(ComponentEvent e)
+	{
+	}
+
+	@Override
+	public void componentHidden(ComponentEvent e)
+	{
+	}
+
 	class ClockThread extends Thread
 	{
 		private volatile boolean timerun = true;
@@ -551,6 +587,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	{
 		private AtomicIntegerArray top2pixelRows, left2pixelColumns, bottom2pixelRows, right2pixelColumns;
 		private int compInt;
+		private volatile Rectangle newBounds;
 		private volatile boolean running = true;
 		
 		Refresher()
@@ -561,20 +598,31 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			bottom2pixelRows   = new AtomicIntegerArray(10);
 			right2pixelColumns = new AtomicIntegerArray(10);
 			compInt            = 0;
+			newBounds          = getBounds();
 		}
 
-		public synchronized void refreshThreadTransparency()
+		public synchronized void refreshTransparency()
 		{
-			int refreshRate = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode().getRefreshRate();
 			if (info.hasGlassEffect() && refreshNow)
 			{
+				DisplayMode thisDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
+				int refreshRate        = thisDevice.getRefreshRate();
+				Dimension thisScreen   = Toolkit.getDefaultToolkit().getScreenSize();
+				float scaleRatio = Math.min(thisDevice.getWidth()/(float)thisScreen.getWidth(), thisDevice.getHeight()/(float)thisScreen.getHeight());
+				newBounds = new Rectangle(Math.round(scaleRatio*getX()), Math.round(scaleRatio*getY()), Math.round(scaleRatio*getWidth()), Math.round(scaleRatio*getHeight()));
 				refreshNow = false;
 				setVisible(false);
 				try
 				{
 					long waitBeforeRefresh = Math.round(2*1000/refreshRate);
 					Thread.sleep(waitBeforeRefresh);
-					tLabel.setBackImage(robot.createScreenCapture(getBounds()));
+					BufferedImage capture = robot.createScreenCapture(newBounds);
+					BufferedImage scaled  = new BufferedImage(getBounds().width, getBounds().height, BufferedImage.TYPE_INT_ARGB);
+					AffineTransform trans = new AffineTransform();
+					trans.scale(1/scaleRatio, 1/scaleRatio);
+					AffineTransformOp scaleOp = new AffineTransformOp(trans, AffineTransformOp.TYPE_BILINEAR);
+					scaled = scaleOp.filter(capture, scaled);
+					tLabel.setBackImage(scaled);
 				}
 				catch (Exception e)
 				{
@@ -596,7 +644,15 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 				}
 				else
 				{
-					refreshThreadTransparency();
+					try
+					{
+						if (info.isSlowTransUpdating()) Thread.sleep(1000L);
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+					}
+					refreshTransparency();
 				}
 			}
 		}
@@ -613,9 +669,8 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 
 		public synchronized boolean backgroundEqualsOld()
 		{
-			Rectangle bound             = getBounds();
 			Rectangle boundWith2pxFence = new Rectangle();
-			boundWith2pxFence.setRect(bound.getX()-2,bound.getY()-2,bound.getWidth()+4,bound.getHeight()+4);
+			boundWith2pxFence.setRect(newBounds.getX()-2,newBounds.getY()-2,newBounds.getWidth()+4,newBounds.getHeight()+4);
 			BufferedImage currImage     = robot.createScreenCapture(boundWith2pxFence);
 
 			compInt             = 0;
