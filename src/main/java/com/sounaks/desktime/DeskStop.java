@@ -33,10 +33,12 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	private Dimension scsize;
 	protected Robot robot;
 	private   boolean refreshNow  = true;
+	private Pomodoro pom;
 	private Container contentPane;
 	protected final String tipGmt = "<html><b>Currently Displaying:</b> Greenwich Mean Time (GMT) <p>This time is reffered as the world standard time.</html>";
 	protected final String tipCur = "<html><b>Currently Displaying:</b> Time of your location (Time-Zone) <p>The system time should be set correctly according <p>to your time zone.</html>";
 	protected final String tipUpt = "<html><b>Currently Displaying:</b> System Up-Time <p>This time shows for how long your computer is running <p>without a shut-down or log-off.</html>";
+	protected final String tipPom = "<html><b>Currently Displaying:</b> Pomodoro Timer <p>This shows pomodoro timer slots of 25 and 5 minutes or as <p>selected. A bigger break slot of 30 minutes after 4 regular slots.</html>";
 
 	public DeskStop()
 	{
@@ -70,7 +72,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		locX  = (int)info.getLocation().getX();
 		locY  = (int)info.getLocation().getY();
 		curX  = curY = 0;
-		sd    = new SimpleDateFormat(info.getThisTimeZoneFormat());
+		sd    = new SimpleDateFormat(info.getZonedTimeFormat());
 		date  = new Date();
 		time  = sd.format(date);
 		pMenu = new JPopupMenu("DeskTime Menu");
@@ -184,25 +186,25 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 
 	private void timeDisplayConfig()
 	{
-		if (info.getDisplayMethod().equals("GMTTZ"))
+		String dispString = info.getDisplayMethod();
+		if (dispString.equals("GMTTZ") || dispString.equals("CURTZ"))
 		{
-			sd   = new SimpleDateFormat(info.getGMTZoneFormat());
-			sd.setTimeZone(TimeZone.getTimeZone("GMT"));
+			sd   = new SimpleDateFormat(info.getZonedTimeFormat());
+			sd.setTimeZone(dispString.equals("GMTTZ") ? TimeZone.getTimeZone(info.getTimeZone()) : TimeZone.getDefault());
 			time = sd.format(date = new Date());
 			resizingMethod();
 			if (info.hasTooltip())
-				tLabel.setToolTipText(tipGmt);
+				tLabel.setToolTipText(dispString.equals("GMTTZ") ? tipGmt : tipCur);
 			else
 				tLabel.setToolTipText(null);
 		}
-		else if (info.getDisplayMethod().equals("CURTZ"))
+		else if (dispString.equals("POMODORO"))
 		{
-			sd   = new SimpleDateFormat(info.getThisTimeZoneFormat());
-			sd.setTimeZone(TimeZone.getDefault());
-			time = sd.format(date = new Date());
+			pom = new Pomodoro(info.getPomodoroTask());
+			time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(), info.getPomodoroFormat(), pom.getRunningLabel(), false);
 			resizingMethod();
 			if (info.hasTooltip())
-				tLabel.setToolTipText(tipCur);
+				tLabel.setToolTipText(tipPom);
 			else
 				tLabel.setToolTipText(null);
 		}
@@ -338,7 +340,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		InfoTracker trackChanges;
 		if (obj.equals(opt))
 		{
-			trackChanges = ChooserBox.showDialog("Preferences...", 2, info, alarms);
+			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.BORDER_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
 			setSystemStartTime(alarms);
@@ -348,7 +350,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		}
 		else if (obj.equals(fore))
 		{
-			trackChanges = ChooserBox.showDialog("Preferences...", 0, info, alarms);
+			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.FONT_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
 			setSystemStartTime(alarms);
@@ -358,7 +360,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		}
 		else if (obj.equals(back))
 		{
-			trackChanges = ChooserBox.showDialog("Preferences...", 1, info, alarms);
+			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.BACKGROUND_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
 			setSystemStartTime(alarms);
@@ -368,7 +370,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		}
 		else if (obj.equals(fmt))
 		{
-			trackChanges = ChooserBox.showDialog("Preferences...", 3, info, alarms);
+			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.TIMES_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
 			setSystemStartTime(alarms);
@@ -378,7 +380,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		}
 		else if (obj.equals(alm))
 		{
-			trackChanges = ChooserBox.showDialog("Preferences...", 4, info, alarms);
+			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.ALARMS_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
 			setSystemStartTime(alarms);
@@ -527,16 +529,21 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		{
 			for (Thread thread = Thread.currentThread(); clockThread == thread && timerun;)
 			{
+				String method = info.getDisplayMethod();
 				date = new Date();
 				try
 				{
-					if (info.getDisplayMethod().equals("UPTIME"))
+					if (method.equals("UPTIME"))
 					{
 						time = ExUtils.formatUptime(Duration.ofNanos(System.nanoTime()), info.getUpTimeFormat());
 					}
-					else
+					else if (method.equals("GMTTZ") || method.equals("CURTZ"))
 					{
 						time = sd.format(date);
+					}
+					else
+					{
+						time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(), info.getPomodoroFormat(), pom.getRunningLabel(), false);
 					}
 					tLabel.setText(time);
 					checkTimeAndRunAlarm(date);

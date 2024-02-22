@@ -1,9 +1,11 @@
 package com.sounaks.desktime;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.awt.geom.*;
 import java.util.*;
@@ -225,11 +227,11 @@ public class ExUtils
 	public static void runProgram(TimeBean tmpb, Component parent)
 	{
 		JOptionPane opt;
-		JDialog dlg;
 		Runtime   nativePro = Runtime.getRuntime();
 		Dimension scsize    = Toolkit.getDefaultToolkit().getScreenSize();
 		String    almStr    = "";
 		int       type      = tmpb.getAlarmExecutionOutputType();
+		int       almShow   = 50 * 1000; // 60 sec x 1000 ms
 		if ((type % 3 == 0) || (type == 2))  //for 2 sound;
 		{
 			Toolkit.getDefaultToolkit().beep();
@@ -245,7 +247,14 @@ public class ExUtils
 			{
 				almStr = "A command was to be run now but the following error occured\n"+e.getMessage();
 				opt    = new JOptionPane(almStr,JOptionPane.ERROR_MESSAGE);
-				dlg    = opt.createDialog(parent,"Alarm Error...");
+				final JDialog dlg    = opt.createDialog(parent,"Alarm Error...");
+				Timer timer = new Timer(almShow, new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						dlg.dispose();
+					}
+				});
+				timer.setRepeats(false);
+				timer.start();
 				dlg.setLocation((scsize.width - dlg.getWidth()) / 2, (scsize.height - dlg.getHeight()) / 2);
 				dlg.setAlwaysOnTop(true);
 				dlg.setModal(false);
@@ -260,7 +269,14 @@ public class ExUtils
 				ccal.add(Calendar.SECOND, 1);
 				almStr = "<html><font size=+3><i>Alarm! \"" + tmpb.getName() + "\"</i></font><p>This alarm was scheduled to run now: <font color=blue>" + ccal.getTime() + "</font>.</html>";
 				opt    = new JOptionPane(almStr,JOptionPane.INFORMATION_MESSAGE,JOptionPane.DEFAULT_OPTION, new ImageIcon("duke.gif"));
-				dlg    = opt.createDialog(parent,"Alarm...");
+				final JDialog dlg    = opt.createDialog(parent,"Alarm...");
+				Timer timer = new Timer(almShow, new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						dlg.dispose();
+					}
+				});
+				timer.setRepeats(false);
+				timer.start();
 				dlg.setLocation((scsize.width - dlg.getWidth()) / 2, (scsize.height - dlg.getHeight()) / 2);
 				dlg.setAlwaysOnTop(true);
 				dlg.setVisible(true);
@@ -270,7 +286,6 @@ public class ExUtils
 		}
 		almStr = null;
 		opt    = null;
-		dlg    = null;
 		nativePro.gc();
 	}
 	
@@ -306,6 +321,43 @@ public class ExUtils
 			outOfQuote = !outOfQuote;
 		}
 		return upTimeFormatted;
+	}
+
+	public static String formatPomodoroTime(Duration duration, String pattern, String label, boolean leadLabel) throws IllegalArgumentException
+	{
+		String arr[]         = pattern.split("\'");
+		String formattedTime = "";
+		boolean outOfQuote   = true;
+		Calendar cal = new GregorianCalendar();
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, (int)duration.getSeconds());
+		for (String val : arr)
+		{
+			if (outOfQuote)
+			{
+				if (val.toLowerCase().contains("hh")) {
+					SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+					formattedTime += sdf.format(cal.getTime());
+				}
+				else
+				{
+					formattedTime += val.replace("mm", String.format("%02d", duration.toMinutes()));
+					formattedTime = formattedTime.replace("ss", String.format("%02d", (duration.getSeconds() % 60) % 60));
+				}
+			}
+			else
+			{
+				formattedTime += val;
+			}
+			outOfQuote = !outOfQuote;
+		}
+
+		if (leadLabel)
+			formattedTime = "[" + label + "] " + formattedTime;
+		else
+			formattedTime = formattedTime + " [" + label + "]";
+		return formattedTime;
 	}
 
 	public String getMetalLookAndFeelName()

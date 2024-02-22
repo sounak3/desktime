@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.text.*;
+import java.time.Duration;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
@@ -20,21 +21,22 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JRadioButton bRaised,bLowered,eRaised,eLowered,lBorder;
 	private JCheckBox nBorder,fixPlace,enTooltip,nativeLook,roundBdr;
 	private JButton selLineCol,resLineCol;
-	private JRadioButton curTimeZone,GMTimeZone,sysUpTime;
-	private JTextField sysDateFormat,gmtDateFormat,uSymbol,hSymbol,mSymbol,sSymbol;
+	private JComboBox<String> comboTz, comboDateFmt, comboPomodoro, comboPomFmt;
+	private JRadioButton selTimeZone,sysUpTime,pomodoroTime;
+	private JLabel jLUptimeTxt, jLHourTxt, jLMinTxt, jLSecTxt, tzLabel;
+	private JTextField uSymbol,hSymbol,mSymbol,sSymbol;
 	private JButton resetDefs,helpFormat;
-	private JLabel transSlide;
+	private JLabel transSlide,previewLabel,jLDateFormat,jLPomFormat;
 	private JSlider transLevel;
-	private JCheckBox useImg,useCol,useTrans,slowUpd;
+	private JCheckBox tzCb,useImg,useCol,useTrans,slowUpd;
 	private FileList fileList;
 	private JButton selectDir,selBackCol,resBackCol;
 	private TLabel picLabel;
 	private JRadioButton rbHtile,rbTile,rbVtile,rbCenter,rbFit,rbStretch;
 	private JList<TimeBean> alarmList;
-	private JLabel almAbout;
+	private JLabel jLAlmAbout, jLAlmSame;
 	private JButton add,remove,edit,test,browse;
 	private JPanel bottomCards;
-	private JLabel label3;
 	private JComboBox<String> period, dateOrWeek;
 	private JCheckBox rept,runCom,runMsg,runSnd;
 	private JTextField cmdToRun, alarmName;
@@ -43,9 +45,17 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private DateChooser choosefrom;
 	private int opmode   = 0;
 	private int selIndex = -1;
+	private boolean exceptionActive = false;
 	private JButton ok,cancel;
+	private Pomodoro pom;
 	public Vector <TimeBean>data;
 	public InitInfo information;
+
+	public static final int FONT_TAB       = 0;
+	public static final int BACKGROUND_TAB = 1;
+	public static final int BORDER_TAB     = 2;
+	public static final int TIMES_TAB      = 3;
+	public static final int ALARMS_TAB     = 4;
 
 	public ChooserBox(InitInfo initinfo, Vector <TimeBean>alarminfo)
 	{
@@ -104,33 +114,84 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		nativeLook = new JCheckBox("Check to view this dialog box in system's look and feel");
 		jpanel1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Looks and Borders"));
 		//All configurations for Time Conf. Panel as follows:
-		JPanel jpanel2 = new JPanel(new GridBagLayout());
-		curTimeZone = new JRadioButton("<html>System's present time zone. This setting displays your current time zone i.e. time of your location in a format given below.</html>");
-		GMTimeZone  = new JRadioButton("<html>GMT zone. This setting displays the world standard referance time i.e. Greenwich Mean Time (GMT) in a format given below.</html>");
-		sysUpTime   = new JRadioButton("<html>System Up-Time. This setting displays the time elapsed since your system had started without a log off or shut down.</html>");
+		JPanel    jpanel2      = new JPanel(new GridBagLayout());
+		Component component1   = Box.createHorizontalStrut(130);
+		          pomodoroTime = new JRadioButton("Pomodoro tasks");
+		pomodoroTime.setToolTipText("<html>Select from well known pomodoro timer schedules (in minutes).<p>The schedules repeats itself once completed.</html>");
+		selTimeZone = new JRadioButton("Current Time");
+		selTimeZone.setToolTipText("<html>This setting displays the current time in selected time zone<p>in the date-time format selected below.</html>");
+		JPanel toolPane1 = getToolbarPanel();
+		sysUpTime   = new JRadioButton("System Up-Time");
+		sysUpTime.setToolTipText("<html>This setting displays the time elapsed since your system<p>had started without a log off or shut down.</html>");
+		JPanel toolPane2 = getToolbarPanel();
 		ButtonGroup buttongroup1 = new ButtonGroup();
-		buttongroup1.add(curTimeZone);
-		buttongroup1.add(GMTimeZone);
+		buttongroup1.add(pomodoroTime);
+		buttongroup1.add(selTimeZone);
 		buttongroup1.add(sysUpTime);
-		Component component1 = Box.createHorizontalStrut(12);
-		JLabel jlabel  = new JLabel("System Date/Time Format");
-		sysDateFormat  = new JTextField(17);
-		JSeparator jseparator2 = new JSeparator();
-		JLabel jlabel1 = new JLabel("GMT Date/Time Format");
-		gmtDateFormat  = new JTextField(17);
+		Component timePaneRadSpace = Box.createHorizontalStrut(17);
+		previewLabel = new JLabel("", JLabel.CENTER);
+		previewLabel.setVerticalAlignment(JLabel.CENTER);
+		previewLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+		tzLabel = new JLabel("Select Timezone");
+		tzCb    = new JCheckBox("Use local timezone");
+		tzCb.setActionCommand("LocalTz");
+		tzLabel.setLabelFor(tzCb);
+		comboTz   = new JComboBox<String>(new DefaultComboBoxModel<String>(TimeZone.getAvailableIDs()));
+		comboTz.setRenderer(new TimezoneCellRenderer());
+		comboTz.addItemListener(this);
+		jLDateFormat = new JLabel("Date/Time Format");
+		String formats[] = {
+			"yyyy.MM.dd G 'at' HH:mm:ss z",
+			"zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy",
+			"yyyy.MM.dd G 'at' hh:mm:ss z",
+			"h:mm a",
+			"hh:mm:ss a",
+			"H:mm:ss",
+			"hh 'o''clock' a, zzzz",
+			"K:mm a, z",
+			"yyyyy.MMMMM.dd GGG hh:mm aaa",
+			"EEE, d MMM yyyy HH:mm:ss Z",
+			"yyMMddHHmmssZ",
+			"YYYY-'W'ww-u",
+			"EEE, MMM d, ''yy",
+			"dd MMMMM yyyy",
+			"dd.MM.yy",
+			"MM/dd/yy"
+		};
+		comboDateFmt  = new JComboBox<String>(formats);
+		comboDateFmt.setEditable(true);
+		comboDateFmt.addItemListener(this);
+		jLDateFormat.setLabelFor(comboDateFmt);
 		JSeparator jseparator3 = new JSeparator();
-		JLabel jlabel2 = new JLabel("Up-time Symbol");
-		JLabel jlabel3 = new JLabel("Hour Symbol");
-		JLabel jlabel4 = new JLabel("Minute Symbol");
-		JLabel jlabel5 = new JLabel("Second Symbol");
+		jLUptimeTxt = new JLabel("Up-time Symbol");
+		jLHourTxt = new JLabel("Hour Symbol");
+		jLMinTxt = new JLabel("Minute Symbol");
+		jLSecTxt = new JLabel("Second Symbol");
 		uSymbol = new JTextField(7);
 		hSymbol = new JTextField(7);
 		mSymbol = new JTextField(7);
 		sSymbol = new JTextField(7);
 		JSeparator jseparator4 = new JSeparator();
-		resetDefs  = new JButton("Reset To Defaults");
-		helpFormat = new JButton("Help On Format");
-		jpanel2.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Time Display Configuration"));
+		String pomtech[] = {
+			"25 min. work, 5 min. break, 30 min. rest",
+			"45 minutes work, 15 minutes break",
+			"50 minutes work, 10 minutes break",
+			"52 minutes work, 17 minutes break",
+			"90 minutes work, 20 minutes break",
+			"112 minutes work, 26 minutes break"
+		};
+		comboPomodoro = new JComboBox<String>(pomtech);
+		comboPomodoro.addItemListener(this);
+		jLPomFormat = new JLabel("Pomodoro format");
+		String pomFormats[] = {
+			"mm:ss",
+			"HH:mm:ss",
+		};
+		comboPomFmt = new JComboBox<String>(pomFormats);
+		comboPomFmt.setEditable(true);
+		comboPomFmt.addItemListener(this);
+		jLPomFormat.setLabelFor(comboPomFmt);
+		jpanel2.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Time Display Options"));
 		//All configurations for Background Panel as follows:
 		JPanel jpanel3 = new JPanel(new GridBagLayout());
 		useImg   = new JCheckBox("<html>Use background image. Use image settings from the following:</html>");
@@ -193,8 +254,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		remove      = new JButton("Remove");
 		test        = new JButton("Test >>");
 		bottomCards = new JPanel(new CardLayout());
-		almAbout  = new JLabel("");
-		almAbout.setBorder(BorderFactory.createEmptyBorder(10, 50, 10, 50));
+		jLAlmAbout  = new JLabel("");
+		jLAlmAbout.setBorder(BorderFactory.createEmptyBorder(10, 50, 10, 50));
 		setDescriptionText();
 		JPanel almSet = new JPanel(new GridBagLayout());
 		JLabel nameLabel    = new JLabel("Alarm Name",JLabel.CENTER);
@@ -213,24 +274,24 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		String pds[]  = new String[]{"Never", "Minute", "Hour", "Day", "Week", "Month", "Year"};
 		       period = new JComboBox<String>(pds);
 		period.addItemListener(this);
-		label3 = new JLabel("same");
+		jLAlmSame = new JLabel("same");
 		String dow[]  = new String[]{"Date", "Weekday"};
 		dateOrWeek    = new JComboBox<String>(dow);
-		label3.setEnabled(false);
+		jLAlmSame.setEnabled(false);
 		dateOrWeek.setEnabled(false);
 		optStartAfter = new JRadioButton("Start after");
 		bgr.add(optStartAfter);
 		timeSpinner2             = new JSpinner(new SpinnerDateModel());
 		JSpinner.DateEditor dit2 = new JSpinner.DateEditor(timeSpinner2,"HH:mm");
 		timeSpinner2.setEditor(dit2);
-		JLabel label4 = new JLabel(" hours of program start-up");
-		JLabel label2 = new JLabel("On Alarm",JLabel.CENTER);
+		JLabel jLAlmHrs = new JLabel(" hours of program start-up");
+		JLabel jLAlmAct = new JLabel("On Alarm",JLabel.CENTER);
 		runCom        = new JCheckBox("Start Command");
 		runSnd        = new JCheckBox("Just Beep");
 		runMsg        = new JCheckBox("Message");
 		cmdToRun      = new JTextField(10);
 		browse        = new JButton("Browse...");
-		bottomCards.add(almAbout, "FinishEdit");
+		bottomCards.add(jLAlmAbout, "FinishEdit");
 		bottomCards.add(almSet,  "AddEdit");
 		//For bottom panel of ok/cancel buttons.
 		JPanel jpanel4 = new JPanel(new FlowLayout(2));
@@ -242,95 +303,100 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		cancel.setActionCommand("CANCEL");
 		try
 		{
-			ExUtils.addComponent(jpanel, cFontList, 0, 0, 1, 1, 0.33D, 0.4D, this);
-			ExUtils.addComponent(jpanel, cFontStyleList, 1, 0, 1, 1, 0.33D, 0.4D, this);
-			ExUtils.addComponent(jpanel, cFontSizeList, 2, 0, 1, 1, 0.33D, 0.4D, this);
-			ExUtils.addComponent(jpanel, setFont, 0, 1, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel, resetFont, 1, 1, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel, selFontCol, 0, 2, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel, resFontCol, 1, 2, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel, jscrollpane, 0, 3, 3, 1, 1.0D, 0.6D, this);
-			ExUtils.addComponent(jpanel1, nBorder, 0, 0, 4, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, bRaised, 0, 2, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, borderPreview, 2, 2, 4, 4, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, bLowered, 0, 3, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, eRaised, 0, 4, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, eLowered, 0, 5, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, jseparator, 0, 6, 5, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, lBorder, 0, 7, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, component, 0, 8, 1, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, selLineCol, 1, 8, 1, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, resLineCol, 2, 8, 1, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, jseparator1, 0, 9, 5, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, enTooltip, 0, 10, 2, 1, 0.33D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, fixPlace, 2, 10, 1, 1, 0.33D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, roundBdr, 3, 10, 2, 1, 0.33D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, nativeLook, 0, 11, 5, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, curTimeZone, 0, 0, 5, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, component1, 0, 1, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jlabel, 1, 1, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, sysDateFormat, 2, 1, 3, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jseparator2, 1, 2, 4, 1, 1.0D, 0.2D, this);
-			ExUtils.addComponent(jpanel2, GMTimeZone, 0, 3, 5, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jlabel1, 1, 4, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, gmtDateFormat, 2, 4, 3, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jseparator3, 1, 5, 4, 1, 1.0D, 0.2D, this);
-			ExUtils.addComponent(jpanel2, sysUpTime, 0, 6, 5, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jlabel2, 1, 7, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, uSymbol, 2, 7, 1, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jlabel3, 3, 7, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, hSymbol, 4, 7, 1, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jlabel4, 1, 8, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, mSymbol, 2, 8, 1, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jlabel5, 3, 8, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, sSymbol, 4, 8, 1, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jseparator4, 1, 9, 4, 1, 1.0D, 0.2D, this);
-			ExUtils.addComponent(jpanel2, resetDefs, 1, 10, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, helpFormat, 3, 10, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, useImg, 		0, 0, 4, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, component2, 	0, 1, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, jscrollpane1, 1, 1, 1, 2, 0.0D, 0.8D, this);
-			ExUtils.addComponent(jpanel3, selectDir, 	2, 1, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, component3,	0, 2, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, component4,	1, 2, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, picLabel, 	2, 2, 2, 1, 0.0D, 0.8D, this);
-			ExUtils.addComponent(jpanel3, rbTile, 		1, 3, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, rbHtile, 		2, 3, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, rbVtile, 		3, 3, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, rbCenter, 	1, 4, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, rbFit, 		2, 4, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, rbStretch, 	3, 4, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, useCol, 		0, 5, 4, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, selBackCol, 	1, 6, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, resBackCol, 	3, 6, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, transSlide, 	1, 7, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, transLevel, 	2, 7, 3, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, useTrans, 	0, 8, 4, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, slowUpd,		1, 9, 7, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(topList,jsp,			0, 0, 1,	5, 1.0D, 1.0D, this);
-			ExUtils.addComponent(topList,add,			1, 0, 1,	1, 0.0D, 0.25D, this);
-			ExUtils.addComponent(topList,edit,			1, 1, 1,	1, 0.0D, 0.25D, this);
-			ExUtils.addComponent(topList,remove,		1, 2, 1,	1, 0.0D, 0.25D, this);
-			ExUtils.addComponent(topList,test,			1, 3, 1,	1, 0.0D, 0.25D, this);
-			ExUtils.addComponent(almSet, nameLabel,		0, 0, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, alarmName,		1, 0, 6,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, optStartOn,	0, 1, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, choosefrom,	1, 1, 5,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, timeSpinner1,	6, 1, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, optStartAfter,	0, 2, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, timeSpinner2,	1, 2, 2,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, label4,		3, 2, 4,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, rept,			0, 3, 2,	1, 0.4D, 0.0D, this);
-			ExUtils.addComponent(almSet, countSpinner1,	2, 3, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, period,		3, 3, 2,	1, 0.2D, 0.0D, this);
-			ExUtils.addComponent(almSet, label3,		5, 3, 1,	1, 0.2D, 0.0D, this);
-			ExUtils.addComponent(almSet, dateOrWeek,	6, 3, 1,	1, 0.2D, 0.0D, this);
-			ExUtils.addComponent(almSet, label2,		0, 4, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, runCom,		1, 4, 3,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, runSnd,		4, 4, 2,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, runMsg,		6, 4, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, cmdToRun,		0, 5, 6,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, browse,		6, 5, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel, cFontList, 		0, 0, 1, 1, 0.33D, 0.4D, this);
+			ExUtils.addComponent(jpanel, cFontStyleList, 	1, 0, 1, 1, 0.33D, 0.4D, this);
+			ExUtils.addComponent(jpanel, cFontSizeList, 	2, 0, 1, 1, 0.33D, 0.4D, this);
+			ExUtils.addComponent(jpanel, setFont, 			0, 1, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel, resetFont, 		1, 1, 2, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel, selFontCol, 		0, 2, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel, resFontCol, 		1, 2, 2, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel, jscrollpane, 		0, 3, 3, 1, 1.0D, 0.6D, this);
+			ExUtils.addComponent(jpanel1, nBorder, 			0, 0, 4, 1, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, bRaised, 			0, 2, 2, 1, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, borderPreview, 	2, 2, 4, 4, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, bLowered, 		0, 3, 2, 1, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, eRaised, 			0, 4, 2, 1, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, eLowered, 		0, 5, 2, 1, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, jseparator, 		0, 6, 5, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, lBorder, 			0, 7, 2, 1, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, component, 		0, 8, 1, 1, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, selLineCol, 		1, 8, 1, 1, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, resLineCol, 		2, 8, 1, 1, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, jseparator1, 		0, 9, 5, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, enTooltip, 		0, 10, 2, 1, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, fixPlace, 		2, 10, 1, 1, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, roundBdr, 		3, 10, 2, 1, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, nativeLook, 		0, 11, 5, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, component1,	 	1, 1, 1, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, previewLabel, 	0, 2, 5, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, selTimeZone, 		0, 3, 2, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, tzCb,		 		2, 3, 2, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, toolPane1, 		4, 3, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, timePaneRadSpace, 0, 2, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, tzLabel, 			1, 4, 1, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, comboTz, 			2, 4, 3, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLDateFormat, 	1, 5, 1, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, comboDateFmt, 	2, 5, 3, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jseparator3, 		1, 6, 4, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, sysUpTime, 		0, 7, 4, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, toolPane2, 		4, 7, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLUptimeTxt, 		1, 8, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, uSymbol, 			2, 8, 1, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLHourTxt, 		3, 8, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, hSymbol, 			4, 8, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLMinTxt, 		1, 9, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, mSymbol, 			2, 9, 1, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLSecTxt, 		3, 9, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, sSymbol, 			4, 9, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jseparator4, 		1, 10, 4, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, pomodoroTime, 	0, 11, 2, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, comboPomodoro, 	2, 11, 3, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLPomFormat, 		1, 12, 1, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, comboPomFmt,		2, 12, 3, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, useImg, 			0, 0, 4, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, component2, 		0, 1, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, jscrollpane1, 	1, 1, 1, 2, 0.0D, 0.8D, this);
+			ExUtils.addComponent(jpanel3, selectDir, 		2, 1, 2, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, component3,		0, 2, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, component4,		1, 2, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, picLabel, 		2, 2, 2, 1, 0.0D, 0.8D, this);
+			ExUtils.addComponent(jpanel3, rbTile, 			1, 3, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, rbHtile, 			2, 3, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, rbVtile, 			3, 3, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, rbCenter, 		1, 4, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, rbFit, 			2, 4, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, rbStretch, 		3, 4, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, useCol, 			0, 5, 4, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, selBackCol, 		1, 6, 2, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, resBackCol, 		3, 6, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, transSlide, 		1, 7, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, transLevel, 		2, 7, 3, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, useTrans, 		0, 8, 4, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, slowUpd,			1, 9, 7, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(topList,jsp,				0, 0, 1,	5, 1.0D, 1.0D, this);
+			ExUtils.addComponent(topList,add,				1, 0, 1,	1, 0.0D, 0.25D, this);
+			ExUtils.addComponent(topList,edit,				1, 1, 1,	1, 0.0D, 0.25D, this);
+			ExUtils.addComponent(topList,remove,			1, 2, 1,	1, 0.0D, 0.25D, this);
+			ExUtils.addComponent(topList,test,				1, 3, 1,	1, 0.0D, 0.25D, this);
+			ExUtils.addComponent(almSet, nameLabel,			0, 0, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, alarmName,			1, 0, 6,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, optStartOn,		0, 1, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, choosefrom,		1, 1, 5,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, timeSpinner1,		6, 1, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, optStartAfter,		0, 2, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, timeSpinner2,		1, 2, 2,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, jLAlmHrs,			3, 2, 4,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, rept,				0, 3, 2,	1, 0.4D, 0.0D, this);
+			ExUtils.addComponent(almSet, countSpinner1,		2, 3, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, period,			3, 3, 2,	1, 0.2D, 0.0D, this);
+			ExUtils.addComponent(almSet, jLAlmSame,			5, 3, 1,	1, 0.2D, 0.0D, this);
+			ExUtils.addComponent(almSet, dateOrWeek,		6, 3, 1,	1, 0.2D, 0.0D, this);
+			ExUtils.addComponent(almSet, jLAlmAct,			0, 4, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, runCom,			1, 4, 3,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, runSnd,			4, 4, 2,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, runMsg,			6, 4, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, cmdToRun,			0, 5, 6,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet, browse,			6, 5, 1,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel5, topList,			0, 0, 1,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel5, bottomCards,		0, 1, 1,	1, 0.0D, 0.0D, this);
 		}
@@ -472,32 +538,72 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		roundBdr.setSelected(initinfo.hasRoundedCorners());
 		enTooltip.setSelected(initinfo.hasTooltip());
 		nativeLook.setSelected(initinfo.hasNativeLook());
-		String s = initinfo.getDisplayMethod();
-		if (s.equals("CURTZ"))
-			curTimeZone.setSelected(true);
-		else if (s.equals("GMTTZ"))
-			GMTimeZone.setSelected(true);
-		else if (s.equals("UPTIME"))
+		String dispM = initinfo.getDisplayMethod();
+		String privT = "";
+		pom          = new Pomodoro(initinfo.getPomodoroTask());
+		if (dispM.equals("CURTZ"))
+		{
+			tzCb.setSelected(true);
+			comboTz.setSelectedItem(TimeZone.getDefault().getID());
+		}
+		else
+		{
+			tzCb.setSelected(false);
+			comboTz.setSelectedItem(TimeZone.getTimeZone(initinfo.getTimeZone()).getID());
+		}
+		comboDateFmt.setSelectedItem(initinfo.getZonedTimeFormat());
+		if (dispM.equals("GMTTZ") || dispM.equals("CURTZ")) {
+			selTimeZone.setSelected(true);
+			SimpleDateFormat sd = new SimpleDateFormat(initinfo.getZonedTimeFormat());
+			sd.setTimeZone(TimeZone.getTimeZone(comboTz.getItemAt(comboTz.getSelectedIndex())));
+			privT = sd.format(new Date());
+		}
+		else if (dispM.equals("UPTIME")) {
 			sysUpTime.setSelected(true);
-		sysDateFormat.setText(initinfo.getThisTimeZoneFormat());
-		gmtDateFormat.setText(initinfo.getGMTZoneFormat());
-		String s1 = initinfo.getUpTimeFormat();
+			privT = ExUtils.formatUptime(Duration.ofNanos(System.nanoTime()), initinfo.getUpTimeFormat());
+		}
+		else if (dispM.equals("POMODORO")) {
+			pomodoroTime.setSelected(true);
+			privT = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(), initinfo.getPomodoroFormat(), pom.getRunningLabel(), false);
+		}
+		previewLabel.setText(privT);
+		String s1    = initinfo.getUpTimeFormat();
 		String arr[] = s1.split("\'");
 		uSymbol.setText(arr[1]);
 		hSymbol.setText(arr[3]);
 		mSymbol.setText(arr[5]);
-		sSymbol.setText(arr.length==8 ? arr[7] : " ");
-		data=alarmInit;
+		sSymbol.setText(arr.length == 8 ? arr[7] : " ");
+		comboPomodoro.setSelectedItem(initinfo.getPomodoroTask());
+		comboPomFmt.setSelectedItem(initinfo.getPomodoroFormat());
+		data = alarmInit;
 		alarmList.setListData(data);
 		setDescriptionText();
 		setOneEnabled();
+	}
+
+	private final JPanel getToolbarPanel()
+	{
+		JPanel smallPane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		Image defaultPng = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/default.png"))).getImage();
+		resetDefs  = new JButton(new ImageIcon(defaultPng.getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
+		resetDefs.setActionCommand("Reset To Defaults");
+		resetDefs.setToolTipText("Reset to default values");
+		resetDefs.addActionListener(this);
+		Image helpPng = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/help.png"))).getImage();
+		helpFormat  = new JButton(new ImageIcon(helpPng.getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
+		helpFormat.setActionCommand("Help On Format");
+		helpFormat.setToolTipText("Help on date time format characters.");
+		helpFormat.addActionListener(this);
+		smallPane.add(resetDefs);
+		smallPane.add(helpFormat);
+		return smallPane;
 	}
 
 	private void setDescriptionText()
 	{
 		if (alarmList.getSelectedIndex() == -1)
 		{
-			almAbout.setText("Click on an alarm list item to view its description.");
+			jLAlmAbout.setText("Click on an alarm list item to view its description.");
 		}
 		else
 		{
@@ -518,17 +624,27 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ltext  = ltext.replace("(next run)", tmp4 == 0 ? "never" : "on " + tmp1.format(ccal.getTime()) + " at " + tmp2.format(ccal.getTime()));
 			tmp4   = tb.getAlarmExecutionOutputType().intValue();
 			ltext  = ltext.replace("(run type)", ((tmp4 % 2 != 0) ? " command," : "") + (((tmp4 % 3 == 0) || (tmp4 == 2)) ? " sound," : "") + ((tmp4 > 3) ? " message" : ""));
-			almAbout.setText(ltext);
+			jLAlmAbout.setText(ltext);
 		}
 	}
 
 	private void setOneEnabled()
 	{
-		sysDateFormat.setEnabled(curTimeZone.isSelected());
-		gmtDateFormat.setEnabled(GMTimeZone.isSelected());
+		comboPomodoro.setEnabled(pomodoroTime.isSelected());
+		jLPomFormat.setEnabled(pomodoroTime.isSelected());
+		comboPomFmt.setEnabled(pomodoroTime.isSelected());
+		jLDateFormat.setEnabled(selTimeZone.isSelected());
+		tzLabel.setEnabled(selTimeZone.isSelected());
+		tzCb.setEnabled(selTimeZone.isSelected());
+		comboTz.setEnabled(selTimeZone.isSelected());
+		comboDateFmt.setEnabled(selTimeZone.isSelected());
+		jLUptimeTxt.setEnabled(sysUpTime.isSelected());
 		uSymbol.setEnabled(sysUpTime.isSelected());
+		jLHourTxt.setEnabled(sysUpTime.isSelected());
 		hSymbol.setEnabled(sysUpTime.isSelected());
+		jLMinTxt.setEnabled(sysUpTime.isSelected());
 		mSymbol.setEnabled(sysUpTime.isSelected());
+		jLSecTxt.setEnabled(sysUpTime.isSelected());
 		sSymbol.setEnabled(sysUpTime.isSelected());
 		selLineCol.setEnabled(lBorder.isSelected());
 		resLineCol.setEnabled(lBorder.isSelected());
@@ -620,7 +736,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		Date temp=new Date();
 		if (optStartOn.isSelected())
 		{
-			String           pttn    = choosefrom.getFormat().toPattern()+((JSpinner.DateEditor)timeSpinner1.getEditor()).getFormat().toPattern();
+			String           pttn    = choosefrom.getFormat().toPattern() + ((JSpinner.DateEditor)timeSpinner1.getEditor()).getFormat().toPattern();
 			String           maintmp = choosefrom.getFormat().format(choosefrom.getDate())+((JSpinner.DateEditor)timeSpinner1.getEditor()).getTextField().getText();
 			SimpleDateFormat sdf     = new SimpleDateFormat(pttn);
 			try
@@ -729,35 +845,39 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		information.setRoundCorners(roundBdr.isSelected());
 		information.setNativeLook(nativeLook.isSelected());
 		SimpleDateFormat simpledateformat = new SimpleDateFormat();
-		if (GMTimeZone.isSelected())
+		if (selTimeZone.isSelected())
 		{
-			information.setDisplayMethod("GMTTZ");
 			try
 			{
-				simpledateformat.applyPattern(gmtDateFormat.getText());
+				simpledateformat.applyPattern(comboDateFmt.getSelectedItem().toString());
 			}
 			catch (Exception exception)
 			{
-				throw new IllegalArgumentException("The following error occured in GMT date/time format field:\n" + exception.toString() + "\n" + exception.getMessage() + " in \"" + gmtDateFormat.getText() + "\"");
+				throw new IllegalArgumentException("The following error occured in date/time format:\n" + exception.toString() + "\n" + exception.getMessage() + " in \"" + comboDateFmt.getSelectedItem().toString() + "\"");
 			}
-			information.setGMTZoneFormat(gmtDateFormat.getText());
+			if (tzCb.isSelected())
+				information.setDisplayMethod("CURTZ");
+			else
+				information.setDisplayMethod("GMTTZ");
+			information.setTimeZone(comboTz.getItemAt(comboTz.getSelectedIndex()));
+			information.setZonedTimeFormat(comboDateFmt.getSelectedItem().toString());
 		}
-		else if (curTimeZone.isSelected())
+		else if (pomodoroTime.isSelected())
 		{
-			information.setDisplayMethod("CURTZ");
 			try
 			{
-				simpledateformat.applyPattern(sysDateFormat.getText());
+				simpledateformat.applyPattern(comboPomFmt.getSelectedItem().toString());
 			}
-			catch (Exception exception1)
+			catch (Exception exception)
 			{
-				throw new IllegalArgumentException("The following error occured in System's date/time format field:\n" + exception1.toString() + "\n" + exception1.getMessage() + " in \"" + sysDateFormat.getText() + "\"");
+				throw new IllegalArgumentException("The following error occured in pomodoro format:\n" + exception.toString() + "\n" + exception.getMessage() + " in \"" + comboPomFmt.getSelectedItem().toString() + "\"");
 			}
-			information.setThisTimeZoneFormat(sysDateFormat.getText());
+			information.setDisplayMethod("POMODORO");
+			information.setPomodoroTask(comboPomodoro.getSelectedItem().toString());
+			information.setPomodoroFormat(comboPomFmt.getSelectedItem().toString());
 		}
 		else if (sysUpTime.isSelected())
 		{
-			information.setDisplayMethod("UPTIME");
 			try
 			{
 				simpledateformat.applyPattern("'" + uSymbol.getText() + "'");
@@ -790,6 +910,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			{
 				throw new IllegalArgumentException("The following error occured in \"Second symbol\" field of Up-time format:\n" + exception5.toString() + "\n" + exception5.getMessage() + " in \"" + sSymbol.getText() + "\"");
 			}
+			information.setDisplayMethod("UPTIME");
 			information.setUpTimeFormat("'" + uSymbol.getText() + "'HH'" + hSymbol.getText() + "'mm'" + mSymbol.getText() + "'ss'" + sSymbol.getText() + "'");
 		}
 		return information;
@@ -844,6 +965,54 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		((CardLayout)(bottomCards.getLayout())).show(bottomCards, "FinishEdit");
 		enadesa2(true);
 		opmode = 0;
+	}
+
+	private void validateTimeFormat()
+	{
+		String privT = "";
+		SimpleDateFormat sd = new SimpleDateFormat();
+		try
+		{
+			if (selTimeZone.isSelected())
+			{
+				sd.applyPattern(comboDateFmt.getSelectedItem().toString());
+				sd.setTimeZone(TimeZone.getTimeZone(comboTz.getItemAt(comboTz.getSelectedIndex())));
+				privT = sd.format(new Date());
+			}
+			else if (sysUpTime.isSelected())
+			{
+				sd.applyPattern("'" + uSymbol.getText() + "'");
+				sd.applyPattern("'" + hSymbol.getText() + "'");
+				sd.applyPattern("'" + mSymbol.getText() + "'");
+				sd.applyPattern("'" + sSymbol.getText() + "'");
+				String pttn = "'" + uSymbol.getText() + "'HH'" + hSymbol.getText() + "'mm'" + mSymbol.getText() + "'ss'" + sSymbol.getText() + "'";
+				privT = ExUtils.formatUptime(Duration.ofNanos(System.nanoTime()), pttn);
+			}
+			else if (pomodoroTime.isSelected())
+			{
+				String pttn = comboPomFmt.getSelectedItem().toString();
+				sd.applyPattern(pttn);
+				pom   = new Pomodoro(comboPomodoro.getSelectedItem().toString());
+				privT = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(), pttn, pom.getRunningLabel(), false);
+			}
+			previewLabel.setText(privT);
+			exceptionActive = false;
+		}
+		catch (Exception exception)
+		{
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					ok.doClick();
+					if (selTimeZone.isSelected())
+						comboDateFmt.requestFocus();
+					else if (sysUpTime.isSelected())
+						uSymbol.requestFocus();
+					else if (pomodoroTime.isSelected())
+						comboPomFmt.requestFocus();
+				}
+			});
+			exceptionActive = true;
+		}
 	}
 
 	public void actionPerformed(ActionEvent actionevent)
@@ -921,22 +1090,38 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			if (lBorder.isSelected())
 				borderPreview.setPreview(BorderFactory.createLineBorder(selLineCol.getBackground(), 2));
 		}
+		else if (comm.equals("LocalTz"))
+		{
+			if (tzCb.isSelected())	comboTz.setSelectedItem(TimeZone.getDefault().getID());
+			else comboTz.setSelectedItem(information.getTimeZone());
+		}
 		else if (comm.equals("Reset To Defaults"))
 		{
-			if (curTimeZone.isSelected())
-				sysDateFormat.setText("zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy");
-			else if (GMTimeZone.isSelected())
-				gmtDateFormat.setText("zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy");
+			if (selTimeZone.isSelected())
+			{
+				tzCb.setSelected(true);
+				comboTz.setSelectedItem(TimeZone.getDefault().getID());
+				comboDateFmt.setSelectedItem("zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy");
+			}
 			else if (sysUpTime.isSelected())
 			{
 				uSymbol.setText("Up-Time: ");
 				hSymbol.setText("-hour(s), ");
 				mSymbol.setText("-minute(s), ");
 				sSymbol.setText("-second(s)");
+			} else if (pomodoroTime.isSelected())
+			{
+				comboPomodoro.setSelectedItem("25 min. work, 5 min. break, 30 min. rest");
+				comboPomFmt.setSelectedItem("mm:ss");
 			}
 		}
 		else if (comm.equals("Help On Format"))
-			new FormatHelp(this);
+		{
+			if (!exceptionActive)
+				new FormatHelp(this);
+			else
+				validateTimeFormat();
+		}
 		else if (comm.equals("<< Choose Image Directory"))
 		{
 			JFileChooser jfilechooser = new JFileChooser(fileList.getDirectory());
@@ -1096,19 +1281,33 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 
 	public void itemStateChanged(ItemEvent ie)
 	{
-		if (ie.getStateChange() == ItemEvent.SELECTED)
+		Object source = ie.getSource();
+		if (ie.getStateChange() == ItemEvent.SELECTED && source.equals(comboTz))
+		{
+			SimpleDateFormat sd = new SimpleDateFormat(information.getZonedTimeFormat());
+			String tzId = comboTz.getItemAt(comboTz.getSelectedIndex());
+			tzCb.setSelected(tzId.equals(TimeZone.getDefault().getID()));
+			sd.setTimeZone(TimeZone.getTimeZone(tzId));
+			previewLabel.setText(sd.format(new Date()));
+		}
+		else if (ie.getStateChange() == ItemEvent.SELECTED && 
+			(source.equals(comboDateFmt) || source.equals(comboPomodoro) || source.equals(comboPomFmt)))
+		{
+			validateTimeFormat();
+		}
+		else
 		{
 			if (ie.getItem().equals("Never")) rept.setSelected(false);
 			else rept.setSelected(true);
 			
 			if (ie.getItem().equals("Month"))
 			{
-				label3.setEnabled(true);
+				jLAlmSame.setEnabled(true);
 				dateOrWeek.setEnabled(true);
 			}
 			else
 			{
-				label3.setEnabled(false);
+				jLAlmSame.setEnabled(false);
 				dateOrWeek.setEnabled(false);
 			}
 		}

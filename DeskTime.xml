@@ -1,29 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<java version="1.8.0_401" class="java.beans.XMLDecoder">
+<java version="1.8.0_402" class="java.beans.XMLDecoder">
  <object class="com.sounaks.desktime.InitInfo" id="InitInfo0">
-  <void method="put">
-   <string>FONT</string>
-   <object class="java.awt.Font">
-    <string>Courier New Bold</string>
-    <int>0</int>
-    <int>16</int>
-   </object>
-  </void>
-  <void method="put">
-   <string>DISPLAY_METHOD</string>
-   <string>UPTIME</string>
-  </void>
-  <void method="put">
-   <string>OPACITY</string>
-   <float>0.5</float>
-  </void>
   <void method="put">
    <string>ROUND_CORNERS</string>
    <boolean>true</boolean>
   </void>
   <void method="put">
-   <string>IMAGEFILE</string>
-   <string>C:\Users\sounak.choudhury\Downloads\java\desktime\target\classes\images\132.jpg</string>
+   <string>TIMEZONE</string>
+   <string>IST</string>
   </void>
   <void method="put">
    <string>LINE_COLOR</string>
@@ -35,6 +19,29 @@
    </object>
   </void>
   <void method="put">
+   <string>ON_TOP</string>
+   <boolean>true</boolean>
+  </void>
+  <void method="put">
+   <string>FOREGROUND</string>
+   <object class="java.awt.Color">
+    <int>255</int>
+    <int>51</int>
+    <int>51</int>
+    <int>255</int>
+   </object>
+  </void>
+  <void method="put">
+   <string>BORDER</string>
+   <object class="javax.swing.border.BevelBorder">
+    <int>0</int>
+    <null/>
+    <null/>
+    <null/>
+    <null/>
+   </object>
+  </void>
+  <void method="put">
    <string>BACKGROUND</string>
    <object class="java.awt.Color">
     <int>204</int>
@@ -43,35 +50,46 @@
     <int>255</int>
    </object>
   </void>
+  <void method="put">
+   <string>FONT</string>
+   <object class="java.awt.Font">
+    <string>Courier New Bold</string>
+    <int>0</int>
+    <int>16</int>
+   </object>
+  </void>
+  <void method="put">
+   <string>GLASS_EFFECT</string>
+   <boolean>true</boolean>
+  </void>
+  <void method="put">
+   <string>DISPLAY_METHOD</string>
+   <string>UPTIME</string>
+  </void>
   <void id="Point0" method="get">
    <string>LOCATION</string>
    <void class="java.awt.Point" method="getField">
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>745</int>
+     <int>804</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>100</int>
+     <int>129</int>
     </void>
    </void>
   </void>
   <void method="put">
-   <string>FOREGROUND</string>
-   <object class="java.awt.Color">
-    <int>255</int>
-    <int>255</int>
-    <int>0</int>
-    <int>255</int>
-   </object>
+   <string>IMAGEFILE</string>
+   <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\132.jpg</string>
   </void>
   <void method="put">
-   <string>ON_TOP</string>
-   <boolean>true</boolean>
+   <string>OPACITY</string>
+   <float>0.5</float>
   </void>
  </object>
 </java>

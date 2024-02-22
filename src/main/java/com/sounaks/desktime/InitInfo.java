@@ -20,8 +20,10 @@ public class InitInfo extends Hashtable<Object, Object>
 		put("LOCATION", new Point(0,0));
 		put("DISPLAY_METHOD", "CURTZ");
 		put("UPTIME_FORMAT", "'Up-Time: 'HH'-hour(s), 'mm'-minute(s), 'ss'-second(s)'");
-		put("TTZ_FORMAT", "zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy");
-		put("GMT_FORMAT", "zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy");
+		put("POMODORO_FORMAT", "mm:ss");
+		put("ZTIME_FORMAT", "zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy");
+		put("POMODORO_TASK", "25 min. work, 5 min. break, 30 min. rest");
+		put("TIMEZONE", "GMT");
 		put("TOOLTIP", true);
 		put("NATIVE_LOOK", false);
 		put("FIXED", false);
@@ -132,26 +134,48 @@ public class InitInfo extends Hashtable<Object, Object>
 			put("UPTIME_FORMAT", s);
 	}
 
-	public String getThisTimeZoneFormat()
+	public String getPomodoroFormat()
 	{
-		return (String)get("TTZ_FORMAT");
+		return (String)get("POMODORO_FORMAT");
 	}
 
-	public void setThisTimeZoneFormat(String s)
+	public void setPomodoroFormat(String s)
 	{
 		if(s != null)
-			put("TTZ_FORMAT", s);
+			put("POMODORO_FORMAT", s);
 	}
 
-	public String getGMTZoneFormat()
+	public String getPomodoroTask()
 	{
-		return (String)get("GMT_FORMAT");
+		return (String)get("POMODORO_TASK");
 	}
 
-	public void setGMTZoneFormat(String s)
+	public void setPomodoroTask(String s)
 	{
 		if(s != null)
-			put("GMT_FORMAT", s);
+			put("POMODORO_TASK", s);
+	}
+
+	public String getZonedTimeFormat()
+	{
+		return (String)get("ZTIME_FORMAT");
+	}
+
+	public void setZonedTimeFormat(String s)
+	{
+		if(s != null)
+			put("ZTIME_FORMAT", s);
+	}
+
+	public String getTimeZone()
+	{
+		return (String)get("TIMEZONE");
+	}
+
+	public void setTimeZone(String s)
+	{
+		if(s != null)
+			put("TIMEZONE", s);
 	}
 
 	public boolean hasTooltip()
