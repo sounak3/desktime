@@ -20,7 +20,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	protected Refresher refreshThread;
 	private String time, lastPomFormat, lastPomTask;
 	private Date date;
-	private int locX,locY,curX,curY;
+	private int locX,locY,cursorX,cursorY;
 	private TLabel tLabel;
 	private SimpleDateFormat sd;
 	private FontMetrics metrics;
@@ -71,7 +71,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		windowLoc    = new Point(0, 0);
 		locX  = (int)info.getLocation().getX();
 		locY  = (int)info.getLocation().getY();
-		curX  = curY = 0;
+		cursorX  = cursorY = 0;
 		sd    = new SimpleDateFormat(info.getZonedTimeFormat());
 		date  = new Date();
 		time  = sd.format(date);
@@ -464,8 +464,8 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	{
 		if (!SwingUtilities.isRightMouseButton(mouseevent))
 		{
-			curX = mouseevent.getX();
-			curY = mouseevent.getY();
+			cursorX = mouseevent.getX();
+			cursorY = mouseevent.getY();
 			if (!info.isFixed())
 				tLabel.addMouseMotionListener(this);
 		}
@@ -477,12 +477,16 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		{
 			if (!info.isFixed())
 				tLabel.removeMouseMotionListener(this);
-			info.setLocation(new Point(locX, locY));
-			curX = 0;
-			curY = 0;
-			saveProperties(info);
+			Point newLocation = new Point(locX, locY);
+			cursorX = 0;
+			cursorY = 0;
 			refreshNow = true;
-			refreshThread.refreshTransparency();
+			if (!info.getLocation().equals(newLocation))
+			{
+				info.setLocation(newLocation);
+				saveProperties(info);
+				refreshThread.refreshTransparency();
+			}
 			startRefresh();
 		}
 	}
@@ -493,8 +497,8 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		SwingUtilities.convertPointToScreen(windowLoc, this);
 		if (Math.abs(windowLoc.getX()) <= (double)scsize.width && Math.abs(windowLoc.getY()) <= (double)scsize.height)
 		{
-			locX = Math.abs((int)windowLoc.getX() - curX);
-			locY = Math.abs((int)windowLoc.getY() - curY);
+			locX = Math.abs((int)windowLoc.getX() - cursorX);
+			locY = Math.abs((int)windowLoc.getY() - cursorY);
 			setLocation(locX, locY);
 		}
 		refreshNow = false;

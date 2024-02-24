@@ -366,7 +366,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel2, comboPomodoro, 	2, 11, 3, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, jLPomFormat, 		1, 12, 1, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, comboPomFmt,		2, 12, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, cbPomLabel,	4, 12, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, cbPomLabel,		4, 12, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, useImg, 			0, 0, 4, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, component2, 		0, 1, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, jscrollpane1, 	1, 1, 1, 2, 0.0D, 0.8D, this);
@@ -588,8 +588,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		mSymbol.setSelectedItem(arr[5]);
 		sSymbol.setSelectedItem(arr.length == 8 ? arr[7] : " ");
 		comboPomodoro.setSelectedItem(initinfo.getPomodoroTask());
-		comboPomFmt.setSelectedItem(initinfo.getPomodoroFormat());
 		cbPomLabel.setSelected(initinfo.getPomodoroLeadingLabel());
+		comboPomFmt.setSelectedItem(initinfo.getPomodoroFormat());
 		data = alarmInit;
 		alarmList.setListData(data);
 		setDescriptionText();
