@@ -18,7 +18,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 {
 	protected ClockThread clockThread; 
 	protected Refresher refreshThread;
-	private String time;
+	private String time, lastPomFormat, lastPomTask;
 	private Date date;
 	private int locX,locY,curX,curY;
 	private TLabel tLabel;
@@ -200,7 +200,9 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		}
 		else if (dispString.equals("POMODORO"))
 		{
-			pom = new Pomodoro(info.getPomodoroTask());
+			// Only create new pomodoro object if earlier was not present, else refer existing one.
+			if (pom == null || !lastPomTask.equals(info.getPomodoroTask()) || !lastPomFormat.equals(info.getPomodoroFormat()))
+				pom  = new Pomodoro(info.getPomodoroTask());
 			time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(), info.getPomodoroFormat(), pom.getRunningLabel(), false);
 			resizingMethod();
 			if (info.hasTooltip())
@@ -208,7 +210,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			else
 				tLabel.setToolTipText(null);
 		}
-		else if (info.getDisplayMethod().equals("UPTIME"))
+		else if (dispString.equals("UPTIME"))
 		{
 			time = ExUtils.formatUptime(Duration.ofNanos(System.nanoTime()), info.getUpTimeFormat());
 			resizingMethod();
@@ -336,6 +338,9 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	
 	public void actionPerformed(ActionEvent actionevent)
 	{
+		lastPomTask   = info.getPomodoroTask();   //Since pomodoro change can be triggered with time tab,
+		lastPomFormat = info.getPomodoroFormat(); //which in turn can be navigated from any of the tabs.
+
 		Object obj = actionevent.getSource();
 		InfoTracker trackChanges;
 		if (obj.equals(bdr))
@@ -543,6 +548,9 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 					}
 					else
 					{
+						// Below 2 line is under timeDisplayConfig(), but added here to avoid NullPointerException in case of race condition.
+						if (pom == null || !lastPomTask.equals(info.getPomodoroTask()) || !lastPomFormat.equals(info.getPomodoroFormat()))
+							pom  = new Pomodoro(info.getPomodoroTask());
 						time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(), info.getPomodoroFormat(), pom.getRunningLabel(), false);
 					}
 					tLabel.setText(time);
