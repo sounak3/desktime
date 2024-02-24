@@ -6,6 +6,10 @@
    <boolean>true</boolean>
   </void>
   <void method="put">
+   <string>POMODORO_LEAD_LABEL</string>
+   <boolean>true</boolean>
+  </void>
+  <void method="put">
    <string>TIMEZONE</string>
    <string>IST</string>
   </void>
@@ -64,7 +68,7 @@
   </void>
   <void method="put">
    <string>DISPLAY_METHOD</string>
-   <string>UPTIME</string>
+   <string>POMODORO</string>
   </void>
   <void id="Point0" method="get">
    <string>LOCATION</string>
@@ -72,14 +76,14 @@
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>789</int>
+     <int>795</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>121</int>
+     <int>133</int>
     </void>
    </void>
   </void>

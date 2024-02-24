@@ -180,6 +180,8 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		fix1.setSelected(info.isFixed());
 		ontop.setSelected(info.getOnTop());
 		mhelp.setSelected(info.hasTooltip());
+		lastPomTask = info.getPomodoroTask();
+		lastPomFormat = info.getPomodoroFormat();
 		timeDisplayConfig();
 		validate();
 	}
@@ -203,7 +205,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			// Only create new pomodoro object if earlier was not present, else refer existing one.
 			if (pom == null || !lastPomTask.equals(info.getPomodoroTask()) || !lastPomFormat.equals(info.getPomodoroFormat()))
 				pom  = new Pomodoro(info.getPomodoroTask());
-			time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(), info.getPomodoroFormat(), pom.getRunningLabel(), false);
+			time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(), info.getPomodoroFormat(), pom.getRunningLabel(), info.getPomodoroLeadingLabel());
 			resizingMethod();
 			if (info.hasTooltip())
 				tLabel.setToolTipText(tipPom);
@@ -551,7 +553,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 						// Below 2 line is under timeDisplayConfig(), but added here to avoid NullPointerException in case of race condition.
 						if (pom == null || !lastPomTask.equals(info.getPomodoroTask()) || !lastPomFormat.equals(info.getPomodoroFormat()))
 							pom  = new Pomodoro(info.getPomodoroTask());
-						time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(), info.getPomodoroFormat(), pom.getRunningLabel(), false);
+						time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(), info.getPomodoroFormat(), pom.getRunningLabel(), info.getPomodoroLeadingLabel());
 					}
 					tLabel.setText(time);
 					checkTimeAndRunAlarm(date);
