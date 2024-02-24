@@ -31,8 +31,8 @@ public class ExUtils
 		                   gridbagconstraints.gridheight = l;
 		                   gridbagconstraints.weightx    = d;
 		                   gridbagconstraints.weighty    = d1;
-		                   gridbagconstraints.fill       = 1;
-		                   gridbagconstraints.anchor     = 17;
+		                   gridbagconstraints.fill       = GridBagConstraints.BOTH;
+		                   gridbagconstraints.anchor     = GridBagConstraints.WEST;
 		                   gridbagconstraints.insets     = new	Insets(5, 5, 5,	0);
 		((GridBagLayout)layoutmanager).setConstraints(component, gridbagconstraints);
 		container.add(component);

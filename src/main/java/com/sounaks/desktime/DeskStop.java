@@ -27,7 +27,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	private InitInfo info;
 	private Vector <TimeBean>alarms;
 	private JPopupMenu pMenu;
-	private JMenuItem fore,back,fmt,alm,opt,exit,about;
+	private JMenuItem fore,back,tim,alm,bdr,exit,about;
 	private JCheckBoxMenuItem fix1,mhelp,ontop;
 	private Point windowLoc;
 	private Dimension scsize;
@@ -82,12 +82,12 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		back  = new JMenuItem("Background...");
 		back.setBackground(Color.white);
 		back.addActionListener(this);
-		opt   = new JMenuItem("Borders & UI...");
-		opt.setBackground(Color.white);
-		opt.addActionListener(this);
-		fmt   = new JMenuItem("Time Format...");
-		fmt.setBackground(Color.white);
-		fmt.addActionListener(this);
+		bdr   = new JMenuItem("Borders & UI...");
+		bdr.setBackground(Color.white);
+		bdr.addActionListener(this);
+		tim   = new JMenuItem("Time Format...");
+		tim.setBackground(Color.white);
+		tim.addActionListener(this);
 		alm   = new JMenuItem("Set Alarm...");
 		alm.setBackground(Color.white);
 		alm.addActionListener(this);
@@ -108,8 +108,8 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		exit.addActionListener(this);
 		pMenu.add(fore);
 		pMenu.add(back);
-		pMenu.add(opt);
-		pMenu.add(fmt);
+		pMenu.add(bdr);
+		pMenu.add(tim);
 		pMenu.add(alm);
 		pMenu.addSeparator();
 		pMenu.add(fix1);
@@ -233,8 +233,8 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 
 	private void setRoundedCorners(boolean isRound)
 	{
-		Border bdr = info.getBorder();
-		if (isRound && (!info.hasGlassEffect() || bdr instanceof EtchedBorder || bdr instanceof LineBorder || bdr instanceof BevelBorder))
+		Border thisBorder = info.getBorder();
+		if (isRound && (!info.hasGlassEffect() || thisBorder instanceof EtchedBorder || thisBorder instanceof LineBorder || thisBorder instanceof BevelBorder))
 		{
 			setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 5, 5));
 		}
@@ -338,7 +338,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	{
 		Object obj = actionevent.getSource();
 		InfoTracker trackChanges;
-		if (obj.equals(opt))
+		if (obj.equals(bdr))
 		{
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.BORDER_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
@@ -368,7 +368,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			saveProperties(info);
 			re_init();
 		}
-		else if (obj.equals(fmt))
+		else if (obj.equals(tim))
 		{
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.TIMES_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;

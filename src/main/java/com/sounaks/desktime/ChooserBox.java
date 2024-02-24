@@ -24,7 +24,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JComboBox<String> comboTz, comboDateFmt, comboPomodoro, comboPomFmt;
 	private JRadioButton selTimeZone,sysUpTime,pomodoroTime;
 	private JLabel jLUptimeTxt, jLHourTxt, jLMinTxt, jLSecTxt, tzLabel;
-	private JTextField uSymbol,hSymbol,mSymbol,sSymbol;
+	private JComboBox<String> uSymbol,hSymbol,mSymbol,sSymbol;
 	private JButton resetDefs,helpFormat;
 	private JLabel transSlide,previewLabel,jLDateFormat,jLPomFormat;
 	private JSlider transLevel;
@@ -115,13 +115,16 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		jpanel1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Looks and Borders"));
 		//All configurations for Time Conf. Panel as follows:
 		JPanel    jpanel2      = new JPanel(new GridBagLayout());
-		Component component1   = Box.createHorizontalStrut(130);
-		          pomodoroTime = new JRadioButton("Pomodoro tasks");
+		Component component1   = Box.createHorizontalStrut(160);
+		pomodoroTime = new JRadioButton("Pomodoro tasks");
+		pomodoroTime.setActionCommand("POMODORO_RADIO_BUTTON");
 		pomodoroTime.setToolTipText("<html>Select from well known pomodoro timer schedules (in minutes).<p>The schedules repeats itself once completed.</html>");
 		selTimeZone = new JRadioButton("Current Time");
+		selTimeZone.setActionCommand("TIME_RADIO_BUTTON");
 		selTimeZone.setToolTipText("<html>This setting displays the current time in selected time zone<p>in the date-time format selected below.</html>");
 		JPanel toolPane1 = getToolbarPanel();
 		sysUpTime   = new JRadioButton("System Up-Time");
+		sysUpTime.setActionCommand("UPTIME_RADIO_BUTTON");
 		sysUpTime.setToolTipText("<html>This setting displays the time elapsed since your system<p>had started without a log off or shut down.</html>");
 		JPanel toolPane2 = getToolbarPanel();
 		ButtonGroup buttongroup1 = new ButtonGroup();
@@ -163,14 +166,22 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		comboDateFmt.addItemListener(this);
 		jLDateFormat.setLabelFor(comboDateFmt);
 		JSeparator jseparator3 = new JSeparator();
-		jLUptimeTxt = new JLabel("Up-time Symbol");
-		jLHourTxt = new JLabel("Hour Symbol");
-		jLMinTxt = new JLabel("Minute Symbol");
-		jLSecTxt = new JLabel("Second Symbol");
-		uSymbol = new JTextField(7);
-		hSymbol = new JTextField(7);
-		mSymbol = new JTextField(7);
-		sSymbol = new JTextField(7);
+		jLUptimeTxt = new JLabel("Up-time Label");
+		jLHourTxt = new JLabel("Hour Label");
+		jLMinTxt = new JLabel("Minute Label");
+		jLSecTxt = new JLabel("Second Label");
+		uSymbol = new JComboBox<String>(new String[]{"Up-Time: ", "", "Run time: ", "Uptime: ", "System uptime: "});
+		hSymbol = new JComboBox<String>(new String[]{"-hour(s), ", "", " hour(s), ", " hrs. ", " hr(s), "});
+		mSymbol = new JComboBox<String>(new String[]{"-minute(s), ", "", " minute(s), ", " mins. ", " min(s), "});
+		sSymbol = new JComboBox<String>(new String[]{"-second(s)", "", " second(s)", " secs.", " sec(s)"});
+		uSymbol.setEditable(true);
+		uSymbol.addItemListener(this);
+		hSymbol.setEditable(true);
+		hSymbol.addItemListener(this);
+		mSymbol.setEditable(true);
+		mSymbol.addItemListener(this);
+		sSymbol.setEditable(true);
+		sSymbol.addItemListener(this);
 		JSeparator jseparator4 = new JSeparator();
 		String pomtech[] = {
 			"25 min. work, 5 min. break, 30 min. rest",
@@ -303,14 +314,14 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		cancel.setActionCommand("CANCEL");
 		try
 		{
-			ExUtils.addComponent(jpanel, cFontList, 		0, 0, 1, 1, 0.33D, 0.4D, this);
-			ExUtils.addComponent(jpanel, cFontStyleList, 	1, 0, 1, 1, 0.33D, 0.4D, this);
-			ExUtils.addComponent(jpanel, cFontSizeList, 	2, 0, 1, 1, 0.33D, 0.4D, this);
-			ExUtils.addComponent(jpanel, setFont, 			0, 1, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel, resetFont, 		1, 1, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel, selFontCol, 		0, 2, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel, resFontCol, 		1, 2, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel, jscrollpane, 		0, 3, 3, 1, 1.0D, 0.6D, this);
+			ExUtils.addComponent(jpanel,  cFontList, 		0, 0, 1, 1, 0.33D, 0.4D, this);
+			ExUtils.addComponent(jpanel,  cFontStyleList, 	1, 0, 1, 1, 0.33D, 0.4D, this);
+			ExUtils.addComponent(jpanel,  cFontSizeList, 	2, 0, 1, 1, 0.33D, 0.4D, this);
+			ExUtils.addComponent(jpanel,  setFont, 			0, 1, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel,  resetFont, 		1, 1, 2, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel,  selFontCol, 		0, 2, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel,  resFontCol, 		1, 2, 2, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel,  jscrollpane, 		0, 3, 3, 1, 1.0D, 0.6D, this);
 			ExUtils.addComponent(jpanel1, nBorder, 			0, 0, 4, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, bRaised, 			0, 2, 2, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, borderPreview, 	2, 2, 4, 4, 1.0D, 0.0D, this);
@@ -327,12 +338,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel1, fixPlace, 		2, 10, 1, 1, 0.33D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, roundBdr, 		3, 10, 2, 1, 0.33D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, nativeLook, 		0, 11, 5, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, component1,	 	1, 1, 1, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, component1,	 	1, 1, 1, 1, 1.0D, 1.0D, this);
 			ExUtils.addComponent(jpanel2, previewLabel, 	0, 2, 5, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, selTimeZone, 		0, 3, 2, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, tzCb,		 		2, 3, 2, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, toolPane1, 		4, 3, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, timePaneRadSpace, 0, 2, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, timePaneRadSpace, 0, 2, 1, 1, 0.0D, 0.2D, this);
 			ExUtils.addComponent(jpanel2, tzLabel, 			1, 4, 1, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, comboTz, 			2, 4, 3, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, jLDateFormat, 	1, 5, 1, 1, 1.0D, 0.0D, this);
@@ -343,11 +354,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel2, jLUptimeTxt, 		1, 8, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, uSymbol, 			2, 8, 1, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, jLHourTxt, 		3, 8, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, hSymbol, 			4, 8, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, hSymbol, 			4, 8, 1, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, jLMinTxt, 		1, 9, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, mSymbol, 			2, 9, 1, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, jLSecTxt, 		3, 9, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, sSymbol, 			4, 9, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, sSymbol, 			4, 9, 1, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, jseparator4, 		1, 10, 4, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, pomodoroTime, 	0, 11, 2, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, comboPomodoro, 	2, 11, 3, 1, 0.0D, 0.0D, this);
@@ -373,30 +384,30 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel3, transLevel, 		2, 7, 3, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, useTrans, 		0, 8, 4, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, slowUpd,			1, 9, 7, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(topList,jsp,				0, 0, 1,	5, 1.0D, 1.0D, this);
-			ExUtils.addComponent(topList,add,				1, 0, 1,	1, 0.0D, 0.25D, this);
-			ExUtils.addComponent(topList,edit,				1, 1, 1,	1, 0.0D, 0.25D, this);
-			ExUtils.addComponent(topList,remove,			1, 2, 1,	1, 0.0D, 0.25D, this);
-			ExUtils.addComponent(topList,test,				1, 3, 1,	1, 0.0D, 0.25D, this);
-			ExUtils.addComponent(almSet, nameLabel,			0, 0, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, alarmName,			1, 0, 6,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, optStartOn,		0, 1, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, choosefrom,		1, 1, 5,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, timeSpinner1,		6, 1, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, optStartAfter,		0, 2, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, timeSpinner2,		1, 2, 2,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, jLAlmHrs,			3, 2, 4,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, rept,				0, 3, 2,	1, 0.4D, 0.0D, this);
-			ExUtils.addComponent(almSet, countSpinner1,		2, 3, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, period,			3, 3, 2,	1, 0.2D, 0.0D, this);
-			ExUtils.addComponent(almSet, jLAlmSame,			5, 3, 1,	1, 0.2D, 0.0D, this);
-			ExUtils.addComponent(almSet, dateOrWeek,		6, 3, 1,	1, 0.2D, 0.0D, this);
-			ExUtils.addComponent(almSet, jLAlmAct,			0, 4, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, runCom,			1, 4, 3,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, runSnd,			4, 4, 2,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, runMsg,			6, 4, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, cmdToRun,			0, 5, 6,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet, browse,			6, 5, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(topList, jsp,				0, 0, 1,	5, 1.0D, 1.0D, this);
+			ExUtils.addComponent(topList, add,				1, 0, 1,	1, 0.0D, 0.25D, this);
+			ExUtils.addComponent(topList, edit,				1, 1, 1,	1, 0.0D, 0.25D, this);
+			ExUtils.addComponent(topList, remove,			1, 2, 1,	1, 0.0D, 0.25D, this);
+			ExUtils.addComponent(topList, test,				1, 3, 1,	1, 0.0D, 0.25D, this);
+			ExUtils.addComponent(almSet,  nameLabel,		0, 0, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  alarmName,		1, 0, 6,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  optStartOn,		0, 1, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  choosefrom,		1, 1, 5,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  timeSpinner1,		6, 1, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  optStartAfter,	0, 2, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  timeSpinner2,		1, 2, 2,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  jLAlmHrs,			3, 2, 4,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  rept,				0, 3, 2,	1, 0.4D, 0.0D, this);
+			ExUtils.addComponent(almSet,  countSpinner1,	2, 3, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  period,			3, 3, 2,	1, 0.2D, 0.0D, this);
+			ExUtils.addComponent(almSet,  jLAlmSame,		5, 3, 1,	1, 0.2D, 0.0D, this);
+			ExUtils.addComponent(almSet,  dateOrWeek,		6, 3, 1,	1, 0.2D, 0.0D, this);
+			ExUtils.addComponent(almSet,  jLAlmAct,			0, 4, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  runCom,			1, 4, 3,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  runSnd,			4, 4, 2,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  runMsg,			6, 4, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  cmdToRun,			0, 5, 6,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  browse,			6, 5, 1,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel5, topList,			0, 0, 1,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel5, bottomCards,		0, 1, 1,	1, 0.0D, 0.0D, this);
 		}
@@ -569,10 +580,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		previewLabel.setText(privT);
 		String s1    = initinfo.getUpTimeFormat();
 		String arr[] = s1.split("\'");
-		uSymbol.setText(arr[1]);
-		hSymbol.setText(arr[3]);
-		mSymbol.setText(arr[5]);
-		sSymbol.setText(arr.length == 8 ? arr[7] : " ");
+		uSymbol.setSelectedItem(arr[1]);
+		hSymbol.setSelectedItem(arr[3]);
+		mSymbol.setSelectedItem(arr[5]);
+		sSymbol.setSelectedItem(arr.length == 8 ? arr[7] : " ");
 		comboPomodoro.setSelectedItem(initinfo.getPomodoroTask());
 		comboPomFmt.setSelectedItem(initinfo.getPomodoroFormat());
 		data = alarmInit;
@@ -588,11 +599,13 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		resetDefs  = new JButton(new ImageIcon(defaultPng.getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
 		resetDefs.setActionCommand("Reset To Defaults");
 		resetDefs.setToolTipText("Reset to default values");
+		resetDefs.setMargin(new Insets(2, 5, 2, 5));
 		resetDefs.addActionListener(this);
 		Image helpPng = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/help.png"))).getImage();
 		helpFormat  = new JButton(new ImageIcon(helpPng.getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
 		helpFormat.setActionCommand("Help On Format");
 		helpFormat.setToolTipText("Help on date time format characters.");
+		helpFormat.setMargin(new Insets(2, 5, 2, 5));
 		helpFormat.addActionListener(this);
 		smallPane.add(resetDefs);
 		smallPane.add(helpFormat);
@@ -880,38 +893,38 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		{
 			try
 			{
-				simpledateformat.applyPattern("'" + uSymbol.getText() + "'");
+				simpledateformat.applyPattern("'" + uSymbol.getSelectedItem().toString() + "'");
 			}
 			catch (Exception exception2)
 			{
-				throw new IllegalArgumentException("The following error occured in \"Up-time symbol\" field of Up-time format:\n" + exception2.toString() + "\n" + exception2.getMessage() + " in \"" + uSymbol.getText() + "\"");
+				throw new IllegalArgumentException("The following error occured in \"Up-time symbol\" field of Up-time format:\n" + exception2.toString() + "\n" + exception2.getMessage() + " in \"" + uSymbol.getSelectedItem().toString() + "\"");
 			}
 			try
 			{
-				simpledateformat.applyPattern("'" + hSymbol.getText() + "'");
+				simpledateformat.applyPattern("'" + hSymbol.getSelectedItem().toString() + "'");
 			}
 			catch (Exception exception3)
 			{
-				throw new IllegalArgumentException("The following error occured in \"Hour symbol\" field of Up-time format:\n" + exception3.toString() + "\n" + exception3.getMessage() + " in \"" + hSymbol.getText() + "\"");
+				throw new IllegalArgumentException("The following error occured in \"Hour symbol\" field of Up-time format:\n" + exception3.toString() + "\n" + exception3.getMessage() + " in \"" + hSymbol.getSelectedItem().toString() + "\"");
 			}
 			try
 			{
-				simpledateformat.applyPattern("'" + mSymbol.getText() + "'");
+				simpledateformat.applyPattern("'" + mSymbol.getSelectedItem().toString() + "'");
 			}
 			catch (Exception exception4)
 			{
-				throw new IllegalArgumentException("The following error occured in \"Minute symbol\" field of Up-time format:\n" + exception4.toString() + "\n" + exception4.getMessage() + " in \"" + mSymbol.getText() + "\"");
+				throw new IllegalArgumentException("The following error occured in \"Minute symbol\" field of Up-time format:\n" + exception4.toString() + "\n" + exception4.getMessage() + " in \"" + mSymbol.getSelectedItem().toString() + "\"");
 			}
 			try
 			{
-				simpledateformat.applyPattern("'" + sSymbol.getText() + "'");
+				simpledateformat.applyPattern("'" + sSymbol.getSelectedItem().toString() + "'");
 			}
 			catch (Exception exception5)
 			{
-				throw new IllegalArgumentException("The following error occured in \"Second symbol\" field of Up-time format:\n" + exception5.toString() + "\n" + exception5.getMessage() + " in \"" + sSymbol.getText() + "\"");
+				throw new IllegalArgumentException("The following error occured in \"Second symbol\" field of Up-time format:\n" + exception5.toString() + "\n" + exception5.getMessage() + " in \"" + sSymbol.getSelectedItem().toString() + "\"");
 			}
 			information.setDisplayMethod("UPTIME");
-			information.setUpTimeFormat("'" + uSymbol.getText() + "'HH'" + hSymbol.getText() + "'mm'" + mSymbol.getText() + "'ss'" + sSymbol.getText() + "'");
+			information.setUpTimeFormat("'" + uSymbol.getSelectedItem().toString() + "'HH'" + hSymbol.getSelectedItem().toString() + "'mm'" + mSymbol.getSelectedItem().toString() + "'ss'" + sSymbol.getSelectedItem().toString() + "'");
 		}
 		return information;
 	}
@@ -981,11 +994,14 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			}
 			else if (sysUpTime.isSelected())
 			{
-				sd.applyPattern("'" + uSymbol.getText() + "'");
-				sd.applyPattern("'" + hSymbol.getText() + "'");
-				sd.applyPattern("'" + mSymbol.getText() + "'");
-				sd.applyPattern("'" + sSymbol.getText() + "'");
-				String pttn = "'" + uSymbol.getText() + "'HH'" + hSymbol.getText() + "'mm'" + mSymbol.getText() + "'ss'" + sSymbol.getText() + "'";
+				sd.applyPattern("'" + uSymbol.getSelectedItem().toString() + "'");
+				sd.applyPattern("'" + hSymbol.getSelectedItem().toString() + "'");
+				sd.applyPattern("'" + mSymbol.getSelectedItem().toString() + "'");
+				sd.applyPattern("'" + sSymbol.getSelectedItem().toString() + "'");
+				String pttn = "'" + uSymbol.getSelectedItem().toString() + 
+								"'HH'" + hSymbol.getSelectedItem().toString() + 
+								"'mm'" + mSymbol.getSelectedItem().toString() + 
+								"'ss'" + sSymbol.getSelectedItem().toString() + "'";
 				privT = ExUtils.formatUptime(Duration.ofNanos(System.nanoTime()), pttn);
 			}
 			else if (pomodoroTime.isSelected())
@@ -1105,10 +1121,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			}
 			else if (sysUpTime.isSelected())
 			{
-				uSymbol.setText("Up-Time: ");
-				hSymbol.setText("-hour(s), ");
-				mSymbol.setText("-minute(s), ");
-				sSymbol.setText("-second(s)");
+				uSymbol.setSelectedItem("Up-Time: ");
+				hSymbol.setSelectedItem("-hour(s), ");
+				mSymbol.setSelectedItem("-minute(s), ");
+				sSymbol.setSelectedItem("-second(s)");
 			} else if (pomodoroTime.isSelected())
 			{
 				comboPomodoro.setSelectedItem("25 min. work, 5 min. break, 30 min. rest");
@@ -1275,6 +1291,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			cmdToRun.setEnabled(runCom.isSelected());
 			browse.setEnabled(runCom.isSelected());
 		}
+		else if (comm.equals("POMODORO_RADIO_BUTTON") || comm.equals("TIME_RADIO_BUTTON") || comm.equals("UPTIME_RADIO_BUTTON"))
+		{
+			validateTimeFormat();
+		}
 		enadesa();
 		setOneEnabled();
 	}
@@ -1290,8 +1310,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			sd.setTimeZone(TimeZone.getTimeZone(tzId));
 			previewLabel.setText(sd.format(new Date()));
 		}
-		else if (ie.getStateChange() == ItemEvent.SELECTED && 
-			(source.equals(comboDateFmt) || source.equals(comboPomodoro) || source.equals(comboPomFmt)))
+		else if (ie.getStateChange() == ItemEvent.SELECTED && (source.equals(comboDateFmt) ||
+			source.equals(comboPomodoro) || source.equals(comboPomFmt) || source.equals(uSymbol) ||
+			source.equals(hSymbol) || source.equals(mSymbol) || source.equals(sSymbol)))
 		{
 			validateTimeFormat();
 		}
