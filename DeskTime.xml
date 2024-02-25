@@ -64,7 +64,7 @@
   </void>
   <void method="put">
    <string>DISPLAY_METHOD</string>
-   <string>POMODORO</string>
+   <string>UPTIME</string>
   </void>
   <void id="Point0" method="get">
    <string>LOCATION</string>
@@ -72,14 +72,14 @@
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>929</int>
+     <int>669</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>85</int>
+     <int>91</int>
     </void>
    </void>
   </void>
@@ -89,7 +89,7 @@
   </void>
   <void method="put">
    <string>UPTIME_FORMAT</string>
-   <string>&apos;Uptime: &apos;HH&apos;-hour(s), &apos;mm&apos;-minute(s), &apos;ss&apos;-second(s)&apos;</string>
+   <string>&apos;Up-Time: &apos;DD&apos;-day(s), &apos;HH&apos;-hour(s), &apos;mm&apos;-minute(s), &apos;ss&apos;-second(s)&apos;</string>
   </void>
   <void method="put">
    <string>IMAGEFILE</string>

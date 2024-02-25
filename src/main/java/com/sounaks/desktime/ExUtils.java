@@ -298,7 +298,11 @@ public class ExUtils
 		{
 			if (outOfQuote)
 			{
-				if (val.contains("HH")) {
+				if (val.contains("DD")) {
+					upTimeFormatted += val.replace("DD", String.format("%02d", duration.toDays()));
+					duration = duration.minusDays(duration.toDays());
+				}
+				else if (val.contains("HH")) {
 					upTimeFormatted += val.replace("HH", String.format("%02d", duration.toHours()));
 				}
 				else if (val.contains("mm"))

@@ -136,6 +136,12 @@ public class InitInfo extends Hashtable<Object, Object>
 			put("UPTIME_FORMAT", s);
 	}
 
+	public boolean isDayShowing()
+	{
+		String formatString = getUpTimeFormat();
+		return formatString.contains("\'DD\'");
+	}
+
 	public String getPomodoroFormat()
 	{
 		return (String)get("POMODORO_FORMAT");
