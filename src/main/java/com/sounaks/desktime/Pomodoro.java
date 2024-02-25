@@ -113,7 +113,7 @@ public class Pomodoro {
                 throw new IllegalArgumentException("4th part found! Input string must have 2 or 3 parts separated by commas.");
             }
         }
-
+        // The below if condition is for hard coding world famous pomodoro cycle
         if (canRest && workTime.toMinutes() == 25 && breakTime.toMinutes() == 5 && restTime.toMinutes() == 30) {
             this.numWorkBreakCycles = 4;
         } else {
@@ -125,7 +125,7 @@ public class Pomodoro {
     }
 
     public Pomodoro() {
-        this("25 min. work, 5 min. break, 30 min. long break");
+        this("25 min. work, 5 min. break, 30 min. rest");
     }
 
     public void reset() {
@@ -165,7 +165,7 @@ public class Pomodoro {
         }
     }
 
-    public Duration getRunningLabelDuration() {
+    public Duration getRunningLabelDuration(boolean reverse) {
         int x = getTotalDuration().compareTo(getRunningDuration());
         if (x < 0) {
             position = getRunningDuration().minus(getTotalDuration().multipliedBy(getRunCount()));
@@ -174,20 +174,40 @@ public class Pomodoro {
         }
 
         if (position.compareTo(getWorkTime()) < 0) {
-            return getWorkTime().minus(position).plus(Duration.ofSeconds(1));
+            if (reverse) {
+                return getWorkTime().minus(position).plus(Duration.ofSeconds(1));
+            } else {
+                return position.plus(Duration.ofSeconds(1));
+            }
         } else if (position.compareTo(getWorkBreakDuration()) < 0) {
-            return getWorkBreakDuration().minus(position).plus(Duration.ofSeconds(1));
+            if (reverse) {
+                return getWorkBreakDuration().minus(position).plus(Duration.ofSeconds(1));
+            } else {
+                return position.minus(getWorkTime()).plus(Duration.ofSeconds(1));
+            }
         } else if (position.compareTo(getTotalDuration().minus(getRestTime())) < 0) {
             Duration tmpPos = Duration.ofSeconds(position.getSeconds() % getWorkBreakDuration().getSeconds());
             if (tmpPos.compareTo(getWorkTime()) < 0) {
-                return getWorkTime().minus(tmpPos);
+                if (reverse) {
+                    return getWorkTime().minus(tmpPos);
+                } else {
+                    return tmpPos.plus(Duration.ofSeconds(1));
+                }
             } else if (tmpPos.compareTo(getWorkBreakDuration()) < 0) {
-                return getWorkBreakDuration().minus(tmpPos);
+                if (reverse) {
+                    return getWorkBreakDuration().minus(tmpPos);
+                } else {
+                    return tmpPos.minus(getWorkTime()).plus(Duration.ofSeconds(1));
+                }
             } else {
                 throw new IllegalStateException("Duration " + tmpPos.toString() + " out of bounds.");
             }
         } else if (position.compareTo(getTotalDuration()) < 0) {
-            return getTotalDuration().minus(position).plus(Duration.ofSeconds(1));
+            if (reverse) {
+                return getTotalDuration().minus(position).plus(Duration.ofSeconds(1));
+            } else {
+                return position.minus(getWorkBreakDuration().multipliedBy(numWorkBreakCycles)).plus(Duration.ofSeconds(1));
+            }
         } else {
             throw new IllegalStateException("Duration " + position.toString() + " out of bounds.");
         }
@@ -204,7 +224,7 @@ public class Pomodoro {
 
     // Getter and Setter methods
     public String getWorkLabel() {
-        return workLabel;
+        return workLabel.toUpperCase();
     }
 
     public void setWorkLabel(String workLabel) {
@@ -220,7 +240,7 @@ public class Pomodoro {
     }
 
     public String getBreakLabel() {
-        return breakLabel;
+        return breakLabel.toUpperCase();
     }
 
     public void setBreakLabel(String breakLabel) {
@@ -237,7 +257,7 @@ public class Pomodoro {
 
     public String getRestLabel() throws NullPointerException {
         if (canRest)
-            return restLabel;
+            return restLabel.toUpperCase();
         else
             throw new NullPointerException("No resting schedule defined for this Pomodoro.");
     }

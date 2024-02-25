@@ -63,16 +63,8 @@
    </object>
   </void>
   <void method="put">
-   <string>POMODORO_FORMAT</string>
-   <string>HH:mm:ss</string>
-  </void>
-  <void method="put">
-   <string>GLASS_EFFECT</string>
-   <boolean>true</boolean>
-  </void>
-  <void method="put">
    <string>DISPLAY_METHOD</string>
-   <string>UPTIME</string>
+   <string>POMODORO</string>
   </void>
   <void id="Point0" method="get">
    <string>LOCATION</string>
@@ -80,16 +72,20 @@
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>759</int>
+     <int>929</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>167</int>
+     <int>85</int>
     </void>
    </void>
+  </void>
+  <void method="put">
+   <string>USING_IMAGE</string>
+   <boolean>true</boolean>
   </void>
   <void method="put">
    <string>UPTIME_FORMAT</string>
@@ -97,11 +93,22 @@
   </void>
   <void method="put">
    <string>IMAGEFILE</string>
-   <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\132.jpg</string>
+   <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\BabyBlue.JPG</string>
   </void>
   <void method="put">
    <string>OPACITY</string>
    <float>0.5</float>
+  </void>
+  <void id="Boolean0" method="get">
+   <string>NATIVE_LOOK</string>
+  </void>
+  <void method="put">
+   <string>POMODORO_COUNTDOWN_MODE</string>
+   <object idref="Boolean0"/>
+  </void>
+  <void method="put">
+   <string>IMAGE_STYLE</string>
+   <int>8</int>
   </void>
  </object>
 </java>

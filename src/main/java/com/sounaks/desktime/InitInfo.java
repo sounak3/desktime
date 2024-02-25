@@ -22,6 +22,7 @@ public class InitInfo extends Hashtable<Object, Object>
 		put("UPTIME_FORMAT", "'Up-Time: 'HH'-hour(s), 'mm'-minute(s), 'ss'-second(s)'");
 		put("POMODORO_FORMAT", "mm:ss");
 		put("POMODORO_LEAD_LABEL", false);
+		put("POMODORO_COUNTDOWN_MODE", true);
 		put("ZTIME_FORMAT", "zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy");
 		put("POMODORO_TASK", "25 min. work, 5 min. break, 30 min. rest");
 		put("TIMEZONE", "GMT");
@@ -157,7 +158,7 @@ public class InitInfo extends Hashtable<Object, Object>
 			put("POMODORO_TASK", s);
 	}
 
-	public boolean getPomodoroLeadingLabel()
+	public boolean isPomodoroLeadingLabel()
 	{
 		return ((Boolean)get("POMODORO_LEAD_LABEL")).booleanValue();
 	}
@@ -165,6 +166,16 @@ public class InitInfo extends Hashtable<Object, Object>
 	public void setPomodoroLeadingLabel(boolean flag)
 	{
 		put("POMODORO_LEAD_LABEL", flag);
+	}
+
+	public boolean isPomodoroCountdown()
+	{
+		return ((Boolean)get("POMODORO_COUNTDOWN_MODE")).booleanValue();
+	}
+
+	public void setPomodoroCountdown(boolean flag)
+	{
+		put("POMODORO_COUNTDOWN_MODE", flag);
 	}
 
 	public String getZonedTimeFormat()

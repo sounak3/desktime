@@ -24,11 +24,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JComboBox<String> comboTz, comboDateFmt, comboPomodoro, comboPomFmt;
 	private JRadioButton selTimeZone,sysUpTime,pomodoroTime;
 	private JLabel jLUptimeTxt, jLHourTxt, jLMinTxt, jLSecTxt, tzLabel;
+	private JCheckBox tzCb, cbPomLabel, cbPomCountdown;
 	private JComboBox<String> uSymbol,hSymbol,mSymbol,sSymbol;
 	private JButton resetDefs,helpFormat;
 	private JLabel transSlide,previewLabel,jLDateFormat,jLPomFormat;
 	private JSlider transLevel;
-	private JCheckBox tzCb,useImg,useCol,useTrans,slowUpd, cbPomLabel;
+	private JCheckBox useImg,useCol,useTrans,slowUpd;
 	private FileList fileList;
 	private JButton selectDir,selBackCol,resBackCol;
 	private TLabel picLabel;
@@ -189,7 +190,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			"50 minutes work, 10 minutes break",
 			"52 minutes work, 17 minutes break",
 			"90 minutes work, 20 minutes break",
-			"112 minutes work, 26 minutes break"
+			"112 minutes work, 26 minutes break",
+			"4 sec breath-in, 6 sec hold, 8 sec breath-out"
 		};
 		comboPomodoro = new JComboBox<String>(pomtech);
 		comboPomodoro.addItemListener(this);
@@ -204,6 +206,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		jLPomFormat.setLabelFor(comboPomFmt);
 		cbPomLabel = new JCheckBox("Leading label");
 		cbPomLabel.setActionCommand("Leading label");
+		cbPomCountdown = new JCheckBox("Countdown");
 		jpanel2.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Time Display Options"));
 		//All configurations for Background Panel as follows:
 		JPanel jpanel3 = new JPanel(new GridBagLayout());
@@ -365,7 +368,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel2, pomodoroTime, 	0, 11, 2, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, comboPomodoro, 	2, 11, 3, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, jLPomFormat, 		1, 12, 1, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, comboPomFmt,		2, 12, 2, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, comboPomFmt,		2, 12, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, cbPomCountdown,	3, 12, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, cbPomLabel,		4, 12, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, useImg, 			0, 0, 4, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, component2, 		0, 1, 1, 1, 0.0D, 0.0D, this);
@@ -578,7 +582,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		}
 		else if (dispM.equals("POMODORO")) {
 			pomodoroTime.setSelected(true);
-			privT = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(), initinfo.getPomodoroFormat(), pom.getRunningLabel(), initinfo.getPomodoroLeadingLabel());
+			privT = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(initinfo.isPomodoroCountdown()), initinfo.getPomodoroFormat(), pom.getRunningLabel(), initinfo.isPomodoroLeadingLabel());
 		}
 		previewLabel.setText(privT);
 		String s1    = initinfo.getUpTimeFormat();
@@ -588,7 +592,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		mSymbol.setSelectedItem(arr[5]);
 		sSymbol.setSelectedItem(arr.length == 8 ? arr[7] : " ");
 		comboPomodoro.setSelectedItem(initinfo.getPomodoroTask());
-		cbPomLabel.setSelected(initinfo.getPomodoroLeadingLabel());
+		cbPomLabel.setSelected(initinfo.isPomodoroLeadingLabel());
+		cbPomCountdown.setSelected(initinfo.isPomodoroCountdown());
 		comboPomFmt.setSelectedItem(initinfo.getPomodoroFormat());
 		data = alarmInit;
 		alarmList.setListData(data);
@@ -651,6 +656,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		jLPomFormat.setEnabled(pomodoroTime.isSelected());
 		comboPomFmt.setEnabled(pomodoroTime.isSelected());
 		cbPomLabel.setEnabled(pomodoroTime.isSelected());
+		cbPomCountdown.setEnabled(pomodoroTime.isSelected());
 		jLDateFormat.setEnabled(selTimeZone.isSelected());
 		tzLabel.setEnabled(selTimeZone.isSelected());
 		tzCb.setEnabled(selTimeZone.isSelected());
@@ -894,6 +900,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			information.setPomodoroTask(comboPomodoro.getSelectedItem().toString());
 			information.setPomodoroFormat(comboPomFmt.getSelectedItem().toString());
 			information.setPomodoroLeadingLabel(cbPomLabel.isSelected());
+			information.setPomodoroCountdown(cbPomCountdown.isSelected());
 		}
 		else if (sysUpTime.isSelected())
 		{
@@ -1015,7 +1022,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				String pttn = comboPomFmt.getSelectedItem().toString();
 				sd.applyPattern(pttn);
 				pom   = new Pomodoro(comboPomodoro.getSelectedItem().toString());
-				privT = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(), pttn, pom.getRunningLabel(), cbPomLabel.isSelected());
+				privT = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(cbPomCountdown.isSelected()), pttn, pom.getRunningLabel(), cbPomLabel.isSelected());
 			}
 			previewLabel.setText(privT);
 			exceptionActive = false;
@@ -1141,6 +1148,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				comboPomodoro.setSelectedItem("25 min. work, 5 min. break, 30 min. rest");
 				comboPomFmt.setSelectedItem("mm:ss");
 				cbPomLabel.setSelected(false);
+				cbPomCountdown.setSelected(false);
 			}
 		}
 		else if (comm.equals("Help On Format"))

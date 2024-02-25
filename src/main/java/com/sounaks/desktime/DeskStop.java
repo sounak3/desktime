@@ -175,7 +175,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			setOpacity(info.getOpacity());
 			stopRefresh();
 		}
-		resizingMethod();
+		resizingMethod(time);
 		setRoundedCorners(info.hasRoundedCorners());
 		fix1.setSelected(info.isFixed());
 		ontop.setSelected(info.getOnTop());
@@ -194,7 +194,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			sd   = new SimpleDateFormat(info.getZonedTimeFormat());
 			sd.setTimeZone(dispString.equals("GMTTZ") ? TimeZone.getTimeZone(info.getTimeZone()) : TimeZone.getDefault());
 			time = sd.format(date = new Date());
-			resizingMethod();
+			resizingMethod(time);
 			if (info.hasTooltip())
 				tLabel.setToolTipText(dispString.equals("GMTTZ") ? tipGmt : tipCur);
 			else
@@ -205,8 +205,18 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			// Only create new pomodoro object if earlier was not present, else refer existing one.
 			if (pom == null || !lastPomTask.equals(info.getPomodoroTask()) || !lastPomFormat.equals(info.getPomodoroFormat()))
 				pom  = new Pomodoro(info.getPomodoroTask());
-			time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(), info.getPomodoroFormat(), pom.getRunningLabel(), info.getPomodoroLeadingLabel());
-			resizingMethod();
+			time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(info.isPomodoroCountdown()), info.getPomodoroFormat(), pom.getRunningLabel(), info.isPomodoroLeadingLabel());
+
+			String lstr1 = info.getPomodoroFormat() + " [" + pom.getWorkLabel() + "]";
+			String lstr2 = info.getPomodoroFormat() + " [" + pom.getBreakLabel() + "]";
+			String lstr3 = pom.checkCanRest() ? info.getPomodoroFormat() + " [" + pom.getRestLabel() + "]" : "";
+			if (lstr1.length() >= lstr2.length() && lstr1.length() >= lstr3.length())
+				resizingMethod(lstr1);
+			else if (lstr2.length() >= lstr1.length() && lstr2.length() >= lstr3.length())
+				resizingMethod(lstr2);
+			else
+				resizingMethod(lstr3);
+
 			if (info.hasTooltip())
 				tLabel.setToolTipText(tipPom);
 			else
@@ -215,7 +225,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		else if (dispString.equals("UPTIME"))
 		{
 			time = ExUtils.formatUptime(Duration.ofNanos(System.nanoTime()), info.getUpTimeFormat());
-			resizingMethod();
+			resizingMethod(time);
 			if (info.hasTooltip())
 				tLabel.setToolTipText(tipUpt);
 			else
@@ -223,13 +233,15 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		}
 	}
 
-	private void resizingMethod()
+	private void resizingMethod(String lstr)
 	{
-		char mChar[] = new char[time.length()];
-		for (int k = 0; k < time.length(); k++)
+		if (lstr == null || lstr.isEmpty())
+			lstr = time;
+		char mChar[] = new char[lstr.length()];
+		for (int k = 0; k < lstr.length(); k++)
 			mChar[k] ='8'; // Coz its the medium char generally :)
 		int k = Math.round(metrics.stringWidth(new String(mChar)));
-		int i = Math.round(metrics.stringWidth(time)) + 10;
+		int i = Math.round(metrics.stringWidth(lstr)) + 10;
 		int j = Math.round(metrics.getHeight()) + 5;
 		tLabel.setSize(i > k ? i : k, j);  // normal string or string of '8'
 		setSize(i > k ? i : k, j);  // whichever gr8er;
@@ -557,7 +569,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 						// Below 2 line is under timeDisplayConfig(), but added here to avoid NullPointerException in case of race condition.
 						if (pom == null || !lastPomTask.equals(info.getPomodoroTask()) || !lastPomFormat.equals(info.getPomodoroFormat()))
 							pom  = new Pomodoro(info.getPomodoroTask());
-						time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(), info.getPomodoroFormat(), pom.getRunningLabel(), info.getPomodoroLeadingLabel());
+						time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(info.isPomodoroCountdown()), info.getPomodoroFormat(), pom.getRunningLabel(), info.isPomodoroLeadingLabel());
 					}
 					tLabel.setText(time);
 					checkTimeAndRunAlarm(date);
