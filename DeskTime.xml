@@ -64,7 +64,7 @@
   </void>
   <void method="put">
    <string>DISPLAY_METHOD</string>
-   <string>UPTIME</string>
+   <string>POMODORO</string>
   </void>
   <void id="Point0" method="get">
    <string>LOCATION</string>
@@ -72,14 +72,14 @@
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>669</int>
+     <int>938</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>91</int>
+     <int>46</int>
     </void>
    </void>
   </void>

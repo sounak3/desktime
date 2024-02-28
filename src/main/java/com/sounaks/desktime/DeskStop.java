@@ -314,7 +314,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	
 	private Vector<TimeBean> loadAlarms()
 	{
-		Vector <TimeBean>data = new Vector<TimeBean>();
+		Vector<TimeBean> data = new Vector<TimeBean>();
 		try
 		{
 			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream("Smrala.xml")));
@@ -322,8 +322,8 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			decoder.close();
 			if (settingsObj instanceof Vector) {
 				Vector<?> tmpVec = (Vector<?>)settingsObj;
-				if (tmpVec.size() != 0 && tmpVec.get(0) instanceof TimeBean) {
-					data    = (Vector<TimeBean>)tmpVec;
+				for (int cnt = 0; cnt < tmpVec.size(); cnt++) {
+					if (tmpVec.elementAt(cnt) instanceof TimeBean) data.add((TimeBean)tmpVec.elementAt(cnt));
 				}
 			}
 		}

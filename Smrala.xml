@@ -22,6 +22,9 @@
   </void>
   <void method="add">
    <object class="com.sounaks.desktime.TimeBean">
+    <void property="alarmExecutionOutputType">
+     <int>6</int>
+    </void>
     <void property="alarmRepeatInterval">
      <int>1</int>
     </void>
@@ -32,11 +35,6 @@
     </void>
     <void property="name">
      <string>Example active</string>
-    </void>
-    <void property="nextAlarmTriggerTime">
-     <object class="java.util.Date">
-      <long>1708900019000</long>
-     </object>
     </void>
     <void property="repeatMultiple">
      <int>2</int>
