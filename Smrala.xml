@@ -36,6 +36,11 @@
     <void property="name">
      <string>Example active</string>
     </void>
+    <void property="nextAlarmTriggerTime">
+     <object class="java.util.Date">
+      <long>1709391539000</long>
+     </object>
+    </void>
     <void property="repeatMultiple">
      <int>2</int>
     </void>

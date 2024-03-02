@@ -36,6 +36,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JRadioButton rbHtile,rbTile,rbVtile,rbCenter,rbFit,rbStretch;
 	private JList<TimeBean> alarmList;
 	private JLabel jLAlmAbout, jLAlmSame;
+	private SoundPlayer sndHour, sndUptime, sndWork, sndBrk, sndRest;
 	private JButton add,remove,edit,test,browse;
 	private JPanel bottomCards;
 	private JComboBox<String> period, dateOrWeek;
@@ -278,6 +279,23 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		jLAlmAbout  = new JLabel("");
 		jLAlmAbout.setBorder(BorderFactory.createEmptyBorder(10, 50, 10, 50));
 		setDescriptionText();
+		JPanel sndSet    = new JPanel(new GridBagLayout());
+		JLabel jlHour    = new JLabel("Hourly sound");
+		JLabel jlUpt     = new JLabel("Uptime Hour sound");
+		JLabel jlPomWork = new JLabel("Pomodoro Work sound");
+		JLabel jlPomBrk  = new JLabel("Pomodoro Break sound");
+		JLabel jlPomRest = new JLabel("Pomodoro Rest sound");
+		sndHour   = new SoundPlayer(15);
+		sndUptime = new SoundPlayer(15);
+		sndWork   = new SoundPlayer(15);
+		sndBrk    = new SoundPlayer(15);
+		sndRest   = new SoundPlayer(15);
+		jlHour.setLabelFor(sndHour);
+		jlUpt.setLabelFor(sndUptime);
+		jlPomWork.setLabelFor(sndWork);
+		jlPomBrk.setLabelFor(sndBrk);
+		jlPomRest.setLabelFor(sndRest);
+		sndSet.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Select sounds"));
 		JPanel almSet = new JPanel(new GridBagLayout());
 		JLabel nameLabel    = new JLabel("Alarm Name",JLabel.CENTER);
 		       alarmName    = new JTextField();
@@ -312,7 +330,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		runMsg        = new JCheckBox("Message");
 		cmdToRun      = new JTextField(10);
 		browse        = new JButton("Browse...");
-		bottomCards.add(jLAlmAbout, "FinishEdit");
+		bottomCards.add(sndSet, "FinishEdit");
 		bottomCards.add(almSet,  "AddEdit");
 		//For bottom panel of ok/cancel buttons.
 		JPanel jpanel4 = new JPanel(new FlowLayout(2));
@@ -421,6 +439,16 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(almSet,  runMsg,			6, 4, 1,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(almSet,  cmdToRun,			0, 5, 6,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(almSet,  browse,			6, 5, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  jlHour,			0, 0, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  sndHour,			1, 0, 1,	1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  jlUpt,			0, 1, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  sndUptime,		1, 1, 1,	1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  jlPomWork,		0, 2, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  sndWork,			1, 2, 1,	1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  jlPomBrk,			0, 3, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  sndBrk,			1, 3, 1,	1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  jlPomRest,		0, 4, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  sndRest,			1, 4, 1,	1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel5, topList,			0, 0, 1,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel5, bottomCards,		0, 1, 1,	1, 0.0D, 0.0D, this);
 		}
