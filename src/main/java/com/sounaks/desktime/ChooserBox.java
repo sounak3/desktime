@@ -35,7 +35,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private TLabel picLabel;
 	private JRadioButton rbHtile,rbTile,rbVtile,rbCenter,rbFit,rbStretch;
 	private JList<TimeBean> alarmList;
-	private JLabel jLAlmAbout, jLAlmSame;
+	private JLabel jLAlmAbout, jLAlmSame, jLAlmDays, jLAlmHrs;
 	private SoundPlayer sndHour, sndUptime, sndWork, sndBrk, sndRest;
 	private JButton add,remove,edit,test,browse;
 	private JPanel bottomCards;
@@ -43,9 +43,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JCheckBox rept,runCom,runMsg,runSnd;
 	private JTextField cmdToRun, alarmName;
 	private JRadioButton optStartOn, optStartAfter;
-	private JSpinner timeSpinner1, timeSpinner2, countSpinner1;
+	private JSpinner timeSpinner1, timeSpinner2, countSpinner1, countSpinner2;
 	private DateChooser choosefrom;
-	private int opmode   = 0;
+	private int opmode   = ChooserBox.ALARM_DISCARD;
 	private int selIndex = -1;
 	private boolean exceptionActive = false;
 	private JButton ok,cancel;
@@ -58,6 +58,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	public static final int BORDER_TAB     = 2;
 	public static final int TIMES_TAB      = 3;
 	public static final int ALARMS_TAB     = 4;
+	public static final int ALARM_ADD      = 11;
+	public static final int ALARM_EDIT     = 13;
+	public static final int ALARM_DISCARD  = 17;
 
 	public ChooserBox(InitInfo initinfo, Vector <TimeBean>alarminfo)
 	{
@@ -320,10 +323,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		dateOrWeek.setEnabled(false);
 		optStartAfter = new JRadioButton("Start after");
 		bgr.add(optStartAfter);
+		countSpinner2 = new JSpinner(new SpinnerNumberModel(0, 0, 999, 1));
+		jLAlmDays = new JLabel(" days and");
 		timeSpinner2             = new JSpinner(new SpinnerDateModel());
 		JSpinner.DateEditor dit2 = new JSpinner.DateEditor(timeSpinner2,"HH:mm");
 		timeSpinner2.setEditor(dit2);
-		JLabel jLAlmHrs = new JLabel(" hours of program start-up");
+		jLAlmHrs = new JLabel(" hours of system uptime");
 		JLabel jLAlmAct = new JLabel("On Alarm",JLabel.CENTER);
 		runCom        = new JCheckBox("Start Command");
 		runSnd        = new JCheckBox("Just Beep");
@@ -426,8 +431,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(almSet,  choosefrom,		1, 1, 5,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(almSet,  timeSpinner1,		6, 1, 1,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(almSet,  optStartAfter,	0, 2, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  timeSpinner2,		1, 2, 2,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  jLAlmHrs,			3, 2, 4,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  countSpinner2,	1, 2, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  jLAlmDays,			2, 2, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  timeSpinner2,		3, 2, 2,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  jLAlmHrs,			5, 2, 2,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(almSet,  rept,				0, 3, 2,	1, 0.4D, 0.0D, this);
 			ExUtils.addComponent(almSet,  countSpinner1,	2, 3, 1,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(almSet,  period,			3, 3, 2,	1, 0.2D, 0.0D, this);
@@ -684,13 +691,13 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			int              tmp4   = 0;
 			ltext  = ltext.replace("(alarm name)", tb.getName());
 			ltext  = ltext.replace("(start time)", tmp1.format(tb.getAlarmTriggerTime()) + " at " + tmp2.format(tb.getAlarmTriggerTime()));
-			tmp4   = tb.getAlarmRepeatInterval().intValue();
-			ltext  = ltext.replace("(multi)", tmp4 == 0 ? "" : "every " + tb.getRepeatMultiple().toString());
+			tmp4   = tb.getAlarmRepeatInterval();
+			ltext  = ltext.replace("(multi)", tmp4 == 0 ? "" : "every " + tb.getRepeatMultiple());
 			ltext  = ltext.replace("(interval)", tmp4 == 0 ? tmp3[tmp4] : tmp3[tmp4] + "(s)");
 			ccal.setTime(tb.getNextAlarmTriggerTime());
 			ccal.add(Calendar.SECOND, 1);
 			ltext  = ltext.replace("(next run)", tmp4 == 0 ? "never" : "on " + tmp1.format(ccal.getTime()) + " at " + tmp2.format(ccal.getTime()));
-			tmp4   = tb.getAlarmExecutionOutputType().intValue();
+			tmp4   = tb.getAlarmExecutionOutputType();
 			ltext  = ltext.replace("(run type)", ((tmp4 % 2 != 0) ? " command," : "") + (((tmp4 % 3 == 0) || (tmp4 == 2)) ? " sound," : "") + ((tmp4 > 3) ? " message" : ""));
 			jLAlmAbout.setText(ltext);
 		}
@@ -737,23 +744,29 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		catch (Exception exception) { exception.printStackTrace(); }
 	}
 	
-	private void enadesa()
+	private void alarmStartOnOrStartAfter()
 	{
 		if (optStartOn.isSelected())
 		{
 			timeSpinner1.setEnabled(true);
+			countSpinner2.setEnabled(false);
+			jLAlmDays.setEnabled(false);
 			timeSpinner2.setEnabled(false);
+			jLAlmHrs.setEnabled(false);
 			choosefrom.setEnabled(true);
 		}
 		else if (optStartAfter.isSelected())
 		{
 			timeSpinner1.setEnabled(false);
+			countSpinner2.setEnabled(true);
+			jLAlmDays.setEnabled(true);
 			timeSpinner2.setEnabled(true);
+			jLAlmHrs.setEnabled(true);
 			choosefrom.setEnabled(false);
 		}
 	}
 
-	private void enadesa2(boolean ena)
+	private void alarmViewOnlyMode(boolean ena)
 	{
 		if (ena) add.setText("Add");
 		else add.setText("Commit");
@@ -817,12 +830,25 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			}
 			catch (NullPointerException pe)
 			{
-				System.out.println("Something wrong happened in date "+pe.getMessage());
+				System.out.println("Something wrong happened in date format.");
+				pe.printStackTrace();
 			}
 		}
 		else if (optStartAfter.isSelected())
 		{
-			temp = ((JSpinner.DateEditor)timeSpinner2.getEditor()).getModel().getDate();
+			Date selDate = ((JSpinner.DateEditor)timeSpinner2.getEditor()).getModel().getDate();
+			GregorianCalendar selCal = new GregorianCalendar();
+			selCal.setTime(selDate);
+			int selDay = Integer.parseInt(countSpinner2.getValue().toString());
+			int selHour = selCal.get(Calendar.HOUR_OF_DAY);
+			int selMin = selCal.get(Calendar.MINUTE);
+			temp = ExUtils.getSystemStartTime();
+			GregorianCalendar startCal = new GregorianCalendar();
+			startCal.setTime(temp);
+			startCal.add(Calendar.DAY_OF_MONTH, selDay);
+			startCal.add(Calendar.HOUR_OF_DAY, selHour);
+			startCal.add(Calendar.MINUTE, selMin);
+			temp = startCal.getTime();
 		}
 		GregorianCalendar second0 = new GregorianCalendar();
 		second0.setTime(temp);
@@ -839,7 +865,24 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		}
 		else if (optStartAfter.isSelected())
 		{
-			timeSpinner2.setValue(date);
+			long startDate = ExUtils.getSystemStartTime().getTime();
+			long savedDate = date.getTime();
+			Duration dur = Duration.ofMillis(savedDate - startDate);
+			long durDays = dur.toDays();
+			dur = dur.minusDays(durDays);
+			long durHours = dur.toHours();
+			dur = dur.minusHours(durHours);
+			long durMin = dur.toMinutes();
+			dur = dur.minusMinutes(durMin);
+			long durSec = dur.getSeconds();
+			int offset = -1 * (TimeZone.getDefault().getRawOffset() + TimeZone.getDefault().getDSTSavings());
+			Calendar setCal = Calendar.getInstance();
+			setCal.setTimeInMillis(offset);
+			setCal.add(Calendar.HOUR_OF_DAY, (int)durHours);
+			setCal.add(Calendar.MINUTE, (int)durMin);
+			setCal.add(Calendar.SECOND, (int)durSec + 1);
+			countSpinner2.setValue(durDays);
+			timeSpinner2.setValue(setCal.getTime());
 		}
 	}
 	
@@ -852,6 +895,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			period.setSelectedIndex(5);
 			dateOrWeek.setSelectedIndex(inv - 7);
 		}
+		rept.setSelected(period.getSelectedIndex() != 0);
 		countSpinner1.setValue(multiple);
 	}
 	
@@ -867,12 +911,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	{
 		optStartOn.setSelected(!flag);
 		optStartAfter.setSelected(flag);
-		enadesa();
+		alarmStartOnOrStartAfter();
 	}
 	
 	public boolean startAfterTimeIsSelected()
 	{
-		enadesa();
+		alarmStartOnOrStartAfter();
 		return optStartAfter.isSelected();
 	}
 	
@@ -894,6 +938,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		return totaltmp;
 	}
 
+	
+	/** 
+	 * Save all settings in the form of class InitInfo.
+	 * @return InitInfo
+	 * @throws Exception
+	 */
 	public InitInfo applySettings() throws Exception
 	{
 		information.setFont(getSelectedFont());
@@ -1002,9 +1052,15 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		return information;
 	}
 	
+	
+	/** 
+	 * Save all the alarms in the form of vector list of TimeBean
+	 * @return Vector<TimeBean>
+	 * @throws NullPointerException
+	 */
 	public Vector<TimeBean> applyAlarms() throws NullPointerException
 	{
-		if (opmode != 0) saveCurrentAlarm();
+		if (opmode != ChooserBox.ALARM_DISCARD) saveCurrentAlarm();
 		return data;
 	}
 	
@@ -1023,6 +1079,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		}
 	}
 	
+	
+	/** 
+	 * Saves the current TimeBean alarm in add or edit mode, to the data vector.
+	 * This also updates the resultant data vector to the alarmList JList.
+	 * @throws NullPointerException
+	 */
 	private void saveCurrentAlarm() throws NullPointerException
 	{
 		if (alarmName.getText().equals("") || alarmName.getText().equals(null))
@@ -1032,25 +1094,25 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		TimeBean tb = new TimeBean();
 		tb.setName(alarmName.getText());
 		tb.setSystemStartTimeBasedAlarm(startAfterTimeIsSelected()); // must be set before setRuntime();
-		if (startAfterTimeIsSelected()) tb.setNextAlarmTriggerTime(getSelectedAlarmTime());//if op2 then nextRuntime
+		if (startAfterTimeIsSelected()) tb.setAlarmTriggerTime(getSelectedAlarmTime());//if op2 then nextRuntime
 		else tb.setAlarmTriggerTime(getSelectedAlarmTime()); // should be set instead of runtime;
 		tb.setAlarmRepeatInterval(getSelectedRepeatInterval());
 		tb.setRepeatMultiple(rept.isSelected() ? (int)countSpinner1.getValue() : 0);
 		tb.setAlarmExecutionOutputType(getSelectedAlarmExecOutputOption());
 		tb.setCommand(cmdToRun.getText());
-		if (opmode == 1)
+		if (opmode == ChooserBox.ALARM_ADD)
 		{
 			data.addElement(tb);
 			alarmList.setListData(data);
 		}
-		else if (opmode == 2)
+		else if (opmode == ChooserBox.ALARM_EDIT)
 		{
-			data.setElementAt(tb,selIndex);
+			data.setElementAt(tb, selIndex);
 			alarmList.setListData(data);
 		}
 		((CardLayout)(bottomCards.getLayout())).show(bottomCards, "FinishEdit");
-		enadesa2(true);
-		opmode = 0;
+		alarmViewOnlyMode(true);
+		opmode = ChooserBox.ALARM_DISCARD;
 	}
 
 	private void validateTimeFormat()
@@ -1276,8 +1338,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		else if (comm.equals("Add"))
 		{
 			cl.show(bottomCards,"AddEdit");
-			enadesa2(false);
-			opmode = 1;
+			alarmViewOnlyMode(false);
+			opmode = ChooserBox.ALARM_ADD;
 			alarmName.setText("");
 			selectStartAfterTimeOption(false); //must be called before timeIn();
 			setSelectedAlarmTime(new Date());
@@ -1290,14 +1352,18 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			if (selIndex != -1)
 			{
 				cl.show(bottomCards,"AddEdit");
-				enadesa2(false);
-				opmode      = 2;
+				alarmViewOnlyMode(false);
+				opmode      = ChooserBox.ALARM_EDIT;
 				TimeBean tb = (TimeBean)data.elementAt(selIndex);
 				alarmName.setText(tb.getName());
-				selectStartAfterTimeOption(tb.isSystemStartTimeBasedAlarm().booleanValue()); //must be called before timeIn();
-				setSelectedAlarmTime(tb.getAlarmTriggerTime());
+				boolean isAfterOpt = tb.isSystemStartTimeBasedAlarm();
+				selectStartAfterTimeOption(isAfterOpt); //must be called before timeIn();
+				if (isAfterOpt)
+					setSelectedAlarmTime(tb.getAlarmTriggerTime());
+				else
+					setSelectedAlarmTime(tb.getAlarmTriggerTime());
 				setSelectedRepeatInterval(tb.getAlarmRepeatInterval(), tb.getRepeatMultiple());
-				selectAlarmExecOutputOption(tb.getAlarmExecutionOutputType().intValue());
+				selectAlarmExecOutputOption(tb.getAlarmExecutionOutputType());
 				cmdToRun.setText(tb.getCommand());
 			}
 			else
@@ -1328,8 +1394,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		else if (comm.equals("Discard"))
 		{
 			cl.show(bottomCards,"FinishEdit");
-			enadesa2(true);
-			opmode = 0;
+			alarmViewOnlyMode(true);
+			opmode = ChooserBox.ALARM_DISCARD;
 		}
 		else if (comm.equals("Remove"))
 		{
@@ -1391,7 +1457,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		{
 			validateTimeFormat();
 		}
-		enadesa();
+		alarmStartOnOrStartAfter();
 		setOneEnabled();
 	}
 

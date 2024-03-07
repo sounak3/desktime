@@ -67,7 +67,6 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			e1.printStackTrace();
 		}
 		addComponentListener(this);
-		setSystemStartTime(alarms);
 		windowLoc    = new Point(0, 0);
 		locX  = (int)info.getLocation().getX();
 		locY  = (int)info.getLocation().getY();
@@ -260,26 +259,6 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		}
 	}
 
-	// Used for setting run time of up-time alarms;
-	private void setSystemStartTime(Vector <TimeBean>vec)
-	{
-		long nano    = Math.abs(System.nanoTime() / 1000000000);
-		int  days    = -1 * (int)nano / 86400;
-		int  hours   = -1 * (int)(nano % 86400) / 3600;
-		int  minutes = -1 * (int)(nano % 3600) / 60;
-		//int seconds=-1*(int)(nano%3600)%60; // Not used coz we need 0;
-		GregorianCalendar gcal = new GregorianCalendar();
-		gcal.add(Calendar.DATE, days);
-		gcal.add(Calendar.HOUR_OF_DAY, hours);
-		gcal.add(Calendar.MINUTE, minutes);
-		gcal.add(Calendar.SECOND, 0);  // Second 0 for a match;
-		for (TimeBean tb : vec)
-		{
-			if (tb.isSystemStartTimeBasedAlarm().booleanValue())
-				tb.setAlarmTriggerTime(gcal.getTime());
-		}
-	}
-
 	private InitInfo loadProperties()
 	{
 		InitInfo data = new InitInfo();
@@ -329,7 +308,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		}
 		catch (Exception exclusive)
 		{// Ignoring missing file...
-			System.out.println("Exception while loading properties file-\"Smarla.xml\": " + exclusive.toString());
+			System.out.println("Exception while loading properties file-\"Smarla.xml\": " + exclusive.getMessage());
 			exclusive.printStackTrace();
 		}
 		return data;
@@ -362,7 +341,6 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.BORDER_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
-			setSystemStartTime(alarms);
 			saveAlarms(alarms);
 			saveProperties(info);
 			re_init();
@@ -372,7 +350,6 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.FONT_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
-			setSystemStartTime(alarms);
 			saveAlarms(alarms);
 			saveProperties(info);
 			re_init();
@@ -382,7 +359,6 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.BACKGROUND_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
-			setSystemStartTime(alarms);
 			saveAlarms(alarms);
 			saveProperties(info);
 			re_init();
@@ -392,7 +368,6 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.TIMES_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
-			setSystemStartTime(alarms);
 			saveAlarms(alarms);
 			saveProperties(info);
 			re_init();
@@ -402,7 +377,6 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.ALARMS_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
-			setSystemStartTime(alarms);
 			saveAlarms(alarms);
 			saveProperties(info);
 			re_init();
@@ -550,6 +524,8 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 
 		public void run()
 		{
+			Calendar gcal  = Calendar.getInstance();
+			Date startTime = ExUtils.getSystemStartTime();
 			for (Thread thread = Thread.currentThread(); clockThread == thread && timerun;)
 			{
 				String method = info.getDisplayMethod();
@@ -558,7 +534,11 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 				{
 					if (method.equals("UPTIME"))
 					{
-						time = ExUtils.formatUptime(Duration.ofNanos(System.nanoTime()), info.getUpTimeFormat());
+						Duration uptimeNow = Duration.ofNanos(System.nanoTime());
+						time = ExUtils.formatUptime(uptimeNow, info.getUpTimeFormat());
+						gcal.setTime(startTime);
+						gcal.add(Calendar.SECOND, (int)uptimeNow.getSeconds());
+						date = gcal.getTime();
 					}
 					else if (method.equals("GMTTZ") || method.equals("CURTZ"))
 					{
@@ -577,7 +557,8 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 				}
 				catch (Exception exception)
 				{
-					System.out.println(exception);
+					System.out.println("An error occurred while displaying time.");
+					exception.printStackTrace();
 					timerun = false;
 				}
 			}

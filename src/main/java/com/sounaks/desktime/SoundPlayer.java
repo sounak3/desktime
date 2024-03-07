@@ -118,7 +118,6 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
                             playTimer = new Timer(playSeconds, this);
                         playTimer.setActionCommand("STOP_AUDIO_FILE");
                         playTimer.setRepeats(false);
-                        System.out.println("Play");
                         if (player == null)
                             player = new Player(fStream);
                         playTimer.start();
@@ -127,7 +126,6 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
                     }
                     else
                     {
-                        System.out.println("Stop");
                         stopPlayer();
                     }
                 }
@@ -154,7 +152,6 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
         }
         else if (cmd.equals("STOP_AUDIO_FILE"))
         {
-            System.out.println("Stopping");
             stopPlayer();
         }
     }
@@ -186,12 +183,10 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
         try {
             if (player != null && !playing)
             {
-                System.out.println("Starting");
                 playing = true;
                 play.setIcon(stopIcon);
                 play.setToolTipText("Stop playing audio file");
                 player.play();
-                System.out.println("Done");
                 playing = false;
             }
         } catch (JavaLayerException e) {
@@ -248,12 +243,12 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
         }
     }
 
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("test");
-        SoundPlayer ch = new SoundPlayer(30);
-        frame.getContentPane().add(ch);
-        frame.pack();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-    }
+    // public static void main(String[] args) {
+    //     JFrame frame = new JFrame("test");
+    //     SoundPlayer ch = new SoundPlayer(30);
+    //     frame.getContentPane().add(ch);
+    //     frame.pack();
+    //     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    //     frame.setVisible(true);
+    // }
 }

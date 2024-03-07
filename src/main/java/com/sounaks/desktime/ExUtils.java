@@ -289,6 +289,22 @@ public class ExUtils
 		nativePro.gc();
 	}
 	
+	public static Date getSystemStartTime()
+	{
+		long nanosToSeconds = Math.abs((long)Math.floor(System.nanoTime() / 1000000000));
+		int  days           = -1 * (int)nanosToSeconds / 86400;
+		int  hours          = -1 * (int)(nanosToSeconds % 86400) / 3600;
+		int  minutes        = -1 * (int)(nanosToSeconds % 86400 % 3600) / 60;
+		int  seconds        = -1 * (int)(nanosToSeconds % 86400 % 3600) % 60;
+		GregorianCalendar gcal = new GregorianCalendar();
+		gcal.add(Calendar.SECOND, seconds); // adding seconds is necessary even when we are removing it later
+		gcal.add(Calendar.MINUTE, minutes);
+		gcal.add(Calendar.HOUR_OF_DAY, hours);
+		gcal.add(Calendar.DATE, days);
+		gcal.set(Calendar.SECOND, 0);  // Second 0 for a match;
+		return gcal.getTime();
+	}
+
 	public static String formatUptime(Duration duration, String pattern)
 	{
 		String  arr[]           = pattern.split("\'");

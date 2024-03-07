@@ -2,47 +2,28 @@
 <java version="1.8.0_402" class="java.beans.XMLDecoder">
  <object class="java.util.Vector">
   <void method="add">
-   <object class="com.sounaks.desktime.TimeBean" id="TimeBean0">
-    <void property="alarmExecutionOutputType">
-     <int>6</int>
-    </void>
-    <void property="alarmTriggerTime">
-     <object class="java.util.Date">
-      <long>1707161880000</long>
-     </object>
-    </void>
-    <void property="name">
-     <string>Example inactive</string>
-    </void>
-    <void id="Integer0" property="alarmRepeatInterval"/>
-    <void property="repeatMultiple">
-     <object idref="Integer0"/>
-    </void>
-   </object>
-  </void>
-  <void method="add">
    <object class="com.sounaks.desktime.TimeBean">
-    <void property="alarmExecutionOutputType">
-     <int>6</int>
-    </void>
     <void property="alarmRepeatInterval">
      <int>1</int>
     </void>
     <void property="alarmTriggerTime">
      <object class="java.util.Date">
-      <long>1707173100000</long>
+      <long>1709779680850</long>
      </object>
     </void>
     <void property="name">
-     <string>Example active</string>
+     <string>test 29</string>
     </void>
     <void property="nextAlarmTriggerTime">
      <object class="java.util.Date">
-      <long>1709391539000</long>
+      <long>1709783459850</long>
      </object>
     </void>
     <void property="repeatMultiple">
-     <int>2</int>
+     <int>3</int>
+    </void>
+    <void property="systemStartTimeBasedAlarm">
+     <boolean>true</boolean>
     </void>
    </object>
   </void>

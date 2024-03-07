@@ -73,7 +73,11 @@ public class TimeBean implements Serializable
 	
 	public Date getNextAlarmTriggerTime()
 	{
-		Date temp, now = new Date();
+		Date temp, now;
+		if (isSystemStartTimeBasedAlarm())
+			temp = now = new Date(ExUtils.getSystemStartTime().getTime() + Math.round(Math.floor(System.nanoTime() / 1000000)));
+		else
+		 	temp = now = new Date();
 		if (alarmTriggerTime.before(now) && alarmRepeatInterval != 0)
 			temp = oneStepPropell(alarmTriggerTime);
 		else
@@ -122,34 +126,34 @@ public class TimeBean implements Serializable
 		this.alarmTriggerTime = alarmTriggerTime;
 	}
 	
-	public Integer getAlarmRepeatInterval()
+	public int getAlarmRepeatInterval()
 	{
-		return alarmRepeatInterval;
+		return alarmRepeatInterval.intValue();
 	}
 
-	public void	setAlarmRepeatInterval(Integer alarmRepeatInterval)
+	public void	setAlarmRepeatInterval(int alarmRepeatInterval)
 	{
-		this.alarmRepeatInterval = alarmRepeatInterval;
+		this.alarmRepeatInterval = new Integer(alarmRepeatInterval);
 	}
 	
-	public Integer getAlarmExecutionOutputType()
+	public int getAlarmExecutionOutputType()
 	{
-		return alarmExecutionOutputType;
+		return alarmExecutionOutputType.intValue();
 	}
 
-	public void	setAlarmExecutionOutputType(Integer alarmExecutionOutputType)
+	public void	setAlarmExecutionOutputType(int alarmExecutionOutputType)
 	{
-		this.alarmExecutionOutputType = alarmExecutionOutputType;
+		this.alarmExecutionOutputType = new Integer(alarmExecutionOutputType);
 	}
 	
-	public Boolean isSystemStartTimeBasedAlarm()
+	public boolean isSystemStartTimeBasedAlarm()
 	{
-		return systemStartTimeBasedAlarm;
+		return systemStartTimeBasedAlarm.booleanValue();
 	}
 	
-	public void setSystemStartTimeBasedAlarm(Boolean systemStartTimeBasedAlarm)
+	public void setSystemStartTimeBasedAlarm(boolean systemStartTimeBasedAlarm)
 	{
-		this.systemStartTimeBasedAlarm = systemStartTimeBasedAlarm;
+		this.systemStartTimeBasedAlarm = new Boolean(systemStartTimeBasedAlarm);
 	}
 	
 	public String getCommand()
@@ -164,16 +168,19 @@ public class TimeBean implements Serializable
 
 	public String toString()
 	{
-		return name + ": " + alarmTriggerTime.toString() + ", " + nextAlarmTriggerTime.toString(); 
+		return name + "|" + alarmTriggerTime.toString() + "|" + nextAlarmTriggerTime.toString() +
+		"|" + repeatMultiple.toString() + "|" + systemStartTimeBasedAlarm.toString() +
+		"|" + alarmRepeatInterval.toString() + "|" + alarmExecutionOutputType.toString() +
+		"|" + command;
 	}
 
-	public Integer getRepeatMultiple()
+	public int getRepeatMultiple()
 	{
-		return repeatMultiple;
+		return repeatMultiple.intValue();
 	}
 
-	public void setRepeatMultiple(Integer repeatMultiple)
+	public void setRepeatMultiple(int repeatMultiple)
 	{
-		this.repeatMultiple = repeatMultiple;
+		this.repeatMultiple = new Integer(repeatMultiple);
 	}
 }
