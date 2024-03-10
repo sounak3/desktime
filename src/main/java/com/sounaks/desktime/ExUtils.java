@@ -3,12 +3,20 @@ package com.sounaks.desktime;
 import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.image.ImageObserver;
+import java.awt.image.BufferedImage;
+import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.awt.geom.*;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 public class ExUtils
 {
@@ -378,6 +386,34 @@ public class ExUtils
 		else
 			formattedTime = formattedTime + " [" + label + "]";
 		return formattedTime;
+	}
+
+	public static File getJarExtractedDirectory(File sourceJar)
+	{
+		File destLocation = new File(System.getProperty("java.io.tmpdir") + "/desktime");
+		Path destDir = destLocation.toPath();
+		try (JarFile jarFile = new JarFile(sourceJar)) {
+			Files.createDirectories(destDir);
+			java.util.List<? extends JarEntry> entries = jarFile.stream()
+														.sorted(Comparator.comparing(JarEntry::getName))
+														.collect(Collectors.toList());
+			for (JarEntry entry : entries) {
+				Path outputFile = destDir.resolve(entry.getName());
+				if (entry.isDirectory()) {
+					// Create directories if it's a directory
+					if (!Files.exists(outputFile)) Files.createDirectory(outputFile);
+					continue;
+				}
+
+				if (!Files.exists(outputFile))
+					Files.copy(jarFile.getInputStream(entry), outputFile);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			destLocation = new File(System.getProperty("user.home"));
+		}
+		System.out.println(destLocation.getAbsolutePath());
+		return destLocation;
 	}
 
 	public String getMetalLookAndFeelName()

@@ -31,18 +31,19 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
         return audioFile;
     }
 
-    public void setAudioFileName(String fileName) throws FileNotFoundException
+    public void setAudioFileName(String fileName)
     {
         File newFile = new File(fileName);
         if (newFile.exists())
         {
             audioFile = fileName;
-            txtFile.setText(fileName);
         }
         else
         {
-            throw new FileNotFoundException(fileName);
+            audioFile = "";
         }
+        txtFile.setText(newFile.getName());
+        txtFile.setEditable(!newFile.exists());
     }
 
     public SoundPlayer(int playSeconds)
@@ -95,12 +96,13 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
         String cmd = e.getActionCommand();
         if (cmd.equals("SEARCH"))
         {
+            fileChooser.setCurrentDirectory(new File(audioFile));
             fileChooser.showOpenDialog(SoundPlayer.this);
             File file = fileChooser.getSelectedFile();
             if (file != null)
             {
                 this.audioFile = file.getAbsolutePath();
-                txtFile.setText(audioFile);
+                txtFile.setText(file.getName());
                 stopPlayer();
             }
         }
@@ -194,8 +196,9 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
         }
     }
 
-    public static Player playAudio(File fileToPlay, int playSec) throws FileNotFoundException, JavaLayerException
+    public static Player playAudio(String filePathString, int playSec) throws FileNotFoundException, JavaLayerException
     {
+        File fileToPlay = new File(filePathString);
         if (fileToPlay.exists())
         {
             FileInputStream fins = new FileInputStream(fileToPlay);

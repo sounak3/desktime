@@ -1,6 +1,9 @@
 package com.sounaks.desktime;
 
 import java.io.File;
+import java.net.URISyntaxException;
+import java.security.CodeSource;
+
 import javax.swing.JList;
 
 class FileList extends JList<File>
@@ -11,11 +14,10 @@ class FileList extends JList<File>
 	{
 		if(file	== null)
 			dir	= new File(System.getProperty("user.home"));
-		else
-		if(file.isDirectory())
-			dir	= file;
-		else
-			dir	= file.getParentFile();
+		else {
+			if (file.isDirectory()) dir = file;
+			else dir = file.getParentFile();
+		}
 		setCellRenderer(new	FileCellRenderer());
 		if(dir.exists())
 		{
@@ -29,25 +31,26 @@ class FileList extends JList<File>
 		return dir;
 	}
 
-	public void	setDirectory(File file)
+	public void	setDirectory(File file) throws URISyntaxException
 	{
-		if(file	== null)
+		if(file	== null) {
 			dir	= new File(System.getProperty("user.home"));
-		else if(file.isDirectory())
-		{
-			if (file.toString().equals("."))
-			{
+		} else if(file.isDirectory()) {
+			if (file.toString().equals(".")) {
 				dir = new File(Thread.currentThread().getContextClassLoader().getResource("images/").getPath());
-			}
-			else
-			{
+				if (!dir.exists()) {
+					CodeSource codeSrc = FileList.class.getProtectionDomain().getCodeSource();
+					File sourceJar = new File(codeSrc.getLocation().toURI());
+					File destDir = ExUtils.getJarExtractedDirectory(sourceJar);
+					dir = new File(destDir, "images");
+				}
+			} else {
 				dir	= file;
 			}
-		}
-		else
+		} else {
 			dir	= file.getParentFile();
-		if(dir.exists())
-		{
+		}
+		if(dir.exists()) {
 			File afile[] = dir.listFiles(new ImageFileFilter());
 			setListData(afile);
 			ensureIndexIsVisible(0);

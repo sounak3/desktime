@@ -31,11 +31,17 @@ public class InitInfo extends Hashtable<Object, Object>
 		put("FIXED", false);
 		put("USING_IMAGE", false);
 		put("GLASS_EFFECT", false);
-		put("IMAGEFILE", ".");
+		put("IMAGEFILE", "./images");
 		put("IMAGE_STYLE", 16);
 		put("ON_TOP", false);
 		put("ROUND_CORNERS", false);
 		put("SLOW_TRANS", false);
+		put("ALARM_SOUND", "");
+		put("HOUR_SOUND", "");
+		put("UPTIME_HOUR_SOUND", "");
+		put("POMO_WORK_SOUND", "");
+		put("POMO_BREAK_SOUND", "");
+		put("POMO_REST_SOUND", "");
 	}
 
 	public Font getFont()
@@ -310,5 +316,65 @@ public class InitInfo extends Hashtable<Object, Object>
 	public void setSlowTransUpdating(boolean slowTrans)
 	{
 		put("SLOW_TRANS", slowTrans);
+	}
+
+	public String getAlarmSound()
+	{
+		return (String)get("ALARM_SOUND");
+	}
+
+	public void setAlarmSound(String alarmSound)
+	{
+		put("ALARM_SOUND", alarmSound);
+	}
+
+	public String getHourSound()
+	{
+		return (String)get("HOUR_SOUND");
+	}
+
+	public void setHourSound(String hourSound)
+	{
+		put("HOUR_SOUND", hourSound);
+	}
+
+	public String getUptimeHourSound()
+	{
+		return (String)get("UPTIME_HOUR_SOUND");
+	}
+
+	public void setUptimeHourSound(String uptimeHrSound)
+	{
+		put("UPTIME_HOUR_SOUND", uptimeHrSound);
+	}
+
+	public String getPomodoroWorkSound()
+	{
+		return (String)get("POMO_WORK_SOUND");
+	}
+
+	public void setPomodoroWorkSound(String pomoWorkSound)
+	{
+		put("POMO_WORK_SOUND", pomoWorkSound);
+	}
+
+	public String getPomodoroBreakSound()
+	{
+		return (String)get("POMO_BREAK_SOUND");
+	}
+
+	public void setPomodoroBreakSound(String pomoBreakSound)
+	{
+		put("POMO_BREAK_SOUND", pomoBreakSound);
+	}
+
+	public String getPomodoroRestSound()
+	{
+		return (String)get("POMO_REST_SOUND");
+	}
+
+	public void setPomodoroRestSound(String pomoRestSound)
+	{
+		put("POMO_REST_SOUND", pomoRestSound);
 	}
 }

@@ -13,6 +13,7 @@ import javax.swing.border.*;
 import javax.swing.event.*;
 import java.beans.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
+import javazoom.jl.player.Player;
 
 public class DeskStop extends JWindow implements MouseInputListener, ActionListener, ComponentListener
 {
@@ -524,8 +525,13 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 
 		public void run()
 		{
-			Calendar gcal  = Calendar.getInstance();
-			Date startTime = ExUtils.getSystemStartTime();
+			Calendar gcal        = Calendar.getInstance();
+			Date     startTime   = ExUtils.getSystemStartTime();
+			String   curLabel    = "";
+			Player   runPlayer   = null;
+			int      soundRunSec = 60;
+			if(pom != null) 
+				curLabel = pom.getRunningLabel();
 			for (Thread thread = Thread.currentThread(); clockThread == thread && timerun;)
 			{
 				String method = info.getDisplayMethod();
@@ -539,10 +545,25 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 						gcal.setTime(startTime);
 						gcal.add(Calendar.SECOND, (int)uptimeNow.getSeconds());
 						date = gcal.getTime();
+						int curMin = Math.round(uptimeNow.getSeconds() % 3600 / 60);
+						int curSec = Math.round(uptimeNow.getSeconds() % 3600 % 60);
+						if (curMin == 0 && curSec == 0)
+						{
+							if (runPlayer != null) SoundPlayer.stopAudio(runPlayer);
+							runPlayer = SoundPlayer.playAudio(info.getUptimeHourSound(), soundRunSec);
+						}
 					}
 					else if (method.equals("GMTTZ") || method.equals("CURTZ"))
 					{
 						time = sd.format(date);
+						gcal.setTime(date);
+						int curMin = gcal.get(Calendar.MINUTE);
+						int curSec = gcal.get(Calendar.SECOND);
+						if (curMin == 0 && curSec == 0)
+						{
+							if (runPlayer != null) SoundPlayer.stopAudio(runPlayer);
+							runPlayer = SoundPlayer.playAudio(info.getHourSound(), soundRunSec);
+						}
 					}
 					else
 					{
@@ -550,6 +571,23 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 						if (pom == null || !lastPomTask.equals(info.getPomodoroTask()) || !lastPomFormat.equals(info.getPomodoroFormat()))
 							pom  = new Pomodoro(info.getPomodoroTask());
 						time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(info.isPomodoroCountdown()), info.getPomodoroFormat(), pom.getRunningLabel(), info.isPomodoroLeadingLabel());
+						if (!curLabel.equals(pom.getRunningLabel())) // compare with stored label as below
+						{
+							if (runPlayer != null) SoundPlayer.stopAudio(runPlayer);
+							if (pom.getRunningLabel().equals(pom.getWorkLabel()))
+							{
+								runPlayer = SoundPlayer.playAudio(info.getPomodoroWorkSound(), soundRunSec);
+							}
+							else if (pom.getRunningLabel().equals(pom.getBreakLabel()))
+							{
+								runPlayer = SoundPlayer.playAudio(info.getPomodoroBreakSound(), soundRunSec);
+							}
+							else if (pom.getRunningLabel().equals(pom.getRestLabel()))
+							{
+								runPlayer = SoundPlayer.playAudio(info.getPomodoroRestSound(), soundRunSec);
+							}
+						}
+						curLabel = pom.getRunningLabel();
 					}
 					tLabel.setText(time);
 					checkTimeAndRunAlarm(date);

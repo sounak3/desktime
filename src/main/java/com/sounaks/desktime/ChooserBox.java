@@ -3,6 +3,7 @@ package com.sounaks.desktime;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.URISyntaxException;
 import java.text.*;
 import java.time.Duration;
 import java.util.*;
@@ -510,10 +511,19 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		useImg.setSelected(initinfo.isUsingImage());
 		useCol.setSelected(!initinfo.isUsingImage());
 		File imgFile = initinfo.getImageFile();
-		fileList.setDirectory(imgFile);
-		int selectIndex = fileList.getNextMatch(imgFile.toString(), 0, Position.Bias.Forward);
+		int selectIndex = -1;
+		try {
+			fileList.setDirectory(imgFile);
+			selectIndex = fileList.getNextMatch(imgFile.toString(), 0, Position.Bias.Forward);
+		} catch (IllegalArgumentException e) {
+			System.out.println("Selected image " + imgFile.toString() + " Not found in list.");
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			System.out.println("Source jar file URL not formatted according to to RFC2396.");
+			e.printStackTrace();
+		}
 		if (selectIndex != -1)
-			fileList.setSelectedValue(initinfo.getImageFile(), true);
+			fileList.setSelectedValue(imgFile, true);
 		else
 			fileList.setSelectedIndex(0);
 		fileList.ensureIndexIsVisible(fileList.getSelectedIndex());
@@ -650,6 +660,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		comboPomFmt.setSelectedItem(initinfo.getPomodoroFormat());
 		data = alarmInit;
 		alarmList.setListData(data);
+		sndHour.setAudioFileName(initinfo.getHourSound());
+		sndUptime.setAudioFileName(initinfo.getUptimeHourSound());
+		sndWork.setAudioFileName(initinfo.getPomodoroWorkSound());
+		sndBrk.setAudioFileName(initinfo.getPomodoroBreakSound());
+		sndRest.setAudioFileName(initinfo.getPomodoroRestSound());
 		setDescriptionText();
 		setOneEnabled();
 	}
@@ -657,13 +672,13 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private final JPanel getToolbarPanel()
 	{
 		JPanel smallPane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		Image defaultPng = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/default.png"))).getImage();
+		Image defaultPng = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/default-icon.png"))).getImage();
 		resetDefs  = new JButton(new ImageIcon(defaultPng.getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
 		resetDefs.setActionCommand("Reset To Defaults");
 		resetDefs.setToolTipText("Reset to default values");
 		resetDefs.setMargin(new Insets(2, 5, 2, 5));
 		resetDefs.addActionListener(this);
-		Image helpPng = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/help.png"))).getImage();
+		Image helpPng = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/help-icon.png"))).getImage();
 		helpFormat  = new JButton(new ImageIcon(helpPng.getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
 		helpFormat.setActionCommand("Help On Format");
 		helpFormat.setToolTipText("Help on date time format characters.");
@@ -966,6 +981,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		information.setFixed(fixPlace.isSelected());
 		information.setRoundCorners(roundBdr.isSelected());
 		information.setNativeLook(nativeLook.isSelected());
+		information.setHourSound(sndHour.getAudioFileName());
+		information.setUptimeHourSound(sndUptime.getAudioFileName());
+		information.setPomodoroWorkSound(sndWork.getAudioFileName());
+		information.setPomodoroBreakSound(sndBrk.getAudioFileName());
+		information.setPomodoroRestSound(sndRest.getAudioFileName());
 		SimpleDateFormat simpledateformat = new SimpleDateFormat();
 		if (selTimeZone.isSelected())
 		{
@@ -1302,8 +1322,13 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			jfilechooser.setFileSelectionMode(1);
 			jfilechooser.setMultiSelectionEnabled(false);
 			int i = jfilechooser.showOpenDialog(this);
-			if (i == 0)
-				fileList.setDirectory(jfilechooser.getSelectedFile());
+			if (i == 0) {
+				try {
+					fileList.setDirectory(jfilechooser.getSelectedFile());
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		else if (comm.equals("Choose Background Color"))
 		{

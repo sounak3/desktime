@@ -27,6 +27,14 @@
    <boolean>true</boolean>
   </void>
   <void method="put">
+   <string>HOUR_SOUND</string>
+   <string>C:\Users\Sounak\Music\sounds\beep-beep-6151.mp3</string>
+  </void>
+  <void method="put">
+   <string>POMODORO_TASK</string>
+   <string>4 sec breath-in, 6 sec hold, 8 sec breath-out</string>
+  </void>
+  <void method="put">
    <string>FOREGROUND</string>
    <object class="java.awt.Color">
     <int>255</int>
@@ -44,6 +52,14 @@
     <null/>
     <null/>
    </object>
+  </void>
+  <void method="put">
+   <string>POMO_BREAK_SOUND</string>
+   <string>C:\Users\Sounak\Music\sounds\bright-phone-ringing-3-152490.mp3</string>
+  </void>
+  <void method="put">
+   <string>UPTIME_HOUR_SOUND</string>
+   <string>C:\Users\Sounak\Music\sounds\ambient-flute-notification-3-185275.mp3</string>
   </void>
   <void method="put">
    <string>BACKGROUND</string>
@@ -65,6 +81,10 @@
   <void method="put">
    <string>DISPLAY_METHOD</string>
    <string>UPTIME</string>
+  </void>
+  <void method="put">
+   <string>POMO_REST_SOUND</string>
+   <string>C:\Users\Sounak\Music\sounds\chiptune-alarm-clock-112869.mp3</string>
   </void>
   <void id="Point0" method="get">
    <string>LOCATION</string>
@@ -90,6 +110,10 @@
   <void method="put">
    <string>UPTIME_FORMAT</string>
    <string>&apos;Up-Time: &apos;DD&apos;-day(s), &apos;HH&apos;-hour(s), &apos;mm&apos;-minute(s), &apos;ss&apos;-second(s)&apos;</string>
+  </void>
+  <void method="put">
+   <string>POMO_WORK_SOUND</string>
+   <string>C:\Users\Sounak\Music\sounds\beep-warning-6387.mp3</string>
   </void>
   <void method="put">
    <string>IMAGEFILE</string>
