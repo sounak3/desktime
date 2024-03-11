@@ -12,7 +12,7 @@ public class TimeBean implements Serializable
 	private Integer alarmRepeatInterval;
 	private Integer repeatMultiple;
 	private Integer alarmExecutionOutputType;
-	private String command;
+	private String soundFilePath;
 	private Boolean systemStartTimeBasedAlarm;
 
 	public TimeBean()
@@ -23,7 +23,7 @@ public class TimeBean implements Serializable
 		this.alarmRepeatInterval       = 0;
 		this.repeatMultiple            = 1;
 		this.alarmExecutionOutputType  = 4;
-		this.command                   = "";
+		this.soundFilePath             = "";
 		this.systemStartTimeBasedAlarm = false;
 	}
 	
@@ -156,14 +156,14 @@ public class TimeBean implements Serializable
 		this.systemStartTimeBasedAlarm = new Boolean(systemStartTimeBasedAlarm);
 	}
 	
-	public String getCommand()
+	public String getAlarmSound()
 	{
-		return command;
+		return soundFilePath;
 	}
 
-	public void	setCommand(String command)
+	public void	setAlarmSound(String soundFilePath)
 	{
-		this.command = command;
+		this.soundFilePath = soundFilePath;
 	}
 
 	public String toString()
@@ -171,7 +171,7 @@ public class TimeBean implements Serializable
 		return name + "|" + alarmTriggerTime.toString() + "|" + nextAlarmTriggerTime.toString() +
 		"|" + repeatMultiple.toString() + "|" + systemStartTimeBasedAlarm.toString() +
 		"|" + alarmRepeatInterval.toString() + "|" + alarmExecutionOutputType.toString() +
-		"|" + command;
+		"|" + soundFilePath;
 	}
 
 	public int getRepeatMultiple()

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <java version="1.8.0_402" class="java.beans.XMLDecoder">
  <object class="com.sounaks.desktime.InitInfo" id="InitInfo0">
-  <void method="put">
+  <void id="Boolean0" method="get">
    <string>ROUND_CORNERS</string>
-   <boolean>true</boolean>
   </void>
   <void method="put">
    <string>POMODORO_LEAD_LABEL</string>
-   <boolean>true</boolean>
+   <object idref="Boolean0"/>
   </void>
   <void method="put">
    <string>TIMEZONE</string>
@@ -21,10 +20,6 @@
     <int>0</int>
     <int>255</int>
    </object>
-  </void>
-  <void method="put">
-   <string>ON_TOP</string>
-   <boolean>true</boolean>
   </void>
   <void method="put">
    <string>HOUR_SOUND</string>
@@ -104,10 +99,6 @@
    </void>
   </void>
   <void method="put">
-   <string>USING_IMAGE</string>
-   <boolean>true</boolean>
-  </void>
-  <void method="put">
    <string>UPTIME_FORMAT</string>
    <string>&apos;Up-Time: &apos;DD&apos;-day(s), &apos;HH&apos;-hour(s), &apos;mm&apos;-minute(s), &apos;ss&apos;-second(s)&apos;</string>
   </void>
@@ -123,16 +114,12 @@
    <string>OPACITY</string>
    <float>0.5</float>
   </void>
-  <void id="Boolean0" method="get">
+  <void id="Boolean1" method="get">
    <string>NATIVE_LOOK</string>
   </void>
   <void method="put">
    <string>POMODORO_COUNTDOWN_MODE</string>
-   <object idref="Boolean0"/>
-  </void>
-  <void method="put">
-   <string>IMAGE_STYLE</string>
-   <int>8</int>
+   <object idref="Boolean1"/>
   </void>
  </object>
 </java>

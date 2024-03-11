@@ -31,21 +31,21 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JLabel transSlide,previewLabel,jLDateFormat,jLPomFormat;
 	private JSlider transLevel;
 	private JCheckBox useImg,useCol,useTrans,slowUpd;
-	private FileList fileList;
+	private ImageFileList fileList;
 	private JButton selectDir,selBackCol,resBackCol;
 	private TLabel picLabel;
 	private JRadioButton rbHtile,rbTile,rbVtile,rbCenter,rbFit,rbStretch;
 	private JList<TimeBean> alarmList;
 	private JLabel jLAlmAbout, jLAlmSame, jLAlmDays, jLAlmHrs;
-	private SoundPlayer sndHour, sndUptime, sndWork, sndBrk, sndRest;
-	private JButton add,remove,edit,test,browse;
+	private SoundPlayer sndHour, sndUptime, sndWork, sndBrk, sndRest, sndToRun;
+	private JButton add,remove,edit,test;
 	private JPanel bottomCards;
 	private JComboBox<String> period, dateOrWeek;
-	private JCheckBox rept,runCom,runMsg,runSnd;
-	private JTextField cmdToRun, alarmName;
+	private JCheckBox rept,runSnd,runMsg;
+	private JTextField alarmName;
 	private JRadioButton optStartOn, optStartAfter;
 	private JSpinner timeSpinner1, timeSpinner2, countSpinner1, countSpinner2;
-	private DateChooser choosefrom;
+	private DateChooser chooseDate;
 	private int opmode   = ChooserBox.ALARM_DISCARD;
 	private int selIndex = -1;
 	private boolean exceptionActive = false;
@@ -232,7 +232,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		buttongroup2.add(useTrans);
 		Component component2 = Box.createHorizontalStrut(12);
 		Component component3 = Box.createVerticalStrut(70);
-		fileList = new FileList(null);
+		fileList = new ImageFileList(null);
 		fileList.setVisibleRowCount(7);
 		fileList.setSelectionMode(0);
 		fileList.setValueIsAdjusting(true);
@@ -308,7 +308,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		ButtonGroup bgr = new ButtonGroup();
 		optStartOn 		= new JRadioButton("Start on");
 		bgr.add(optStartOn);
-		choosefrom   = new DateChooser();
+		chooseDate   = new DateChooser();
 		timeSpinner1 = new JSpinner(new SpinnerDateModel());
 		JSpinner.DateEditor spinModel = new JSpinner.DateEditor(timeSpinner1,"hh:mm a");
 		timeSpinner1.setEditor(spinModel);
@@ -330,12 +330,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		JSpinner.DateEditor dit2 = new JSpinner.DateEditor(timeSpinner2,"HH:mm");
 		timeSpinner2.setEditor(dit2);
 		jLAlmHrs = new JLabel(" hours of system uptime");
-		JLabel jLAlmAct = new JLabel("On Alarm",JLabel.CENTER);
-		runCom        = new JCheckBox("Start Command");
-		runSnd        = new JCheckBox("Just Beep");
-		runMsg        = new JCheckBox("Message");
-		cmdToRun      = new JTextField(10);
-		browse        = new JButton("Browse...");
+		JLabel jLAlmAct = new JLabel(" On Alarm:");
+		runSnd        = new JCheckBox("Play selected sound");
+		runMsg        = new JCheckBox("Show message");
+		sndToRun      = new SoundPlayer(60);
 		bottomCards.add(sndSet, "FinishEdit");
 		bottomCards.add(almSet,  "AddEdit");
 		//For bottom panel of ok/cancel buttons.
@@ -429,11 +427,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(almSet,  nameLabel,		0, 0, 1,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(almSet,  alarmName,		1, 0, 6,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(almSet,  optStartOn,		0, 1, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  choosefrom,		1, 1, 5,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  chooseDate,		1, 1, 5,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(almSet,  timeSpinner1,		6, 1, 1,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(almSet,  optStartAfter,	0, 2, 1,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(almSet,  countSpinner2,	1, 2, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  jLAlmDays,			2, 2, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  jLAlmDays,		2, 2, 1,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(almSet,  timeSpinner2,		3, 2, 2,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(almSet,  jLAlmHrs,			5, 2, 2,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(almSet,  rept,				0, 3, 2,	1, 0.4D, 0.0D, this);
@@ -442,11 +440,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(almSet,  jLAlmSame,		5, 3, 1,	1, 0.2D, 0.0D, this);
 			ExUtils.addComponent(almSet,  dateOrWeek,		6, 3, 1,	1, 0.2D, 0.0D, this);
 			ExUtils.addComponent(almSet,  jLAlmAct,			0, 4, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  runCom,			1, 4, 3,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  runSnd,			4, 4, 2,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  runMsg,			6, 4, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  cmdToRun,			0, 5, 6,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  browse,			6, 5, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  runSnd,			1, 4, 4,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  runMsg,			5, 4, 2,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  sndToRun,			1, 5, 6,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(sndSet,  jlHour,			0, 0, 1,	1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(sndSet,  sndHour,			1, 0, 1,	1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(sndSet,  jlUpt,			0, 1, 1,	1, 0.0D, 0.0D, this);
@@ -510,9 +506,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		selFontCol.setForeground(Math.abs(color.getRGB()) >= 0x800000 ? Color.white : Color.black);
 		useImg.setSelected(initinfo.isUsingImage());
 		useCol.setSelected(!initinfo.isUsingImage());
+
 		File imgFile = initinfo.getImageFile();
 		int selectIndex = -1;
 		try {
+			fileList.setDefaultImagesDir(initinfo.getDefaultsDir() + "/images");
 			fileList.setDirectory(imgFile);
 			selectIndex = fileList.getNextMatch(imgFile.toString(), 0, Position.Bias.Forward);
 		} catch (IllegalArgumentException e) {
@@ -527,6 +525,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		else
 			fileList.setSelectedIndex(0);
 		fileList.ensureIndexIsVisible(fileList.getSelectedIndex());
+
 		useTrans.setSelected(initinfo.hasGlassEffect());
 		slowUpd.setSelected(initinfo.isSlowTransUpdating());
 		if (initinfo.getImageFile().isFile())
@@ -665,6 +664,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		sndWork.setAudioFileName(initinfo.getPomodoroWorkSound());
 		sndBrk.setAudioFileName(initinfo.getPomodoroBreakSound());
 		sndRest.setAudioFileName(initinfo.getPomodoroRestSound());
+		sndToRun.setDefaultSoundsDir(initinfo.getDefaultsDir() + "/sounds");
 		setDescriptionText();
 		setOneEnabled();
 	}
@@ -699,7 +699,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		{
 			TimeBean         tb     = (TimeBean)data.elementAt(alarmList.getSelectedIndex());
 			String           ltext  = "<html>This alarm \"(alarm name)\", is scheduled to start on (start time) and repeat (multi) (interval).<p><p>Its next run will be (next run).<p><p>A (run type) runs at the scheduled time.</html>";
-			SimpleDateFormat tmp1   = choosefrom.getFormat();
+			SimpleDateFormat tmp1   = chooseDate.getFormat();
 			SimpleDateFormat tmp2   = ((JSpinner.DateEditor)timeSpinner1.getEditor()).getFormat();
 			GregorianCalendar ccal  = new GregorianCalendar();
 			String           tmp3[] = {"never", "minute", "hour", "day", "week", "??", "year", "month", "month same weekday"};
@@ -713,7 +713,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ccal.add(Calendar.SECOND, 1);
 			ltext  = ltext.replace("(next run)", tmp4 == 0 ? "never" : "on " + tmp1.format(ccal.getTime()) + " at " + tmp2.format(ccal.getTime()));
 			tmp4   = tb.getAlarmExecutionOutputType();
-			ltext  = ltext.replace("(run type)", ((tmp4 % 2 != 0) ? " command," : "") + (((tmp4 % 3 == 0) || (tmp4 == 2)) ? " sound," : "") + ((tmp4 > 3) ? " message" : ""));
+			ltext  = ltext.replace("(run type)", ((tmp4 % 2 != 0) ? " alarm sound," : "") + (((tmp4 % 3 == 0) || (tmp4 == 2)) ? " system beep," : "") + ((tmp4 > 3) ? " message" : ""));
 			jLAlmAbout.setText(ltext);
 		}
 	}
@@ -768,7 +768,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			jLAlmDays.setEnabled(false);
 			timeSpinner2.setEnabled(false);
 			jLAlmHrs.setEnabled(false);
-			choosefrom.setEnabled(true);
+			chooseDate.setEnabled(true);
 		}
 		else if (optStartAfter.isSelected())
 		{
@@ -777,7 +777,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			jLAlmDays.setEnabled(true);
 			timeSpinner2.setEnabled(true);
 			jLAlmHrs.setEnabled(true);
-			choosefrom.setEnabled(false);
+			chooseDate.setEnabled(false);
 		}
 	}
 
@@ -833,11 +833,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 
 	public Date getSelectedAlarmTime()
 	{
-		Date temp=new Date();
+		Date temp = new Date();
 		if (optStartOn.isSelected())
 		{
-			String           pttn    = choosefrom.getFormat().toPattern() + ((JSpinner.DateEditor)timeSpinner1.getEditor()).getFormat().toPattern();
-			String           maintmp = choosefrom.getFormat().format(choosefrom.getDate())+((JSpinner.DateEditor)timeSpinner1.getEditor()).getTextField().getText();
+			String           pttn    = chooseDate.getFormat().toPattern() + ((JSpinner.DateEditor)timeSpinner1.getEditor()).getFormat().toPattern();
+			String           maintmp = chooseDate.getFormat().format(chooseDate.getDate())+((JSpinner.DateEditor)timeSpinner1.getEditor()).getTextField().getText();
 			SimpleDateFormat sdf     = new SimpleDateFormat(pttn);
 			try
 			{
@@ -875,7 +875,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	{
 		if (optStartOn.isSelected())
 		{
-			choosefrom.setDate(date);
+			chooseDate.setDate(date);
 			timeSpinner1.setValue(date);
 		}
 		else if (optStartAfter.isSelected())
@@ -937,18 +937,17 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	
 	public void selectAlarmExecOutputOption(int type)
 	{
-		runCom.setSelected(type % 2 != 0); //for 1;
+		runSnd.setSelected(type % 2 != 0); //for 1;
 		runMsg.setSelected(type > 3); //for 4;
-		runSnd.setSelected((type % 3 == 0) || (type == 2)); //for 2;
-		cmdToRun.setEnabled(type % 2 != 0);
-		browse.setEnabled(type % 2 != 0);
+		// runBeep.setSelected((type % 3 == 0) || (type == 2)); //for 2;
+		sndToRun.setEnabled(type % 2 != 0);
 	}
 	
 	public int getSelectedAlarmExecOutputOption()
 	{
 		int totaltmp = 0;
-		if  (runCom.isSelected()) totaltmp += 1;
-		if  (runSnd.isSelected()) totaltmp += 2;
+		if  (runSnd.isSelected()) totaltmp += 1;
+		// if  (runBeep.isSelected()) totaltmp += 2;
 		if  (runMsg.isSelected()) totaltmp += 4;
 		return totaltmp;
 	}
@@ -1109,8 +1108,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	{
 		if (alarmName.getText().equals("") || alarmName.getText().equals(null))
 			throw new NullPointerException("Blank name");
-		if ((cmdToRun.getText().equals("") || cmdToRun.getText().equals(null)) && runCom.isSelected())
-			throw new NullPointerException("Blank command");
+		if ((sndToRun.getAudioFileName().isEmpty() && runSnd.isSelected()))
+			throw new NullPointerException("No Audio File");
 		TimeBean tb = new TimeBean();
 		tb.setName(alarmName.getText());
 		tb.setSystemStartTimeBasedAlarm(startAfterTimeIsSelected()); // must be set before setRuntime();
@@ -1119,7 +1118,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		tb.setAlarmRepeatInterval(getSelectedRepeatInterval());
 		tb.setRepeatMultiple(rept.isSelected() ? (int)countSpinner1.getValue() : 0);
 		tb.setAlarmExecutionOutputType(getSelectedAlarmExecOutputOption());
-		tb.setCommand(cmdToRun.getText());
+		tb.setAlarmSound(sndToRun.getAudioFileName());
 		if (opmode == ChooserBox.ALARM_ADD)
 		{
 			data.addElement(tb);
@@ -1389,7 +1388,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 					setSelectedAlarmTime(tb.getAlarmTriggerTime());
 				setSelectedRepeatInterval(tb.getAlarmRepeatInterval(), tb.getRepeatMultiple());
 				selectAlarmExecOutputOption(tb.getAlarmExecutionOutputType());
-				cmdToRun.setText(tb.getCommand());
+				sndToRun.setAudioFileName(tb.getAlarmSound());
 			}
 			else
 			{
@@ -1409,10 +1408,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 					JOptionPane.showMessageDialog(this,"Please enter a brief non-blank alarm name","Empty alarm name",JOptionPane.INFORMATION_MESSAGE);
 					alarmName.grabFocus();
 				}
-				else if (exception.getMessage().equals("Blank command"))
+				else if (exception.getMessage().equals("No Audio File"))
 				{
-					JOptionPane.showMessageDialog(this,"The command to be executed is empty","Empty command",JOptionPane.INFORMATION_MESSAGE);
-					cmdToRun.grabFocus();
+					JOptionPane.showMessageDialog(this,"No audio file selected to play alarm.","No Alarm Sound",JOptionPane.INFORMATION_MESSAGE);
+					sndToRun.grabFocus();
 				}
 			}
 		}
@@ -1438,7 +1437,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			if (selIndex != -1)
 			{
 				TimeBean tb = (TimeBean)data.elementAt(selIndex);
-				ExUtils.runProgram(tb,this);
+				ExUtils.runAlarm(tb, this, 50);
 			}
 		}
 		else if (comm.equals("and repeat every"))
@@ -1446,37 +1445,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			if (rept.isSelected()) period.setSelectedIndex(1);
 			else period.setSelectedIndex(0);
 		}
-		else if (comm.equals("Browse..."))
+		else if (comm.equals("Play selected sound") || comm.equals("Show message"))
 		{
-			JFileChooser fchoose   = new JFileChooser(".");
-			int          chooseOpt = 1;
-			try
-			{
-				chooseOpt=fchoose.showOpenDialog(this);
-				switch(chooseOpt)
-				{
-					case JFileChooser.APPROVE_OPTION:
-					cmdToRun.setText(cmdToRun.getText() + fchoose.getSelectedFile().getPath());
-					break;
-					case JFileChooser.CANCEL_OPTION:
-					//do nothing;
-					break;
-					case JFileChooser.ERROR_OPTION:
-					JOptionPane.showMessageDialog(this,"Error occured while opening the file.","File Error",JOptionPane.ERROR_MESSAGE);
-					break;
-				}
-			}
-			catch (Exception hle)
-			{
-				JOptionPane.showMessageDialog(this, "Error occured while opening the file.", "File Error", JOptionPane.ERROR_MESSAGE);
-			}
-		}
-		else if (comm.equals("Start Command") || comm.equals("Just Beep") || comm.equals("Message"))
-		{
-			if (!runCom.isSelected() && !runSnd.isSelected() && !runMsg.isSelected())
+			if (!runSnd.isSelected() && !runMsg.isSelected())
 				runMsg.setSelected(true);
-			cmdToRun.setEnabled(runCom.isSelected());
-			browse.setEnabled(runCom.isSelected());
+			sndToRun.setEnabled(runSnd.isSelected());
 		}
 		else if (comm.equals("POMODORO_RADIO_BUTTON") || comm.equals("TIME_RADIO_BUTTON") || comm.equals("UPTIME_RADIO_BUTTON"))
 		{

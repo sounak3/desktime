@@ -2,22 +2,37 @@ package com.sounaks.desktime;
 
 import java.awt.*;
 import java.io.*;
+import java.net.URISyntaxException;
+import java.security.CodeSource;
 import java.util.*;
 import javax.swing.BorderFactory;
 import javax.swing.border.*;
 
 public class InitInfo extends Hashtable<Object, Object>
 {
+	File defaultsDir;
+
 	public InitInfo()
 	{
 		super(18,0.6f);
-		put("FONT", new Font("SansSerif", Font.BOLD, 16));
+		try {
+			CodeSource codeSrc = InitInfo.class.getProtectionDomain().getCodeSource();
+			File sourceJar = new File(codeSrc.getLocation().toURI());
+			if (sourceJar.getAbsolutePath().toLowerCase().endsWith(".jar")) {
+				defaultsDir = ExUtils.getJarExtractedDirectory(sourceJar);
+			} else {
+				defaultsDir = new File(sourceJar.getAbsolutePath());
+			}
+		} catch (URISyntaxException ue) {
+			defaultsDir = new File(".");
+		}
+		put("FONT", new Font("Courier New", Font.BOLD, 16));
 		put("BACKGROUND", Color.white);
 		put("OPACITY", 1.0F);
 		put("FOREGROUND", Color.black);
 		put("LINE_COLOR", Color.black);
 		put("BORDER", BorderFactory.createEmptyBorder());
-		put("LOCATION", new Point(0,0));
+		put("LOCATION", new Point(10,10));
 		put("DISPLAY_METHOD", "CURTZ");
 		put("UPTIME_FORMAT", "'Up-Time: 'HH'-hour(s), 'mm'-minute(s), 'ss'-second(s)'");
 		put("POMODORO_FORMAT", "mm:ss");
@@ -29,19 +44,24 @@ public class InitInfo extends Hashtable<Object, Object>
 		put("TOOLTIP", true);
 		put("NATIVE_LOOK", false);
 		put("FIXED", false);
-		put("USING_IMAGE", false);
+		put("USING_IMAGE", true);
 		put("GLASS_EFFECT", false);
-		put("IMAGEFILE", "./images");
-		put("IMAGE_STYLE", 16);
-		put("ON_TOP", false);
-		put("ROUND_CORNERS", false);
+		put("IMAGEFILE", defaultsDir.getAbsolutePath() + "/images/" + "BabyBlue.JPG");
+		put("IMAGE_STYLE", ExUtils.STRETCH);
+		put("ON_TOP", true);
+		put("ROUND_CORNERS", true);
 		put("SLOW_TRANS", false);
-		put("ALARM_SOUND", "");
-		put("HOUR_SOUND", "");
-		put("UPTIME_HOUR_SOUND", "");
-		put("POMO_WORK_SOUND", "");
-		put("POMO_BREAK_SOUND", "");
-		put("POMO_REST_SOUND", "");
+		// put("ALARM_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "Alarm-chosic_com.mp3");
+		put("HOUR_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "beep-beep-6151.mp3");
+		put("UPTIME_HOUR_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "ambient-flute-notification-3-185275.mp3");
+		put("POMO_WORK_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "beep-warning-6387.mp3");
+		put("POMO_BREAK_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "bright-phone-ringing-3-152490.mp3");
+		put("POMO_REST_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "chiptune-alarm-clock-112869.mp3");
+	}
+
+	public String getDefaultsDir()
+	{
+		return defaultsDir.getAbsolutePath();
 	}
 
 	public Font getFont()
@@ -318,15 +338,15 @@ public class InitInfo extends Hashtable<Object, Object>
 		put("SLOW_TRANS", slowTrans);
 	}
 
-	public String getAlarmSound()
-	{
-		return (String)get("ALARM_SOUND");
-	}
+	// public String getAlarmSound()
+	// {
+	// 	return (String)get("ALARM_SOUND");
+	// }
 
-	public void setAlarmSound(String alarmSound)
-	{
-		put("ALARM_SOUND", alarmSound);
-	}
+	// public void setAlarmSound(String alarmSound)
+	// {
+	// 	put("ALARM_SOUND", alarmSound);
+	// }
 
 	public String getHourSound()
 	{

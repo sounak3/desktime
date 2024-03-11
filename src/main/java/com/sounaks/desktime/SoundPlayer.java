@@ -20,6 +20,15 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
     private ImageIcon playIcon, stopIcon, brseIcon;
     public int playSeconds;
     public String audioFile;
+    public String defaultSoundsDir;
+
+    public String getDefaultSoundsDir() {
+        return defaultSoundsDir;
+    }
+
+    public void setDefaultSoundsDir(String defaultSoundsDir) {
+        this.defaultSoundsDir = defaultSoundsDir;
+    }
 
     public int getPlayDurationInSeconds()
     {
@@ -29,6 +38,21 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
     public String getAudioFileName()
     {
         return audioFile;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled)
+    {
+        super.setEnabled(enabled);
+        txtFile.setEnabled(enabled);
+        browser.setEnabled(enabled);
+        play.setEnabled(enabled);
+    }
+
+    @Override
+    public boolean isEnabled()
+    {
+        return txtFile.isEnabled() && browser.isEnabled() && play.isEnabled();
     }
 
     public void setAudioFileName(String fileName)
@@ -96,7 +120,25 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
         String cmd = e.getActionCommand();
         if (cmd.equals("SEARCH"))
         {
-            fileChooser.setCurrentDirectory(new File(audioFile));
+            if (txtFile.isEditable()) {
+                File updatedAudio = new File(txtFile.getText());
+                if (updatedAudio.exists()) {
+                    if (updatedAudio.isDirectory()) {
+                        fileChooser.setCurrentDirectory(updatedAudio);
+                    } else {
+                        if (txtFile.getText().toLowerCase().endsWith(".mp3")) {
+                            setAudioFileName(txtFile.getText());
+                            fileChooser.setCurrentDirectory(new File(audioFile));
+                        } else {
+                            fileChooser.setCurrentDirectory(updatedAudio);
+                        }
+                    }
+                } else {
+                    fileChooser.setCurrentDirectory(new File(defaultSoundsDir));
+                }
+            } else {
+                fileChooser.setCurrentDirectory(new File(audioFile));
+            }
             fileChooser.showOpenDialog(SoundPlayer.this);
             File file = fileChooser.getSelectedFile();
             if (file != null)
@@ -108,7 +150,27 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
         }
         else if (cmd.equals("PLAY_AUDIO_FILE"))
         {
-            File file = new File(audioFile);
+            File file;
+            if (txtFile.isEditable()) {
+                File updatedAudio = new File(txtFile.getText());
+                if (updatedAudio.exists()) {
+                    if (updatedAudio.isDirectory()) {
+                        file = updatedAudio;
+                    } else {
+                        if (txtFile.getText().toLowerCase().endsWith(".mp3")) {
+                            setAudioFileName(txtFile.getText());
+                            file = new File(audioFile);
+                        } else {
+                            file = updatedAudio;
+                        }
+                    }
+                } else {
+                    file = updatedAudio;
+                }
+            } else {
+                file = new File(audioFile);
+            }
+            
             try
             {
                 if (file.exists())

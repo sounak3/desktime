@@ -617,7 +617,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 					Thread newProc = new Thread("DeskTime-Alarm-" + tmpb.getName()) {
 						public void run()
 						{
-							ExUtils.runProgram(tmpb, contentPane);
+							ExUtils.runAlarm(tmpb, contentPane, 50);
 						}
 					};
 					newProc.start();

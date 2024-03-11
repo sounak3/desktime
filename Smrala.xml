@@ -3,21 +3,22 @@
  <object class="java.util.Vector">
   <void method="add">
    <object class="com.sounaks.desktime.TimeBean">
+    <void property="alarmExecutionOutputType">
+     <int>5</int>
+    </void>
     <void property="alarmRepeatInterval">
      <int>1</int>
     </void>
+    <void property="alarmSound">
+     <string>C:\Users\Sounak\AppData\Local\Temp\desktime\sounds\simple-notification-152054.mp3</string>
+    </void>
     <void property="alarmTriggerTime">
      <object class="java.util.Date">
-      <long>1709779680850</long>
+      <long>1709779680726</long>
      </object>
     </void>
     <void property="name">
      <string>test 29</string>
-    </void>
-    <void property="nextAlarmTriggerTime">
-     <object class="java.util.Date">
-      <long>1710102959850</long>
-     </object>
     </void>
     <void property="repeatMultiple">
      <int>3</int>

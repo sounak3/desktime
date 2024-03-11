@@ -2,6 +2,9 @@ package com.sounaks.desktime;
 
 import javax.swing.*;
 import javax.swing.Timer;
+
+import javazoom.jl.decoder.JavaLayerException;
+
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -9,6 +12,7 @@ import java.awt.image.ImageObserver;
 import java.awt.image.BufferedImage;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
@@ -232,41 +236,60 @@ public class ExUtils
 		gc1.get(Calendar.SECOND)      == gc2.get(Calendar.SECOND);
 	}
 	
-	public static void runProgram(TimeBean tmpb, Component parent)
+	public static void showErrorMessage(String messageStr, String errTitle, Component parent, int displaySec) {
+		Dimension   scsize      = Toolkit.getDefaultToolkit().getScreenSize();
+		JOptionPane opt         = new JOptionPane(messageStr,JOptionPane.ERROR_MESSAGE);
+		final       JDialog dlg = opt.createDialog(parent, errTitle);
+		int         errShow     = displaySec * 1000; // 60 sec x 1000 ms
+		Timer       timer       = new Timer(errShow, new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dlg.dispose();
+			}
+		});
+		timer.setRepeats(false);
+		timer.start();
+		dlg.setLocation((scsize.width - dlg.getWidth()) / 2, (scsize.height - dlg.getHeight()) / 2);
+		dlg.setAlwaysOnTop(true);
+		dlg.setModal(false);
+		dlg.setVisible(true);
+	}
+
+	public static void runProgram(String command, Component parent) {
+		Runtime   nativePro = Runtime.getRuntime();
+		try
+		{
+			nativePro.exec(command);
+		}
+		catch(Exception e)
+		{
+			String errStr = "A command was to be run now, but the following error occured\n" + e.getMessage();
+			showErrorMessage(errStr, "Program error", parent, 50);
+		}
+		nativePro.gc();
+	}
+
+	public static void runAlarm(TimeBean tmpb, Component parent, int numSec)
 	{
 		JOptionPane opt;
-		Runtime   nativePro = Runtime.getRuntime();
 		Dimension scsize    = Toolkit.getDefaultToolkit().getScreenSize();
 		String    almStr    = "";
 		int       type      = tmpb.getAlarmExecutionOutputType();
-		int       almShow   = 50 * 1000; // 60 sec x 1000 ms
-		if ((type % 3 == 0) || (type == 2))  //for 2 sound;
+		int       almShow   = numSec * 1000; // 60 sec x 1000 ms
+		if ((type % 3 == 0) || (type == 2))  //for 2 beep;
 		{
 			Toolkit.getDefaultToolkit().beep();
 			System.out.println("\007");
 		}
-		if (type % 2 != 0)  //for 1 to run Command;
+		if (type % 2 != 0)  //for 1 to play sound;
 		{
-			try
-			{
-				nativePro.exec(tmpb.getCommand());
-			}
-			catch(Exception e)
-			{
-				almStr = "A command was to be run now but the following error occured\n"+e.getMessage();
-				opt    = new JOptionPane(almStr,JOptionPane.ERROR_MESSAGE);
-				final JDialog dlg    = opt.createDialog(parent,"Alarm Error...");
-				Timer timer = new Timer(almShow, new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						dlg.dispose();
-					}
-				});
-				timer.setRepeats(false);
-				timer.start();
-				dlg.setLocation((scsize.width - dlg.getWidth()) / 2, (scsize.height - dlg.getHeight()) / 2);
-				dlg.setAlwaysOnTop(true);
-				dlg.setModal(false);
-				dlg.setVisible(true);
+			try {
+				SoundPlayer.playAudio(tmpb.getAlarmSound(), almShow);
+			} catch (FileNotFoundException fe) {
+				almStr = "The alarm sound file is not found:\n" + fe.getMessage();
+				showErrorMessage(almStr, "Alarm Error...", parent, numSec);
+			} catch (JavaLayerException je) {
+				almStr = "Cannot play alarm:\n" + je.getMessage();
+				showErrorMessage(almStr, "Alarm Error...", parent, numSec);
 			}
 		}
 		if (type > 3) //for 4 to show Message;
@@ -275,7 +298,7 @@ public class ExUtils
 			{
 				GregorianCalendar ccal = new GregorianCalendar();
 				ccal.add(Calendar.SECOND, 1);
-				almStr = "<html><font size=+3><i>Alarm! \"" + tmpb.getName() + "\"</i></font><p>This alarm was scheduled to run now: <font color=blue>" + ccal.getTime() + "</font>.</html>";
+				almStr = "<html><font size=+3><i>Alarm! \"" + tmpb.getName() + "\"</i></font><p>This alarm was scheduled to run now: <font color=blue>" + tmpb.getNextAlarmTriggerTime() + "</font>.</html>";
 				opt    = new JOptionPane(almStr,JOptionPane.INFORMATION_MESSAGE,JOptionPane.DEFAULT_OPTION, new ImageIcon("duke.gif"));
 				final JDialog dlg    = opt.createDialog(parent,"Alarm...");
 				Timer timer = new Timer(almShow, new ActionListener() {
@@ -294,7 +317,6 @@ public class ExUtils
 		}
 		almStr = null;
 		opt    = null;
-		nativePro.gc();
 	}
 	
 	public static Date getSystemStartTime()
@@ -412,7 +434,7 @@ public class ExUtils
 			e.printStackTrace();
 			destLocation = new File(System.getProperty("user.home"));
 		}
-		System.out.println(destLocation.getAbsolutePath());
+		// System.out.println(destLocation.getAbsolutePath());
 		return destLocation;
 	}
 
