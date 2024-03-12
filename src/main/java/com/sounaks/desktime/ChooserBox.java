@@ -31,7 +31,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JLabel transSlide,previewLabel,jLDateFormat,jLPomFormat;
 	private JSlider transLevel;
 	private JCheckBox useImg,useCol,useTrans,slowUpd;
-	private ImageFileList fileList;
+	private ImageFileList imgFileList;
 	private JButton selectDir,selBackCol,resBackCol;
 	private TLabel picLabel;
 	private JRadioButton rbHtile,rbTile,rbVtile,rbCenter,rbFit,rbStretch;
@@ -232,13 +232,13 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		buttongroup2.add(useTrans);
 		Component component2 = Box.createHorizontalStrut(12);
 		Component component3 = Box.createVerticalStrut(70);
-		fileList = new ImageFileList(null);
-		fileList.setVisibleRowCount(7);
-		fileList.setSelectionMode(0);
-		fileList.setValueIsAdjusting(true);
-		fileList.addListSelectionListener(this);
+		imgFileList = new ImageFileList(null);
+		imgFileList.setVisibleRowCount(7);
+		imgFileList.setSelectionMode(0);
+		imgFileList.setValueIsAdjusting(true);
+		imgFileList.addListSelectionListener(this);
 		JScrollPane jscrollpane1 = new JScrollPane();
-		jscrollpane1.getViewport().setView(fileList);
+		jscrollpane1.getViewport().setView(imgFileList);
 		Component component4 = Box.createHorizontalStrut(140);
 		selectDir = new JButton("<< Choose Image Directory");
 		picLabel  = new TLabel("No Preview", null, 16);
@@ -274,7 +274,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		alarmList.setCellRenderer(new AlarmListCellRenderer());
 		alarmList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		jsp.setViewportView(alarmList);
-		alarmList.addListSelectionListener(this);
+		alarmList.addMouseListener(new JListDoubleClickAction());
 		add         = new JButton("Add");
 		edit        = new JButton("Edit");
 		remove      = new JButton("Remove");
@@ -282,7 +282,6 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		bottomCards = new JPanel(new CardLayout());
 		jLAlmAbout  = new JLabel("");
 		jLAlmAbout.setBorder(BorderFactory.createEmptyBorder(10, 50, 10, 50));
-		setDescriptionText();
 		JPanel sndSet    = new JPanel(new GridBagLayout());
 		JLabel jlHour    = new JLabel("Hourly sound");
 		JLabel jlUpt     = new JLabel("Uptime Hour sound");
@@ -510,9 +509,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		File imgFile = initinfo.getImageFile();
 		int selectIndex = -1;
 		try {
-			fileList.setDefaultImagesDir(initinfo.getDefaultsDir() + "/images");
-			fileList.setDirectory(imgFile);
-			selectIndex = fileList.getNextMatch(imgFile.toString(), 0, Position.Bias.Forward);
+			imgFileList.setDefaultImagesDir(initinfo.getDefaultsDir() + "/images");
+			imgFileList.setDirectory(imgFile);
+			selectIndex = imgFileList.getNextMatch(imgFile.toString(), 0, Position.Bias.Forward);
 		} catch (IllegalArgumentException e) {
 			System.out.println("Selected image " + imgFile.toString() + " Not found in list.");
 			e.printStackTrace();
@@ -521,10 +520,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			e.printStackTrace();
 		}
 		if (selectIndex != -1)
-			fileList.setSelectedValue(imgFile, true);
+			imgFileList.setSelectedValue(imgFile, true);
 		else
-			fileList.setSelectedIndex(0);
-		fileList.ensureIndexIsVisible(fileList.getSelectedIndex());
+			imgFileList.setSelectedIndex(0);
+		imgFileList.ensureIndexIsVisible(imgFileList.getSelectedIndex());
 
 		useTrans.setSelected(initinfo.hasGlassEffect());
 		slowUpd.setSelected(initinfo.isSlowTransUpdating());
@@ -665,7 +664,6 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		sndBrk.setAudioFileName(initinfo.getPomodoroBreakSound());
 		sndRest.setAudioFileName(initinfo.getPomodoroRestSound());
 		sndToRun.setDefaultSoundsDir(initinfo.getDefaultsDir() + "/sounds");
-		setDescriptionText();
 		setOneEnabled();
 	}
 
@@ -689,11 +687,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		return smallPane;
 	}
 
-	private void setDescriptionText()
+	private String getAlarmDescription()
 	{
 		if (alarmList.getSelectedIndex() == -1)
 		{
-			jLAlmAbout.setText("Click on an alarm list item to view its description.");
+			return "Click on an alarm list item to view its description.";
 		}
 		else
 		{
@@ -714,7 +712,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ltext  = ltext.replace("(next run)", tmp4 == 0 ? "never" : "on " + tmp1.format(ccal.getTime()) + " at " + tmp2.format(ccal.getTime()));
 			tmp4   = tb.getAlarmExecutionOutputType();
 			ltext  = ltext.replace("(run type)", ((tmp4 % 2 != 0) ? " alarm sound," : "") + (((tmp4 % 3 == 0) || (tmp4 == 2)) ? " system beep," : "") + ((tmp4 > 3) ? " message" : ""));
-			jLAlmAbout.setText(ltext);
+			return ltext;
 		}
 	}
 
@@ -937,18 +935,18 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	
 	public void selectAlarmExecOutputOption(int type)
 	{
-		runSnd.setSelected(type % 2 != 0); //for 1;
-		runMsg.setSelected(type > 3); //for 4;
-		// runBeep.setSelected((type % 3 == 0) || (type == 2)); //for 2;
+		runSnd.setSelected(type % 2 != 0); //for 1 (ExUtils.AUDIO_ALARM);
+		runMsg.setSelected(type > 3); //for 4 (ExUtils.MESSAGE_ALARM);
+		// runBeep.setSelected((type % 3 == 0) || (type == 2)); //for 2 (ExUtils.BEEP_ALARM);
 		sndToRun.setEnabled(type % 2 != 0);
 	}
 	
 	public int getSelectedAlarmExecOutputOption()
 	{
 		int totaltmp = 0;
-		if  (runSnd.isSelected()) totaltmp += 1;
-		// if  (runBeep.isSelected()) totaltmp += 2;
-		if  (runMsg.isSelected()) totaltmp += 4;
+		if  (runSnd.isSelected()) totaltmp += ExUtils.AUDIO_ALARM;  // value=1
+		// if  (!runSnd.isSelected()) totaltmp += ExUtils.BEEP_ALARM;  // value=2
+		if  (runMsg.isSelected()) totaltmp += ExUtils.MESSAGE_ALARM;// value=4
 		return totaltmp;
 	}
 
@@ -965,9 +963,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		information.setUsingImage(useImg.isSelected());
 		information.setGlassEffect(useTrans.isSelected());
 		information.setSlowTransUpdating(slowUpd.isSelected());
-		if (!fileList.isSelectionEmpty())
+		if (!imgFileList.isSelectionEmpty())
 		{
-			File testfile=(File)fileList.getSelectedValue();
+			File testfile=(File)imgFileList.getSelectedValue();
 			information.setImageFile(testfile.getAbsolutePath());
 		}
 		information.setImageStyle(picLabel.getImagePosition());
@@ -1171,17 +1169,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		}
 		catch (Exception exception)
 		{
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					ok.doClick();
-					if (selTimeZone.isSelected())
-						comboDateFmt.requestFocus();
-					else if (sysUpTime.isSelected())
-						uSymbol.requestFocus();
-					else if (pomodoroTime.isSelected())
-						comboPomFmt.requestFocus();
-				}
-			});
+			SwingUtilities.invokeLater(new ValidateTimeAid());
 			exceptionActive = true;
 		}
 	}
@@ -1317,13 +1305,13 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		}
 		else if (comm.equals("<< Choose Image Directory"))
 		{
-			JFileChooser jfilechooser = new JFileChooser(fileList.getDirectory());
+			JFileChooser jfilechooser = new JFileChooser(imgFileList.getDirectory());
 			jfilechooser.setFileSelectionMode(1);
 			jfilechooser.setMultiSelectionEnabled(false);
 			int i = jfilechooser.showOpenDialog(this);
 			if (i == 0) {
 				try {
-					fileList.setDirectory(jfilechooser.getSelectedFile());
+					imgFileList.setDirectory(jfilechooser.getSelectedFile());
 				} catch (URISyntaxException e) {
 					e.printStackTrace();
 				}
@@ -1497,22 +1485,18 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	public void valueChanged(ListSelectionEvent listselectionevent)
 	{
 		Object srcList = listselectionevent.getSource();
-		if (srcList.equals(fileList))
+		if (srcList.equals(imgFileList))
 		{
-			if (fileList.isSelectionEmpty())
+			if (imgFileList.isSelectionEmpty())
 			{
 				picLabel.setBackImage(null);
 				picLabel.setText("No Preview");
 			}
 			else
 			{
-				picLabel.setBackImage((new ImageIcon(fileList.getSelectedValue().toString())).getImage());
+				picLabel.setBackImage((new ImageIcon(imgFileList.getSelectedValue().toString())).getImage());
 				picLabel.setText("");
 			}
-		}
-		else if (srcList.equals(alarmList))
-		{
-			setDescriptionText();
 		}
 	}
 
@@ -1521,5 +1505,33 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		String opacityPercent = Math.round((float)transLevel.getValue() / 20 * 100) + " %";
 		transSlide.setText("Opacity [ " + opacityPercent + " ]");
 		transLevel.setToolTipText(opacityPercent);
+	}
+
+	private class ValidateTimeAid implements Runnable {
+		public void run() {
+			ok.doClick();
+			if (selTimeZone.isSelected())
+				comboDateFmt.requestFocus();
+			else if (sysUpTime.isSelected())
+				uSymbol.requestFocus();
+			else if (pomodoroTime.isSelected())
+				comboPomFmt.requestFocus();
+		}
+	}
+
+	protected class JListDoubleClickAction extends MouseAdapter
+	{
+		public void mouseClicked(MouseEvent me)
+		{
+			Object src = me.getSource();
+			if (src.equals(alarmList) && me.getClickCount() >= 2 && me.getButton() == MouseEvent.BUTTON1)
+			{
+				Rectangle dim = alarmList.getCellBounds(0, alarmList.getLastVisibleIndex());
+				if (dim != null && dim.contains(me.getPoint())) {
+					String des = getAlarmDescription();
+					JOptionPane.showMessageDialog(alarmList, des,"Alarm Description",JOptionPane.INFORMATION_MESSAGE);
+				}
+			}
+		}
 	}
 }

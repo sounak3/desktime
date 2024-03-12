@@ -39,16 +39,6 @@
    </object>
   </void>
   <void method="put">
-   <string>BORDER</string>
-   <object class="javax.swing.border.BevelBorder">
-    <int>0</int>
-    <null/>
-    <null/>
-    <null/>
-    <null/>
-   </object>
-  </void>
-  <void method="put">
    <string>POMO_BREAK_SOUND</string>
    <string>C:\Users\Sounak\Music\sounds\bright-phone-ringing-3-152490.mp3</string>
   </void>
@@ -87,14 +77,14 @@
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>697</int>
+     <int>628</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>63</int>
+     <int>99</int>
     </void>
    </void>
   </void>
@@ -108,7 +98,7 @@
   </void>
   <void method="put">
    <string>IMAGEFILE</string>
-   <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\BabyBlue.JPG</string>
+   <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\light-gray-capsule.png</string>
   </void>
   <void method="put">
    <string>OPACITY</string>

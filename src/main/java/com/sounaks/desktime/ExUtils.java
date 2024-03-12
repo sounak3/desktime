@@ -31,6 +31,10 @@ public class ExUtils
 	public static final int FIT     = 16;
 	public static final int TILE    = 32;
 
+	public static final int AUDIO_ALARM   = 1;
+	public static final int BEEP_ALARM    = 2;
+	public static final int MESSAGE_ALARM = 4;
+
 	public static void	addComponent(Container container, Component	component, int i, int j, int k,	int	l, double d, double	d1, ActionListener alistener) throws AWTException
 	{
 		java.awt.LayoutManager layoutmanager = container.getLayout();
