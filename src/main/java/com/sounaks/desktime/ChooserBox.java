@@ -36,7 +36,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private TLabel picLabel;
 	private JRadioButton rbHtile,rbTile,rbVtile,rbCenter,rbFit,rbStretch;
 	private JList<TimeBean> alarmList;
-	private JLabel jLAlmAbout, jLAlmSame, jLAlmDays, jLAlmHrs;
+	private JLabel jLAlmSame, jLAlmDays, jLAlmHrs;
 	private SoundPlayer sndHour, sndUptime, sndWork, sndBrk, sndRest, sndToRun;
 	private JButton add,remove,edit,test;
 	private JPanel bottomCards;
@@ -79,14 +79,14 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		for (int i = 0; i < ai.length; i++)
 			ainteger[i] = new Integer(ai[i]);
 		
-		String as1[] = {"Plain", "Bold", "Italic", "Bold Italic"};
-		String as[]  = graphicsenvironment.getAvailableFontFamilyNames();
-		cFontList         = new ListChooser(as, "Font");
-		cFontStyleList        = new ListChooser(as1, "Style");
-		cFontSizeList         = new ListChooser(ainteger, "Size");
-		selFontCol   = new JButton("Choose Font Color");
-		resFontCol   = new JButton("Reset Font Color");
-		fontPreview  = new TLabel("AaBbCc...0123...!#@%&$");
+		String as1[]   = {"Plain", "Bold", "Italic", "Bold Italic"};
+		String as[]    = graphicsenvironment.getAvailableFontFamilyNames();
+		cFontList      = new ListChooser(as, "Font");
+		cFontStyleList = new ListChooser(as1, "Style");
+		cFontSizeList  = new ListChooser(ainteger, "Size");
+		selFontCol     = new JButton("Choose Font Color", new ButtonIcon(ButtonIcon.RECTANGLE, Color.BLACK));
+		resFontCol     = new JButton("Reset Font Color", new ButtonIcon(ButtonIcon.RECTANGLE, Color.BLACK));
+		fontPreview    = new TLabel("AaBbCc...0123...!#@%&$");
 		fontPreview.setBackground(Color.white);
 		JScrollPane jscrollpane = new JScrollPane();
 		jscrollpane.getViewport().setView(fontPreview);
@@ -110,8 +110,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		buttongroup.add(nBorder);
 		JSeparator jseparator  = new JSeparator();
 		Component component    = Box.createHorizontalStrut(8);
-		selLineCol = new JButton("Line Border Color");
-		resLineCol = new JButton("Reset");
+		selLineCol = new JButton("Line Border Color", new ButtonIcon(ButtonIcon.RECTANGLE, Color.BLACK));
+		resLineCol = new JButton("Reset", new ButtonIcon(ButtonIcon.RECTANGLE, getBackground()));
 		resLineCol.setActionCommand("Default Line Color");
 		JSeparator jseparator1 = new JSeparator();
 		fixPlace   = new JCheckBox("Fix to Place");
@@ -240,7 +240,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		JScrollPane jscrollpane1 = new JScrollPane();
 		jscrollpane1.getViewport().setView(imgFileList);
 		Component component4 = Box.createHorizontalStrut(140);
-		selectDir = new JButton("<< Choose Image Directory");
+		selectDir = new JButton("Choose Image Directory", new ButtonIcon(ButtonIcon.LEFT_ARROW, Color.BLACK));
 		picLabel  = new TLabel("No Preview", null, 16);
 		picLabel.setBorder(BorderFactory.createBevelBorder(1));
 		rbHtile      = new JRadioButton("Tile Vertically");
@@ -256,8 +256,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		buttongroup3.add(rbCenter);
 		buttongroup3.add(rbFit);
 		buttongroup3.add(rbStretch);
-		selBackCol = new JButton("Choose Background Color");
-		resBackCol = new JButton("Default Color");
+		selBackCol = new JButton("Choose Background Color", new ButtonIcon(ButtonIcon.RECTANGLE, Color.BLACK));
+		resBackCol = new JButton("Default Color", new ButtonIcon(ButtonIcon.RECTANGLE, getBackground()));
 		transSlide = new JLabel("Opacity [ Low \u2192 High ]");
 		transLevel = new JSlider(4, 20, 10);
 		transSlide.setLabelFor(transLevel);
@@ -278,10 +278,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		add         = new JButton("Add");
 		edit        = new JButton("Edit");
 		remove      = new JButton("Remove");
-		test        = new JButton("Test >>");
+		test        = new JButton("Test", new ButtonIcon(ButtonIcon.RIGHT_ARROW, Color.BLACK));
 		bottomCards = new JPanel(new CardLayout());
-		jLAlmAbout  = new JLabel("");
-		jLAlmAbout.setBorder(BorderFactory.createEmptyBorder(10, 50, 10, 50));
+		test.setHorizontalTextPosition(SwingConstants.LEADING);
 		JPanel sndSet    = new JPanel(new GridBagLayout());
 		JLabel jlHour    = new JLabel("Hourly sound");
 		JLabel jlUpt     = new JLabel("Uptime Hour sound");
@@ -299,9 +298,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		jlPomBrk.setLabelFor(sndBrk);
 		jlPomRest.setLabelFor(sndRest);
 		sndSet.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Select sounds"));
-		JPanel almSet = new JPanel(new GridBagLayout());
-		JLabel nameLabel    = new JLabel("Alarm Name",JLabel.CENTER);
-		       alarmName    = new JTextField();
+		JPanel almSet    = new JPanel(new GridBagLayout());
+		JLabel nameLabel = new JLabel("Alarm Name",JLabel.CENTER);
+		       alarmName = new JTextField();
 		nameLabel.setLabelFor(alarmName);
 		alarmName.setToolTipText("<html>Please enter a brief description of the alarm such as:<p> &quot;John's Birthday&quot;</html>");
 		ButtonGroup bgr = new ButtonGroup();
@@ -316,15 +315,15 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		String pds[]  = new String[]{"Never", "Minute", "Hour", "Day", "Week", "Month", "Year"};
 		       period = new JComboBox<String>(pds);
 		period.addItemListener(this);
-		jLAlmSame = new JLabel("same");
-		String dow[]  = new String[]{"Date", "Weekday"};
-		dateOrWeek    = new JComboBox<String>(dow);
+		String dow[]      = new String[]{"Date", "Weekday"};
+		       jLAlmSame  = new JLabel("same");
+		       dateOrWeek = new JComboBox<String>(dow);
 		jLAlmSame.setEnabled(false);
 		dateOrWeek.setEnabled(false);
 		optStartAfter = new JRadioButton("Start after");
 		bgr.add(optStartAfter);
 		countSpinner2 = new JSpinner(new SpinnerNumberModel(0, 0, 999, 1));
-		jLAlmDays = new JLabel(" days and");
+		jLAlmDays     = new JLabel(" days and");
 		timeSpinner2             = new JSpinner(new SpinnerDateModel());
 		JSpinner.DateEditor dit2 = new JSpinner.DateEditor(timeSpinner2,"HH:mm");
 		timeSpinner2.setEditor(dit2);
@@ -500,9 +499,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		setSelectedFont(initinfo.getFont());
 		fontPreview.setFont(initinfo.getFont());
 		Color color = initinfo.getForeground();
-		selFontCol.setBackground(color);
+		((ButtonIcon)selFontCol.getIcon()).setEnabledColor(color);
 		fontPreview.setForeground(color);
-		selFontCol.setForeground(Math.abs(color.getRGB()) >= 0x800000 ? Color.white : Color.black);
 		useImg.setSelected(initinfo.isUsingImage());
 		useCol.setSelected(!initinfo.isUsingImage());
 
@@ -570,8 +568,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				break;
 		}
 		color = initinfo.getBackground();
-		selBackCol.setBackground(color);
-		selBackCol.setForeground(Math.abs(color.getRGB()) >= 0x800000 ? Color.white : Color.black);
+		((ButtonIcon)selBackCol.getIcon()).setEnabledColor(color);
 		transLevel.setValue(Math.round(initinfo.getOpacity() * 20));
 		transSlide.setText("Opacity [ " + Math.round(initinfo.getOpacity() * 100) + " % ]");
 		Border border = initinfo.getBorder();
@@ -594,8 +591,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		{
 			lBorder.setSelected(true);
 			Color color1 = ((LineBorder)border).getLineColor();
-			selLineCol.setBackground(color1);
-			selLineCol.setForeground(Math.abs(color1.getRGB()) >= 0x800000 ? Color.white : Color.black);
+			((ButtonIcon)selLineCol.getIcon()).setEnabledColor(color1);
 		}
 		else
 		{
@@ -959,7 +955,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	public InitInfo applySettings() throws Exception
 	{
 		information.setFont(getSelectedFont());
-		information.setForeground(selFontCol.getBackground());
+		information.setForeground(((ButtonIcon)selFontCol.getIcon()).getEnabledColor());
 		information.setUsingImage(useImg.isSelected());
 		information.setGlassEffect(useTrans.isSelected());
 		information.setSlowTransUpdating(slowUpd.isSelected());
@@ -973,7 +969,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		information.setOpacity((float)transLevel.getValue() / 20);
 		information.setBorder(borderPreview.getPreview());
 		if (lBorder.isSelected())
-			information.setLineColor(selLineCol.getBackground());
+			information.setLineColor(((ButtonIcon)selLineCol.getIcon()).getEnabledColor());
 		information.setTooltip(enTooltip.isSelected());
 		information.setFixed(fixPlace.isSelected());
 		information.setRoundCorners(roundBdr.isSelected());
@@ -1187,19 +1183,17 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		}
 		else if (comm.equals("Choose Font Color"))
 		{
-			Color color  = selFontCol.getBackground();
-			Color color3 = JColorChooser.showDialog(new Frame(), "Choose Font Color...", selFontCol.getBackground());
+			Color color  = ((ButtonIcon)selFontCol.getIcon()).getEnabledColor();
+			Color color3 = JColorChooser.showDialog(new Frame(), "Choose Font Color...", color);
 			if (color3 == null)
 				color3 = color;
-			selFontCol.setBackground(color3);
+			((ButtonIcon)selFontCol.getIcon()).setEnabledColor(color3);
 			fontPreview.setForeground(color3);
-			selFontCol.setForeground(Math.abs(color3.getRGB()) >= 0x800000 ? Color.white : Color.black);
 		}
 		else if (comm.equals("Reset Font Color"))
 		{
-			selFontCol.setBackground(Color.black);
-			fontPreview.setForeground(Color.black);
-			selFontCol.setForeground(Math.abs(Color.black.getRGB()) >= 0x800000 ? Color.white : Color.black);
+			((ButtonIcon)selFontCol.getIcon()).setEnabledColor(Color.BLACK);
+			fontPreview.setForeground(Color.BLACK);
 		}
 		else if (comm.equals("Beveled Raised Border"))
 		{
@@ -1224,7 +1218,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		else if (comm.equals("Line Border"))
 		{
 			if (lBorder.isSelected())
-				borderPreview.setPreview(BorderFactory.createLineBorder(selLineCol.getBackground(), 2));
+				borderPreview.setPreview(BorderFactory.createLineBorder(((ButtonIcon)selLineCol.getIcon()).getEnabledColor(), 2));
 		}
 		else if (comm.equals("Don't Use Any Border"))
 		{
@@ -1233,21 +1227,19 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		}
 		else if (comm.equals("Line Border Color"))
 		{
-			Color color1 = selLineCol.getBackground();
-			Color color4 = JColorChooser.showDialog(new Frame(), "Choose Line Color...", selLineCol.getBackground());
+			Color color1 = ((ButtonIcon)selLineCol.getIcon()).getEnabledColor();
+			Color color4 = JColorChooser.showDialog(new Frame(), "Choose Line Color...", color1);
 			if (color4 == null)
 				color4 = color1;
-			selLineCol.setBackground(color4);
-			selLineCol.setForeground(Math.abs(color4.getRGB()) >= 0x800000 ? Color.white : Color.black);
+			((ButtonIcon)selLineCol.getIcon()).setEnabledColor(color4);
 			if (lBorder.isSelected())
-				borderPreview.setPreview(BorderFactory.createLineBorder(selLineCol.getBackground(), 2));
+				borderPreview.setPreview(BorderFactory.createLineBorder(color4, 2));
 		}
 		else if (comm.equals("Default Line Color"))
 		{
-			selLineCol.setBackground(resLineCol.getBackground());
-			selLineCol.setForeground(Math.abs(resLineCol.getBackground().getRGB()) >= 0x800000 ? Color.white : Color.black);
+			((ButtonIcon)selLineCol.getIcon()).setEnabledColor(resLineCol.getBackground());
 			if (lBorder.isSelected())
-				borderPreview.setPreview(BorderFactory.createLineBorder(selLineCol.getBackground(), 2));
+				borderPreview.setPreview(BorderFactory.createLineBorder(resLineCol.getBackground(), 2));
 		}
 		else if (comm.equals("LocalTz"))
 		{
@@ -1303,7 +1295,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			else
 				validateTimeFormat();
 		}
-		else if (comm.equals("<< Choose Image Directory"))
+		else if (comm.equals("Choose Image Directory"))
 		{
 			JFileChooser jfilechooser = new JFileChooser(imgFileList.getDirectory());
 			jfilechooser.setFileSelectionMode(1);
@@ -1323,13 +1315,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			Color color5 = JColorChooser.showDialog(new Frame(), "Choose Background...", selBackCol.getBackground());
 			if (color5 == null)
 				color5 = color2;
-			selBackCol.setBackground(color5);
-			selBackCol.setForeground(Math.abs(color5.getRGB()) >= 0x800000 ? Color.white : Color.black);
+			((ButtonIcon)selBackCol.getIcon()).setEnabledColor(color5);
 		}
 		else if (comm.equals("Default Color"))
 		{
-			selBackCol.setBackground(resBackCol.getBackground());
-			selBackCol.setForeground(Math.abs(resBackCol.getBackground().getRGB()) >= 0x800000 ? Color.white : Color.black);
+			((ButtonIcon)selBackCol.getIcon()).setEnabledColor(resBackCol.getBackground());
 		}
 		else if (comm.equals("Tile Vertically"))
 			picLabel.setImagePosition(TLabel.V_TILE);
@@ -1419,7 +1409,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				alarmList.setSelectedIndex(selIndex);
 			}
 		}
-		else if (comm.equals("Test >>"))
+		else if (comm.equals("Test"))
 		{
 			selIndex = alarmList.getSelectedIndex();
 			if (selIndex != -1)

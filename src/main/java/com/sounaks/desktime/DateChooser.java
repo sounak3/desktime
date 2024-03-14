@@ -19,14 +19,15 @@ public class DateChooser extends JComponent implements ActionListener
 	private Point location;
 	protected boolean showing;
 	protected SimpleDateFormat OWN_FORMAT = new SimpleDateFormat("EEEE',' MMM dd',' yyyy ");
+	private   final ButtonIcon upArrow    = new ButtonIcon(ButtonIcon.UP_ARROW, Color.BLACK);
+	private   final ButtonIcon downArrow  = new ButtonIcon(ButtonIcon.DOWN_ARROW, Color.BLACK);
 	private WindowHandler handler;
 	
 	public DateChooser()
 	{
 		TEXTFIELD = new JFormattedTextField(OWN_FORMAT);
 		TEXTFIELD.setPreferredSize(new Dimension(160, 20));
-		BUTTON= new JButton(new DownArrowIcon());
-		//BUTTON= new JButton("\u25BC");
+		BUTTON= new JButton(downArrow);
 		BUTTON.setActionCommand("POPUP");
 		BUTTON.addActionListener(this);
 		BUTTON.setPreferredSize(new Dimension(20, 20));
@@ -97,6 +98,7 @@ public class DateChooser extends JComponent implements ActionListener
 	{
 		if (show && forPane == null)
 		{
+			BUTTON.setIcon(upArrow);
 			pane.setSelectedDate(getDate());
 			parent  = (JDialog)SwingUtilities.windowForComponent(this);
 			forPane = new JWindow(parent);
@@ -117,6 +119,7 @@ public class DateChooser extends JComponent implements ActionListener
 		{
 			try
 			{
+				BUTTON.setIcon(downArrow);
 				showing = false;
 				forPane.setVisible(false);
 				forPane.dispose();
