@@ -13,6 +13,7 @@ class ListChooser extends JPanel implements ListSelectionListener, KeyListener
 	private	JList<Object> jl;
 	private	JScrollPane	jsp;
 	Object listDataFinal[];
+	private int curPosition;
 
 	public ListChooser(Object aobj[], String s)
 	{
@@ -30,6 +31,7 @@ class ListChooser extends JPanel implements ListSelectionListener, KeyListener
 		add(jtf, "North");
 		add(jsp, "Center");
 		setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), s));
+		curPosition = 0;
 	}
 
 	public void	keyPressed(KeyEvent	keyevent)
@@ -49,6 +51,7 @@ class ListChooser extends JPanel implements ListSelectionListener, KeyListener
 		{
 			if(!listDataFinal[j].toString().toLowerCase().startsWith(jtf.getText().toLowerCase()))
 				continue;
+			curPosition = jtf.getCaretPosition();
 			jl.setSelectedValue(listDataFinal[j], true);
 			break;
 		}
@@ -96,6 +99,10 @@ class ListChooser extends JPanel implements ListSelectionListener, KeyListener
 	{
 		JList<?> jlist	= (JList<?>)listselectionevent.getSource();
 		if(!jlist.isSelectionEmpty())
-			jtf.setText(jlist.getSelectedValue().toString());
+		{
+			String curTextVal = jlist.getSelectedValue().toString();
+			jtf.setText(curTextVal);
+			jtf.select(curPosition, curTextVal.length());
+		}
 	}
 }

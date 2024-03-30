@@ -281,6 +281,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		test        = new JButton("Test", new ButtonIcon(ButtonIcon.RIGHT_ARROW, Color.BLACK));
 		bottomCards = new JPanel(new CardLayout());
 		test.setHorizontalTextPosition(SwingConstants.LEADING);
+		topList.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Alarms List"));
 		JPanel sndSet    = new JPanel(new GridBagLayout());
 		JLabel jlHour    = new JLabel("Hourly sound");
 		JLabel jlUpt     = new JLabel("Uptime Hour sound");
@@ -332,6 +333,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		runSnd        = new JCheckBox("Play selected sound");
 		runMsg        = new JCheckBox("Show message");
 		sndToRun      = new SoundPlayer(60);
+		almSet.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Alarm Details"));
 		bottomCards.add(sndSet, "FinishEdit");
 		bottomCards.add(almSet,  "AddEdit");
 		//For bottom panel of ok/cancel buttons.
@@ -965,7 +967,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			information.setImageFile(testfile.getAbsolutePath());
 		}
 		information.setImageStyle(picLabel.getImagePosition());
-		information.setBackground(selBackCol.getBackground());
+		information.setBackground(((ButtonIcon)selBackCol.getIcon()).getEnabledColor());
 		information.setOpacity((float)transLevel.getValue() / 20);
 		information.setBorder(borderPreview.getPreview());
 		if (lBorder.isSelected())
@@ -1311,8 +1313,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		}
 		else if (comm.equals("Choose Background Color"))
 		{
-			Color color2 = selBackCol.getBackground();
-			Color color5 = JColorChooser.showDialog(new Frame(), "Choose Background...", selBackCol.getBackground());
+			Color color2 = ((ButtonIcon)selBackCol.getIcon()).getEnabledColor();
+			Color color5 = JColorChooser.showDialog(new Frame(), "Choose Background...", color2);
 			if (color5 == null)
 				color5 = color2;
 			((ButtonIcon)selBackCol.getIcon()).setEnabledColor(color5);

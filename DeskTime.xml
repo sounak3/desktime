@@ -33,8 +33,8 @@
    <string>FOREGROUND</string>
    <object class="java.awt.Color">
     <int>255</int>
-    <int>51</int>
-    <int>51</int>
+    <int>0</int>
+    <int>0</int>
     <int>255</int>
    </object>
   </void>
@@ -49,16 +49,16 @@
   <void method="put">
    <string>BACKGROUND</string>
    <object class="java.awt.Color">
-    <int>204</int>
-    <int>153</int>
     <int>255</int>
+    <int>204</int>
+    <int>204</int>
     <int>255</int>
    </object>
   </void>
   <void method="put">
    <string>FONT</string>
    <object class="java.awt.Font">
-    <string>Courier New Bold</string>
+    <string>Courier New</string>
     <int>0</int>
     <int>16</int>
    </object>
@@ -77,16 +77,23 @@
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>661</int>
+     <int>643</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>83</int>
+     <int>53</int>
     </void>
    </void>
+  </void>
+  <void id="Boolean1" method="get">
+   <string>NATIVE_LOOK</string>
+  </void>
+  <void method="put">
+   <string>USING_IMAGE</string>
+   <object idref="Boolean1"/>
   </void>
   <void method="put">
    <string>UPTIME_FORMAT</string>
@@ -99,13 +106,6 @@
   <void method="put">
    <string>IMAGEFILE</string>
    <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\light-gray-capsule.png</string>
-  </void>
-  <void method="put">
-   <string>OPACITY</string>
-   <float>0.5</float>
-  </void>
-  <void id="Boolean1" method="get">
-   <string>NATIVE_LOOK</string>
   </void>
   <void method="put">
    <string>POMODORO_COUNTDOWN_MODE</string>
