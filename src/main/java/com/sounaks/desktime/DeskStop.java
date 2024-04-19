@@ -91,7 +91,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		alm   = new JMenuItem("Set Alarm...");
 		alm.setBackground(Color.white);
 		alm.addActionListener(this);
-		fix1  = new JCheckBoxMenuItem("Fix To Place");
+		fix1  = new JCheckBoxMenuItem("Unmovable");
 		fix1.setBackground(Color.white);
 		fix1.addActionListener(this);
 		mhelp = new JCheckBoxMenuItem("Mouse-Over Help");
@@ -158,7 +158,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			}
 			catch (Exception e)
 			{
-				System.err.println("Can't process robot task due to -");
+				System.err.println("Can't process robot task due to - ");
 				e.printStackTrace();
 				tLabel.setTransparency(false);
 				tLabel.setBackImage(null);
