@@ -32,9 +32,9 @@
   <void method="put">
    <string>FOREGROUND</string>
    <object class="java.awt.Color">
-    <int>255</int>
     <int>0</int>
     <int>0</int>
+    <int>51</int>
     <int>255</int>
    </object>
   </void>
@@ -77,23 +77,16 @@
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>643</int>
+     <int>668</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>53</int>
+     <int>115</int>
     </void>
    </void>
-  </void>
-  <void id="Boolean1" method="get">
-   <string>NATIVE_LOOK</string>
-  </void>
-  <void method="put">
-   <string>USING_IMAGE</string>
-   <object idref="Boolean1"/>
   </void>
   <void method="put">
    <string>UPTIME_FORMAT</string>
@@ -105,11 +98,18 @@
   </void>
   <void method="put">
    <string>IMAGEFILE</string>
-   <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\light-gray-capsule.png</string>
+   <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\blue-glass.png</string>
+  </void>
+  <void id="Boolean1" method="get">
+   <string>NATIVE_LOOK</string>
   </void>
   <void method="put">
    <string>POMODORO_COUNTDOWN_MODE</string>
    <object idref="Boolean1"/>
+  </void>
+  <void method="put">
+   <string>IMAGE_STYLE</string>
+   <int>2</int>
   </void>
  </object>
 </java>

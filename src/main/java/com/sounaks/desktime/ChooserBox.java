@@ -34,7 +34,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private ImageFileList imgFileList;
 	private JButton selectDir,selBackCol,resBackCol;
 	private TLabel picLabel;
-	private JRadioButton rbHtile,rbTile,rbVtile,rbCenter,rbFit,rbStretch;
+	private JComboBox<String> comboTLayout;
 	private JList<TimeBean> alarmList;
 	private JLabel jLAlmSame, jLAlmDays, jLAlmHrs;
 	private SoundPlayer sndHour, sndUptime, sndWork, sndBrk, sndRest, sndToRun;
@@ -114,10 +114,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		resLineCol = new JButton("Reset", new ButtonIcon(ButtonIcon.RECTANGLE, getBackground()));
 		resLineCol.setActionCommand("Default Line Color");
 		JSeparator jseparator1 = new JSeparator();
-		fixPlace   = new JCheckBox("Fix to Place");
+		fixPlace   = new JCheckBox("Unmovable");
 		roundBdr   = new JCheckBox("Round Corners");
 		enTooltip  = new JCheckBox("Mouse-over Time info");
-		nativeLook = new JCheckBox("Check to view this dialog box in system's look and feel");
+		nativeLook = new JCheckBox("Check to view this in system's look and feel");
 		jpanel1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Looks and Borders"));
 		//All configurations for Time Conf. Panel as follows:
 		JPanel    jpanel2      = new JPanel(new GridBagLayout());
@@ -243,19 +243,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		selectDir = new JButton("Choose Image Directory", new ButtonIcon(ButtonIcon.LEFT_ARROW, Color.BLACK));
 		picLabel  = new TLabel("No Preview", null, 16);
 		picLabel.setBorder(BorderFactory.createBevelBorder(1));
-		rbHtile      = new JRadioButton("Tile Vertically");
-		rbVtile      = new JRadioButton("Tile Horizontally");
-		rbTile       = new JRadioButton("Tile");
-		rbStretch    = new JRadioButton("Stretch to Fit");
-		rbFit        = new JRadioButton("Resize to Fit");
-		rbCenter     = new JRadioButton("Center");
-		ButtonGroup buttongroup3 = new ButtonGroup();
-		buttongroup3.add(rbTile);
-		buttongroup3.add(rbHtile);
-		buttongroup3.add(rbVtile);
-		buttongroup3.add(rbCenter);
-		buttongroup3.add(rbFit);
-		buttongroup3.add(rbStretch);
+		JLabel layLabel = new JLabel("Layout");
+		String layouts[] = {"Tile Vertically", "Tile Horizontally", "Tile", "Stretch to Fit", "Resize to Fit", "Center"};
+		comboTLayout = new JComboBox<String>(layouts);
+		layLabel.setLabelFor(comboTLayout);
+		comboTLayout.addItemListener(this);
 		selBackCol = new JButton("Choose Background Color", new ButtonIcon(ButtonIcon.RECTANGLE, Color.BLACK));
 		resBackCol = new JButton("Default Color", new ButtonIcon(ButtonIcon.RECTANGLE, getBackground()));
 		transSlide = new JLabel("Opacity [ Low \u2192 High ]");
@@ -401,17 +393,13 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel2, cbPomLabel,		4, 12, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, useImg, 			0, 0, 4, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, component2, 		0, 1, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, jscrollpane1, 	1, 1, 1, 2, 0.0D, 0.8D, this);
+			ExUtils.addComponent(jpanel3, jscrollpane1, 	1, 1, 1, 3, 0.0D, 0.8D, this);
 			ExUtils.addComponent(jpanel3, selectDir, 		2, 1, 2, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, component3,		0, 2, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, component4,		1, 2, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, picLabel, 		2, 2, 2, 1, 0.0D, 0.8D, this);
-			ExUtils.addComponent(jpanel3, rbTile, 			1, 3, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, rbHtile, 			2, 3, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, rbVtile, 			3, 3, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, rbCenter, 		1, 4, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, rbFit, 			2, 4, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, rbStretch, 		3, 4, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, layLabel, 		2, 3, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, comboTLayout, 	3, 3, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, useCol, 			0, 5, 4, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, selBackCol, 		1, 6, 2, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, resBackCol, 		3, 6, 1, 1, 0.0D, 0.0D, this);
@@ -541,33 +529,20 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		picLabel.setImagePosition(initinfo.getImageStyle());
 		switch (initinfo.getImageStyle())
 		{
-			case 16: // '\020'
-				rbFit.setSelected(true);
-				break;
-	
-			case 4: // '\004'
-				rbCenter.setSelected(true);
-				break;
-	
-			case 32: // ' '
-				rbTile.setSelected(true);
-				break;
-	
-			case 8: // '\b'
-				rbStretch.setSelected(true);
-				break;
-	
-			case 1: // '\001'
-				rbHtile.setSelected(true);
-				break;
-	
-			case 2: // '\002'
-				rbVtile.setSelected(true);
-				break;
-				
+			case TLabel.FIT:
+				comboTLayout.setSelectedItem("Resize to Fit"); break;
+			case TLabel.CENTER:
+				comboTLayout.setSelectedItem("Center"); break;
+			case TLabel.TILE:
+				comboTLayout.setSelectedItem("Tile"); break;
+			case TLabel.STRETCH:
+				comboTLayout.setSelectedItem("Stretch to Fit"); break;
+			case TLabel.V_TILE:
+				comboTLayout.setSelectedItem("Tile Vertically"); break;
+			case TLabel.H_TILE:
+				comboTLayout.setSelectedItem("Tile Horizontally"); break;	
 			default:
-				rbFit.setSelected(true);
-				break;
+				comboTLayout.setSelectedItem("Resize to Fit"); break;
 		}
 		color = initinfo.getBackground();
 		((ButtonIcon)selBackCol.getIcon()).setEnabledColor(color);
@@ -743,12 +718,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			if (nativeLook.isSelected())
 			{
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-				nativeLook.setText("Uncheck to view this dialog box in cross platform look and feel");
+				nativeLook.setText("Uncheck to view this in cross platform look and feel");
 			}
 			else
 			{
 				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-				nativeLook.setText("Check to view this dialog box in system's own look and feel");
+				nativeLook.setText("Check to view this in system's look and feel");
 			}
 			SwingUtilities.updateComponentTreeUI(this);
 		}
@@ -1323,18 +1298,6 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		{
 			((ButtonIcon)selBackCol.getIcon()).setEnabledColor(resBackCol.getBackground());
 		}
-		else if (comm.equals("Tile Vertically"))
-			picLabel.setImagePosition(TLabel.V_TILE);
-		else if (comm.equals("Tile"))
-			picLabel.setImagePosition(TLabel.TILE);
-		else if (comm.equals("Tile Horizontally"))
-			picLabel.setImagePosition(TLabel.H_TILE);
-		else if (comm.equals("Center"))
-			picLabel.setImagePosition(TLabel.CENTER);
-		else if (comm.equals("Resize to Fit"))
-			picLabel.setImagePosition(TLabel.FIT);
-		else if (comm.equals("Stretch to Fit"))
-			picLabel.setImagePosition(TLabel.STRETCH);
 		else if (comm.equals("Transparent background"))
 		{
 			setTransparentBackground();
@@ -1442,7 +1405,27 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	public void itemStateChanged(ItemEvent ie)
 	{
 		Object source = ie.getSource();
-		if (ie.getStateChange() == ItemEvent.SELECTED && source.equals(comboTz))
+		if (ie.getStateChange() == ItemEvent.SELECTED && source.equals(comboTLayout))
+		{
+			String comm = ie.getItem().toString();
+			switch (comm) {
+				case "Tile Vertically":
+					picLabel.setImagePosition(TLabel.V_TILE); break;
+				case "Tile":
+					picLabel.setImagePosition(TLabel.TILE); break;
+				case "Tile Horizontally":
+					picLabel.setImagePosition(TLabel.H_TILE); break;
+				case "Center":
+					picLabel.setImagePosition(TLabel.CENTER); break;
+				case "Resize to Fit":
+					picLabel.setImagePosition(TLabel.FIT); break;
+				case "Stretch to Fit":
+					picLabel.setImagePosition(TLabel.STRETCH); break;
+				default:
+					picLabel.setImagePosition(TLabel.FIT); break;
+			}
+		}
+		else if (ie.getStateChange() == ItemEvent.SELECTED && source.equals(comboTz))
 		{
 			SimpleDateFormat sd = new SimpleDateFormat(information.getZonedTimeFormat());
 			String tzId = comboTz.getItemAt(comboTz.getSelectedIndex());
