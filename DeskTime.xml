@@ -77,14 +77,14 @@
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>668</int>
+     <int>757</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>115</int>
+     <int>95</int>
     </void>
    </void>
   </void>
