@@ -88,13 +88,6 @@
     </void>
    </void>
   </void>
-  <void id="Boolean1" method="get">
-   <string>NATIVE_LOOK</string>
-  </void>
-  <void method="put">
-   <string>USING_IMAGE</string>
-   <object idref="Boolean1"/>
-  </void>
   <void method="put">
    <string>UPTIME_FORMAT</string>
    <string>&apos;Up-Time: &apos;DD&apos;-day(s), &apos;HH&apos;-hour(s), &apos;mm&apos;-minute(s), &apos;ss&apos;-second(s)&apos;</string>
@@ -110,6 +103,9 @@
   <void method="put">
    <string>OPACITY</string>
    <float>0.8</float>
+  </void>
+  <void id="Boolean1" method="get">
+   <string>NATIVE_LOOK</string>
   </void>
   <void method="put">
    <string>POMODORO_COUNTDOWN_MODE</string>

@@ -16,7 +16,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 {
 	private JTabbedPane tabPane;
 	private ListChooser cFontList,cFontStyleList,cFontSizeList;
-	private JButton setFont,resetFont,selFontCol,resFontCol;
+	private JButton resetFont,selFontCol,resFontCol;
 	private TLabel fontPreview;
 	private BorderPreview borderPreview;
 	private JRadioButton bRaised,bLowered,eRaised,eLowered,lBorder;
@@ -71,7 +71,6 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		tabPane     = new JTabbedPane();
 		//All configuration for Font Panel as follows:
 		JPanel  jpanel = new JPanel(new GridBagLayout());
-		setFont    	   = new JButton("Preview Font");
 		resetFont  	   = new JButton("Reset Font");
 		Integer ainteger[] = new Integer[20];
 		int     ai[]       = {6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 
@@ -85,8 +84,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		cFontStyleList = new ListChooser(as1, "Style");
 		cFontSizeList  = new ListChooser(ainteger, "Size");
 		selFontCol     = new JButton("Choose Font Color", new ButtonIcon(ButtonIcon.RECTANGLE, Color.BLACK));
-		resFontCol     = new JButton("Reset Font Color", new ButtonIcon(ButtonIcon.RECTANGLE, Color.BLACK));
+		resFontCol     = new JButton("Reset Color", new ButtonIcon(ButtonIcon.RECTANGLE, Color.BLACK));
 		fontPreview    = new TLabel("AaBbCc...0123...!#@%&$");
+		cFontList.addListSelectionListener(this);
+		cFontStyleList.addListSelectionListener(this);
+		cFontSizeList.addListSelectionListener(this);
 		fontPreview.setBackground(Color.white);
 		JScrollPane jscrollpane = new JScrollPane();
 		jscrollpane.getViewport().setView(fontPreview);
@@ -338,13 +340,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		cancel.setActionCommand("CANCEL");
 		try
 		{
-			ExUtils.addComponent(jpanel,  cFontList, 		0, 0, 1, 1, 0.33D, 0.4D, this);
-			ExUtils.addComponent(jpanel,  cFontStyleList, 	1, 0, 1, 1, 0.33D, 0.4D, this);
-			ExUtils.addComponent(jpanel,  cFontSizeList, 	2, 0, 1, 1, 0.33D, 0.4D, this);
-			ExUtils.addComponent(jpanel,  setFont, 			0, 1, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel,  resetFont, 		1, 1, 2, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel,  cFontList, 		0, 0, 1, 2, 0.33D, 0.4D, this);
+			ExUtils.addComponent(jpanel,  cFontStyleList, 	1, 0, 1, 2, 0.33D, 0.4D, this);
+			ExUtils.addComponent(jpanel,  cFontSizeList, 	2, 0, 1, 2, 0.33D, 0.4D, this);
 			ExUtils.addComponent(jpanel,  selFontCol, 		0, 2, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel,  resFontCol, 		1, 2, 2, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel,  resFontCol, 		1, 2, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel,  resetFont, 		2, 2, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel,  jscrollpane, 		0, 3, 3, 1, 1.0D, 0.6D, this);
 			ExUtils.addComponent(jpanel1, nBorder, 			0, 0, 4, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, bRaised, 			0, 2, 2, 1, 0.5D, 0.0D, this);
@@ -800,7 +801,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		int i;
 		try
 		{
-			i = Integer.parseInt(cFontSizeList.getText());
+			i = Integer.parseInt(cFontSizeList.getText().isEmpty() ? "10" : cFontSizeList.getText());
 		}
 		catch (NumberFormatException numberformatexception)
 		{
@@ -1161,9 +1162,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	{
 		String     comm = actionevent.getActionCommand();
 		CardLayout cl   = (CardLayout)(bottomCards.getLayout());
-		if (comm.equals("Preview Font"))
-			fontPreview.setFont(getSelectedFont());
-		else if (comm.equals("Reset Font"))
+		if (comm.equals("Reset Font"))
 		{
 			fontPreview.setFont((new JLabel()).getFont());
 			setSelectedFont((new JLabel()).getFont());
@@ -1177,7 +1176,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			((ButtonIcon)selFontCol.getIcon()).setEnabledColor(color3);
 			fontPreview.setForeground(color3);
 		}
-		else if (comm.equals("Reset Font Color"))
+		else if (comm.equals("Reset Color"))
 		{
 			((ButtonIcon)selFontCol.getIcon()).setEnabledColor(Color.BLACK);
 			fontPreview.setForeground(Color.BLACK);
@@ -1482,6 +1481,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				picLabel.setBackImage((new ImageIcon(imgFileList.getSelectedValue().toString())).getImage());
 				picLabel.setText("");
 			}
+		}
+		else if (srcList.equals(cFontList) || srcList.equals(cFontStyleList) || srcList.equals(cFontSizeList))
+		{
+			fontPreview.setFont(getSelectedFont());
 		}
 	}
 

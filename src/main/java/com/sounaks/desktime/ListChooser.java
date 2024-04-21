@@ -1,19 +1,25 @@
 package com.sounaks.desktime;
 
 import java.awt.BorderLayout;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-class ListChooser extends JPanel implements ListSelectionListener, KeyListener
+class ListChooser extends JPanel implements ListSelectionListener, KeyListener, FocusListener
 {
 	private	JTextField jtf;
 	private	JList<Object> jl;
 	private	JScrollPane	jsp;
 	Object listDataFinal[];
 	private int curPosition;
+	private List<ListSelectionListener> listeners1;
 
 	public ListChooser(Object aobj[], String s)
 	{
@@ -28,11 +34,18 @@ class ListChooser extends JPanel implements ListSelectionListener, KeyListener
 		jsp.getViewport().setView(jl);
 		jtf	= new JTextField();
 		jtf.addKeyListener(this);
+		jtf.addFocusListener(this);
 		add(jtf, "North");
 		add(jsp, "Center");
 		setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), s));
 		curPosition = 0;
+		listeners1 = new ArrayList<ListSelectionListener>();
 	}
+
+	public void addListSelectionListener(ListSelectionListener toAdd)
+	{
+        listeners1.add(toAdd);
+    }
 
 	public void	keyPressed(KeyEvent	keyevent)
 	{
@@ -103,6 +116,17 @@ class ListChooser extends JPanel implements ListSelectionListener, KeyListener
 			String curTextVal = jlist.getSelectedValue().toString();
 			jtf.setText(curTextVal);
 			jtf.select(curPosition, curTextVal.length());
+			for (ListSelectionListener listener1 : listeners1)
+				listener1.valueChanged(new ListSelectionEvent(this, listselectionevent.getFirstIndex(), listselectionevent.getLastIndex(), listselectionevent.getValueIsAdjusting()));
 		}
+	}
+
+	@Override
+	public void focusGained(FocusEvent e) {
+		jtf.select(0, jtf.getText().length());
+	}
+
+	@Override
+	public void focusLost(FocusEvent e) {
 	}
 }
