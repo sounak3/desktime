@@ -138,7 +138,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		if (screen.contains(savedLocation))
 			setLocation(savedLocation);
 		else
-			setLocation(5, 5);
+			setLocation(10, 10);
 		if (info.isUsingImage())
 		{
 			tLabel.setText(time);
@@ -148,6 +148,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			tLabel.setBackImage((new ImageIcon(info.getImageFile().toString())).getImage());
 			tLabel.setImagePosition(info.getImageStyle());
 			tLabel.setBackground(null);
+			getRootPane().putClientProperty("Window.shadow", Boolean.TRUE);
 		}
 		else if (info.hasGlassEffect())
 		{
@@ -157,6 +158,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 					robot = new Robot();
 				tLabel.setTransparency(true);
 				setOpacity(1.0f);
+				getRootPane().putClientProperty("Window.shadow", Boolean.FALSE);
 			}
 			catch (Exception e)
 			{
@@ -175,6 +177,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			tLabel.setBackImage(null);
 			tLabel.setBackground(info.getBackground());
 			setOpacity(info.getOpacity());
+			getRootPane().putClientProperty("Window.shadow", Boolean.TRUE);
 			stopRefresh();
 		}
 		resizingMethod(time);
@@ -672,7 +675,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			if (info.hasGlassEffect() && refreshNow)
 			{
 				DisplayMode thisDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
-				int refreshRate        = thisDevice.getRefreshRate();
+				int refreshRate        = thisDevice.getRefreshRate() <= 0 ? 60 : thisDevice.getRefreshRate(); // In Mac refresh rate comes as 0.
 				Dimension thisScreen   = Toolkit.getDefaultToolkit().getScreenSize();
 				float scaleRatio = Math.min(thisDevice.getWidth()/(float)thisScreen.getWidth(), thisDevice.getHeight()/(float)thisScreen.getHeight());
 				newBounds = new Rectangle(Math.round(scaleRatio*getX()), Math.round(scaleRatio*getY()), Math.round(scaleRatio*getWidth()), Math.round(scaleRatio*getHeight()));

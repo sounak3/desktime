@@ -19,7 +19,7 @@
     </void>
     <void property="nextAlarmTriggerTime">
      <object class="java.util.Date">
-      <long>1713685139769</long>
+      <long>1713709799769</long>
      </object>
     </void>
     <void property="repeatMultiple">
