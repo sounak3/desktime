@@ -54,19 +54,20 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		contentPane = getContentPane();
 		contentPane.setLayout(new BorderLayout());
 		contentPane.add(tLabel, "Center");
+		pack();
 		setSize(300, 50);
 		setLocation((scsize.width - 200) / 2, (scsize.height - 200) / 2);
 		setVisible(true);
-		info   = loadProperties();
-		alarms = loadAlarms();
 		try
 		{
-			Thread.sleep(500L);
+			Thread.sleep(3000L);
 		} 
 		catch (InterruptedException e1)
 		{
 			e1.printStackTrace();
 		}
+		info   = loadProperties();
+		alarms = loadAlarms();
 		addComponentListener(this);
 		windowLoc    = new Point(0, 0);
 		locX  = (int)info.getLocation().getX();

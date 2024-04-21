@@ -24,7 +24,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JButton selLineCol,resLineCol;
 	private JComboBox<String> comboTz, comboDateFmt, comboPomodoro, comboPomFmt;
 	private JRadioButton selTimeZone,sysUpTime,pomodoroTime;
-	private JLabel jLUptimeTxt, jLHourTxt, jLMinTxt, jLSecTxt, tzLabel;
+	private JLabel layLabel, jLUptimeTxt, jLHourTxt, jLMinTxt, jLSecTxt, tzLabel;
 	private JCheckBox tzCb, cbPomLabel, cbPomCountdown, cbShowDays;
 	private JComboBox<String> dSymbol, uSymbol, hSymbol, mSymbol, sSymbol;
 	private JButton resetDefs,helpFormat;
@@ -241,9 +241,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		jscrollpane1.getViewport().setView(imgFileList);
 		Component component4 = Box.createHorizontalStrut(140);
 		selectDir = new JButton("Choose Image Directory", new ButtonIcon(ButtonIcon.LEFT_ARROW, Color.BLACK));
-		picLabel  = new TLabel("No Preview", null, 16);
+		picLabel  = new TLabel("No Preview", null, TLabel.FIT);
 		picLabel.setBorder(BorderFactory.createBevelBorder(1));
-		JLabel layLabel = new JLabel("Layout");
+		layLabel  = new JLabel("Layout");
 		String layouts[] = {"Tile Vertically", "Tile Horizontally", "Tile", "Stretch to Fit", "Resize to Fit", "Center"};
 		comboTLayout = new JComboBox<String>(layouts);
 		layLabel.setLabelFor(comboTLayout);
@@ -404,7 +404,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel3, selBackCol, 		1, 6, 2, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, resBackCol, 		3, 6, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, transSlide, 		1, 7, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, transLevel, 		2, 7, 3, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, transLevel, 		2, 7, 2, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, useTrans, 		0, 8, 4, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, slowUpd,			1, 9, 7, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(topList, jsp,				0, 0, 1,	5, 1.0D, 1.0D, this);
@@ -450,7 +450,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			awtexception.printStackTrace();
 		}
 
-		tabPane.add("Foreground", jpanel);
+		tabPane.add("Font", jpanel);
 		tabPane.add("Background", jpanel3);
 		tabPane.add("Border & UI", jpanel1);
 		tabPane.add("Time View", jpanel2);
@@ -691,6 +691,16 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 
 	private void setOneEnabled()
 	{
+		imgFileList.setEnabled(useImg.isSelected());
+		selectDir.setEnabled(useImg.isSelected());
+		picLabel.setEnabled(useImg.isSelected());
+		layLabel.setEnabled(useImg.isSelected());
+		comboTLayout.setEnabled(useImg.isSelected());
+		selBackCol.setEnabled(useCol.isSelected());
+		resBackCol.setEnabled(useCol.isSelected());
+		transLevel.setEnabled(useCol.isSelected());
+		transSlide.setEnabled(useCol.isSelected());
+		slowUpd.setEnabled(useTrans.isSelected());
 		comboPomodoro.setEnabled(pomodoroTime.isSelected());
 		jLPomFormat.setEnabled(pomodoroTime.isSelected());
 		comboPomFmt.setEnabled(pomodoroTime.isSelected());

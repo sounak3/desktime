@@ -32,9 +32,9 @@
   <void method="put">
    <string>FOREGROUND</string>
    <object class="java.awt.Color">
+    <int>255</int>
+    <int>102</int>
     <int>0</int>
-    <int>0</int>
-    <int>51</int>
     <int>255</int>
    </object>
   </void>
@@ -58,7 +58,7 @@
   <void method="put">
    <string>FONT</string>
    <object class="java.awt.Font">
-    <string>Courier New</string>
+    <string>Courier New Bold</string>
     <int>0</int>
     <int>16</int>
    </object>
@@ -77,16 +77,23 @@
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>757</int>
+     <int>718</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>95</int>
+     <int>86</int>
     </void>
    </void>
+  </void>
+  <void id="Boolean1" method="get">
+   <string>NATIVE_LOOK</string>
+  </void>
+  <void method="put">
+   <string>USING_IMAGE</string>
+   <object idref="Boolean1"/>
   </void>
   <void method="put">
    <string>UPTIME_FORMAT</string>
@@ -98,10 +105,11 @@
   </void>
   <void method="put">
    <string>IMAGEFILE</string>
-   <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\blue-glass.png</string>
+   <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\cyan-glass.png</string>
   </void>
-  <void id="Boolean1" method="get">
-   <string>NATIVE_LOOK</string>
+  <void method="put">
+   <string>OPACITY</string>
+   <float>0.8</float>
   </void>
   <void method="put">
    <string>POMODORO_COUNTDOWN_MODE</string>

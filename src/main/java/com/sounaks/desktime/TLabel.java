@@ -1,13 +1,14 @@
 package com.sounaks.desktime;
 
 import java.awt.*;
+import java.awt.image.*;
 import javax.swing.*;
 
 public class TLabel extends JLabel
 {
 
 	private Graphics2D g2;
-	private Image image;
+	private Image image, backupImage;
 	private int position;
 	protected boolean hasImage;
 	protected boolean useTrans;
@@ -29,14 +30,12 @@ public class TLabel extends JLabel
 	public TLabel(String s, Image image1)
 	{
 		super(s, 0);
-		if (image1 == null)
-			hasImage = false;
-		else
-		hasImage = true;
-		useTrans = false;
-		image    = image1;
-		position = 8;
-		g2       = (Graphics2D)super.getGraphics();
+		hasImage    = (image1 != null);
+		useTrans    = false;
+		image       = image1;
+		backupImage = image1;
+		position    = TLabel.STRETCH;
+		g2          = (Graphics2D)super.getGraphics();
 		setOpaque(!hasImage);
 		setVerticalAlignment(0);
 		//setDoubleBuffered(true);
@@ -45,17 +44,15 @@ public class TLabel extends JLabel
 	public TLabel(String s, Image image1, int i)
 	{
 		super(s, 0);
-		if (image1 == null)
-			hasImage = false;
-		else
-			hasImage = true;
+		hasImage = (image1 != null);
 		if (i == 4 || i == 2 || i == 1 || i == 8 || i == 16 || i == 32)
 			position = i;
 		else
 			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
-		useTrans = false;
-		image    = image1;
-		g2       = (Graphics2D)super.getGraphics();
+		useTrans    = false;
+		image       = image1;
+		backupImage = image1;
+		g2          = (Graphics2D)super.getGraphics();
 		setOpaque(!hasImage);
 		setVerticalAlignment(0);
 		//setDoubleBuffered(true);
@@ -64,16 +61,14 @@ public class TLabel extends JLabel
 	public TLabel(String s, Image image1, int i, boolean useTrans)
 	{
 		super(s, 0);
-		if (image1 == null)
-			hasImage = false;
-		else
-			hasImage = true;
+		hasImage = (image1 != null);
 		if (i == 4 || i == 2 || i == 1 || i == 8 || i == 16 || i == 32)
 			position = i;
 		else
 			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
 		this.useTrans = useTrans;
 		image         = image1;
+		backupImage   = image1;
 		g2            = (Graphics2D)super.getGraphics();
 		setOpaque(!hasImage);
 		setVerticalAlignment(0);
@@ -113,11 +108,9 @@ public class TLabel extends JLabel
 	
 	public void setBackImage(Image image1)
 	{
-		if (image1 == null)
-			hasImage = false;
-		else
-			hasImage = true;
-		image = image1;
+		hasImage    = (image1 != null);
+		image       = image1;
+		backupImage = image1;
 		setOpaque(!hasImage);
 		repaint();
 	}
@@ -134,6 +127,22 @@ public class TLabel extends JLabel
 	public int getImagePosition()
 	{
 		return position;
+	}
+
+	public void setEnabled(boolean enabled)
+	{
+		super.setEnabled(enabled);
+		if (hasImage)
+			image = enabled ? backupImage : getGrayImage();
+	}
+
+	protected Image getGrayImage()
+	{
+		BufferedImage  curImage  = ExUtils.toBufferedImage(image);
+		BufferedImage  resultImg = new BufferedImage( image.getWidth(this), image.getHeight(this), BufferedImage.TYPE_BYTE_GRAY );
+		ColorConvertOp op        = new ColorConvertOp( curImage.getColorModel().getColorSpace(), resultImg.getColorModel().getColorSpace(), null );
+		op.filter( curImage, resultImg );
+		return resultImg;
 	}
 
 	protected void paintComponent(Graphics g)
@@ -155,10 +164,10 @@ public class TLabel extends JLabel
 			{
 				switch (position)
 				{
-					case 8: // For image Stretch to Fit;
+					case TLabel.STRETCH: // For image Stretch to Fit;
 						g2.drawImage(image, 0, 0, getWidth(), getHeight(), this);
 						break;
-					case 2: // For image Horizontal tiles;
+					case TLabel.H_TILE: // For image Horizontal tiles;
 						if (labelHeight > imgHeight)
 							newWH = new Dimension((int)Math.ceil((double)imgWidth * aspectHeight), (int)Math.ceil((double)imgHeight * aspectHeight));
 						else
@@ -174,7 +183,7 @@ public class TLabel extends JLabel
 								g2.drawImage(image, i * newWH.width, 0, newWH.width, newWH.height, this);
 						}
 						break;
-					case 1: // For image Vertical tiles;
+					case TLabel.V_TILE: // For image Vertical tiles;
 						if (labelWidth > imgWidth)
 							newWH = new Dimension((int)Math.ceil((double)imgWidth * aspectWidth), (int)Math.ceil((double)imgHeight * aspectWidth));
 						else
@@ -190,7 +199,7 @@ public class TLabel extends JLabel
 								g2.drawImage(image, 0, j * newWH.height, newWH.width, newWH.height, this);
 						}
 						break;
-					case 4: // For image Center
+					case TLabel.CENTER: // For image Center
 						if (imgWidth > labelWidth && imgHeight > labelHeight)
 							g2.drawImage(image, 0, 0, 0 + labelWidth, 0 + labelHeight, (imgWidth - labelWidth) / 2, (imgHeight - labelHeight) / 2, (imgWidth - labelWidth) / 2 + labelWidth, (imgHeight - labelHeight) / 2 + labelHeight, this);
 						else if (imgWidth > labelWidth && imgHeight <= labelHeight)
@@ -200,7 +209,7 @@ public class TLabel extends JLabel
 						else if (imgWidth < labelWidth && imgHeight < labelHeight)
 							g2.drawImage(image, (labelWidth - imgWidth) / 2, (labelHeight - imgHeight) / 2, imgWidth, imgHeight, this);
 						break;
-					case 16: // For image Resize to Fit
+					case TLabel.FIT: // For image Resize to Fit
 						if (imgWidth > labelWidth && imgHeight > labelHeight)
 							g2.drawImage(image, 0, 0, labelWidth, labelHeight, this);
 						else if (imgWidth > labelWidth && imgHeight <= labelHeight)
@@ -210,7 +219,7 @@ public class TLabel extends JLabel
 						else if (imgWidth < labelWidth && imgHeight < labelHeight)
 							g2.drawImage(image, (labelWidth - imgWidth) / 2, (labelHeight - imgHeight) / 2, imgWidth, imgHeight, this);
 						break;
-					case 32: // For image Tile
+					case TLabel.TILE: // For image Tile
 						int k = (int)Math.ceil((double)labelWidth / (double)imgWidth);
 						int l = (int)Math.ceil((double)labelHeight / (double)imgHeight);
 						for (int i1 = 0; i1 < l; i1++)
