@@ -29,7 +29,8 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	private Vector <TimeBean>alarms;
 	private JPopupMenu pMenu;
 	private JMenuItem fore,back,tim,alm,bdr,exit,about;
-	private JCheckBoxMenuItem fix1,mhelp,ontop;
+	private JCheckBoxMenuItem fix1,ontop;
+	private PointerInfo pi;
 	private Point windowLoc;
 	private Dimension scsize;
 	protected Robot robot;
@@ -96,9 +97,6 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		fix1  = new JCheckBoxMenuItem("Unmovable");
 		fix1.setBackground(Color.white);
 		fix1.addActionListener(this);
-		mhelp = new JCheckBoxMenuItem("Mouse-Over Help");
-		mhelp.setBackground(Color.white);
-		mhelp.addActionListener(this);
 		ontop = new JCheckBoxMenuItem("Always on top");
 		ontop.setBackground(Color.white);
 		ontop.addActionListener(this);
@@ -116,7 +114,6 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		pMenu.addSeparator();
 		pMenu.add(fix1);
 		pMenu.add(ontop);
-		pMenu.add(mhelp);
 		pMenu.addSeparator();
 		pMenu.add(about);
 		pMenu.add(exit);
@@ -184,7 +181,6 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		setRoundedCorners(info.hasRoundedCorners());
 		fix1.setSelected(info.isFixed());
 		ontop.setSelected(info.getOnTop());
-		mhelp.setSelected(info.hasTooltip());
 		lastPomTask = info.getPomodoroTask();
 		lastPomFormat = info.getPomodoroFormat();
 		timeDisplayConfig();
@@ -398,12 +394,6 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			saveProperties(info);
 			setAlwaysOnTop(info.getOnTop());
 		}
-		else if (obj.equals(mhelp))
-		{
-			info.setTooltip(mhelp.isSelected());
-			saveProperties(info);
-			timeDisplayConfig();
-		}
 		else if (obj.equals(about))
 		{
 			String    s1        = "<html>Created and Developed by : Sounak Choudhury<p>E-mail Address : <a href='mailto:sounak_s@rediffmail.com'>sounak_s@rediffmail.com</a><p>The software, information and documentation<p>is provided \"AS IS\" without warranty of any<p>kind, either express or implied. The Readme.txt<p>file containing EULA must be read before use.<p>Suggestions and credits are Welcomed.</html>";
@@ -456,10 +446,13 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	{
 		if (!SwingUtilities.isRightMouseButton(mouseevent))
 		{
-			cursorX = mouseevent.getX();
-			cursorY = mouseevent.getY();
-			cursorW = getWidth() - mouseevent.getX();
-			cursorH = getHeight() - mouseevent.getY();
+			pi = MouseInfo.getPointerInfo();
+			Point currPoint = pi.getLocation();
+			SwingUtilities.convertPointFromScreen(currPoint, this);
+			cursorX = ((int)currPoint.getX());
+			cursorY = ((int)currPoint.getY());
+			cursorW = getWidth() - ((int)currPoint.getX());
+			cursorH = getHeight() - ((int)currPoint.getY());
 			// As sometimes unremoved listenenrs cause buggy movement.
 			for (MouseMotionListener mListener : tLabel.getMouseMotionListeners()) {
 				if (!(mListener instanceof ToolTipManager))
@@ -474,8 +467,10 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	{
 		if (!SwingUtilities.isRightMouseButton(mouseevent))
 		{
-			if (!info.isFixed())
-				tLabel.removeMouseMotionListener(this);
+			for (MouseMotionListener mListener : tLabel.getMouseMotionListeners()) {
+				if (!(mListener instanceof ToolTipManager) && !info.isFixed())
+					tLabel.removeMouseMotionListener(mListener);
+			}
 			Point newLocation = getLocation();
 			cursorX = 0;
 			cursorY = 0;
@@ -494,8 +489,8 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 
 	public void mouseDragged(MouseEvent mouseevent)
 	{
-		windowLoc.setLocation(mouseevent.getPoint());
-		SwingUtilities.convertPointToScreen(windowLoc, this);
+		pi = MouseInfo.getPointerInfo();
+		windowLoc = pi.getLocation();
 		if (Math.abs(windowLoc.getX()) <= (double)scsize.width && Math.abs(windowLoc.getY()) <= (double)scsize.height)
 		{
 			locX = (int)windowLoc.getX() - cursorX;
