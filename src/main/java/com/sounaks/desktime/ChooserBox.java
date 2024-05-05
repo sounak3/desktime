@@ -278,10 +278,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		topList.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Alarms List"));
 		JPanel sndSet    = new JPanel(new GridBagLayout());
 		JLabel jlHour    = new JLabel("Hourly sound");
-		JLabel jlUpt     = new JLabel("Uptime Hour sound");
-		JLabel jlPomWork = new JLabel("Pomodoro Work sound");
-		JLabel jlPomBrk  = new JLabel("Pomodoro Break sound");
-		JLabel jlPomRest = new JLabel("Pomodoro Rest sound");
+		JLabel jlUpt     = new JLabel("Uptime Hour");
+		JLabel jlPomWork = new JLabel("Pomodoro Work");
+		JLabel jlPomBrk  = new JLabel("Pomodoro Break");
+		JLabel jlPomRest = new JLabel("Pomodoro Rest");
 		sndHour   = new SoundPlayer(15);
 		sndUptime = new SoundPlayer(15);
 		sndWork   = new SoundPlayer(15);

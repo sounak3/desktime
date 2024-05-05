@@ -64,6 +64,10 @@
    </object>
   </void>
   <void method="put">
+   <string>GLASS_EFFECT</string>
+   <object idref="Boolean0"/>
+  </void>
+  <void method="put">
    <string>DISPLAY_METHOD</string>
    <string>UPTIME</string>
   </void>
@@ -77,16 +81,23 @@
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>722</int>
+     <int>746</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>120</int>
+     <int>131</int>
     </void>
    </void>
+  </void>
+  <void id="Boolean1" method="get">
+   <string>NATIVE_LOOK</string>
+  </void>
+  <void method="put">
+   <string>USING_IMAGE</string>
+   <object idref="Boolean1"/>
   </void>
   <void method="put">
    <string>UPTIME_FORMAT</string>
@@ -103,9 +114,6 @@
   <void method="put">
    <string>OPACITY</string>
    <float>0.8</float>
-  </void>
-  <void id="Boolean1" method="get">
-   <string>NATIVE_LOOK</string>
   </void>
   <void method="put">
    <string>POMODORO_COUNTDOWN_MODE</string>
