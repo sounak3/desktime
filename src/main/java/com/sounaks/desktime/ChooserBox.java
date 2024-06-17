@@ -76,7 +76,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		int     ai[]       = {6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 
 								24, 28, 32, 36, 40, 48, 56, 64, 72, 80};
 		for (int i = 0; i < ai.length; i++)
-			ainteger[i] = new Integer(ai[i]);
+			ainteger[i] = Integer.valueOf(ai[i]);
 		
 		String as1[]   = {"Plain", "Bold", "Italic", "Bold Italic"};
 		String as[]    = graphicsenvironment.getAvailableFontFamilyNames();
@@ -110,12 +110,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		buttongroup.add(eLowered);
 		buttongroup.add(lBorder);
 		buttongroup.add(nBorder);
-		JSeparator jseparator  = new JSeparator();
+		JSeparator jseparator1  = new JSeparator();
 		Component component    = Box.createHorizontalStrut(8);
 		selLineCol = new JButton("Line Border Color", new ButtonIcon(ButtonIcon.RECTANGLE, Color.BLACK));
 		resLineCol = new JButton("Reset", new ButtonIcon(ButtonIcon.RECTANGLE, getBackground()));
 		resLineCol.setActionCommand("Default Line Color");
-		JSeparator jseparator1 = new JSeparator();
+		JSeparator jseparator2 = new JSeparator();
 		fixPlace   = new JCheckBox("Unmovable");
 		roundBdr   = new JCheckBox("Round Corners");
 		enTooltip  = new JCheckBox("Mouse-over Time info");
@@ -228,6 +228,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		useTrans.setActionCommand("Transparent background");
 		slowUpd  = new JCheckBox("<html>Reduce flicker (slower transparent background updates)</html>");
 		slowUpd.setActionCommand("Reduce flicker");
+		JSeparator jSeparator5 = new JSeparator();
 		ButtonGroup buttongroup2 = new ButtonGroup();
 		buttongroup2.add(useImg);
 		buttongroup2.add(useCol);
@@ -353,12 +354,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel1, bLowered, 		0, 3, 2, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, eRaised, 			0, 4, 2, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, eLowered, 		0, 5, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, jseparator, 		0, 6, 5, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, jseparator1, 		0, 6, 5, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, lBorder, 			0, 7, 2, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, component, 		0, 8, 1, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, selLineCol, 		1, 8, 1, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, resLineCol, 		2, 8, 1, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, jseparator1, 		0, 9, 5, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, jseparator2, 		0, 9, 5, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, enTooltip, 		0, 10, 2, 1, 0.33D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, fixPlace, 		2, 10, 1, 1, 0.33D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, roundBdr, 		3, 10, 2, 1, 0.33D, 0.0D, this);
@@ -406,8 +407,15 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel3, resBackCol, 		3, 6, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, transSlide, 		1, 7, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, transLevel, 		2, 7, 2, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, useTrans, 		0, 8, 4, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, slowUpd,			1, 9, 7, 1, 1.0D, 0.0D, this);
+			if (!initinfo.isPixelAlphaSupported() && initinfo.isScreenshotSupported())
+			{
+				ExUtils.addComponent(jpanel3, useTrans, 		0, 8, 4, 1, 1.0D, 0.0D, this);
+				ExUtils.addComponent(jpanel3, slowUpd,			1, 9, 7, 1, 1.0D, 0.0D, this);
+			}
+			else
+			{
+				ExUtils.addComponent(jpanel3, jSeparator5, 		0, 4, 4, 1, 1.0D, 0.0D, this);
+			}
 			ExUtils.addComponent(topList, jsp,				0, 0, 1,	5, 1.0D, 1.0D, this);
 			ExUtils.addComponent(topList, add,				1, 0, 1,	1, 0.0D, 0.25D, this);
 			ExUtils.addComponent(topList, edit,				1, 1, 1,	1, 0.0D, 0.25D, this);
@@ -547,6 +555,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		}
 		color = initinfo.getBackground();
 		((ButtonIcon)selBackCol.getIcon()).setEnabledColor(color);
+		transLevel.setMinimum(initinfo.isPixelAlphaSupported() ? 0 : 4);
 		transLevel.setValue(Math.round(initinfo.getOpacity() * 20));
 		transSlide.setText("Opacity [ " + Math.round(initinfo.getOpacity() * 100) + " % ]");
 		Border border = initinfo.getBorder();
@@ -699,8 +708,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		comboTLayout.setEnabled(useImg.isSelected());
 		selBackCol.setEnabled(useCol.isSelected());
 		resBackCol.setEnabled(useCol.isSelected());
-		transLevel.setEnabled(useCol.isSelected());
-		transSlide.setEnabled(useCol.isSelected());
+		transLevel.setEnabled(useCol.isSelected() && (information.isWindowAlphaSupported() || information.isPixelAlphaSupported()));
+		transSlide.setEnabled(useCol.isSelected() && (information.isWindowAlphaSupported() || information.isPixelAlphaSupported()));
 		slowUpd.setEnabled(useTrans.isSelected());
 		comboPomodoro.setEnabled(pomodoroTime.isSelected());
 		jLPomFormat.setEnabled(pomodoroTime.isSelected());
@@ -779,7 +788,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		if (font1 == null)
 			throw new NullPointerException("The Font Parameter Is Blank.");
 		String  s       = font1.getFamily();
-		Integer integer = new Integer(font1.getSize());
+		Integer integer = Integer.valueOf(font1.getSize());
 		int     i       = font1.getStyle();
 		if (ExUtils.contains(font1.getFontName(), "bold", true))
 			i = 1;
@@ -1067,7 +1076,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	
 	private void setTransparentBackground()
 	{
-		if (useTrans.isSelected() && ExUtils.checkAWTPermission("createRobot") && ExUtils.checkAWTPermission("readDisplayPixels"))
+		if (useTrans.isSelected())
 		{
 			useTrans.setSelected(true);
 		}

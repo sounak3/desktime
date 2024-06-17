@@ -11,6 +11,7 @@ import javax.swing.border.*;
 public class InitInfo extends Hashtable<Object, Object>
 {
 	File defaultsDir;
+	boolean pixelAlphaSupport, windowAlphaSupport, screenshotSupport;
 
 	public InitInfo()
 	{
@@ -57,6 +58,36 @@ public class InitInfo extends Hashtable<Object, Object>
 		put("POMO_WORK_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "beep-warning-6387.mp3");
 		put("POMO_BREAK_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "bright-phone-ringing-3-152490.mp3");
 		put("POMO_REST_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "chiptune-alarm-clock-112869.mp3");
+	}
+
+	public boolean isPixelAlphaSupported()
+	{
+		return pixelAlphaSupport;
+	}
+
+	public void setPixelAlphaSupport(boolean pixelAlphaSupport)
+	{
+		this.pixelAlphaSupport = pixelAlphaSupport;
+	}
+
+	public boolean isWindowAlphaSupported()
+	{
+		return windowAlphaSupport;
+	}
+
+	public void setWindowAlphaSupport(boolean windowAlphaSupport)
+	{
+		this.windowAlphaSupport = windowAlphaSupport;
+	}
+
+	public boolean isScreenshotSupported()
+	{
+		return screenshotSupport;
+	}
+
+	public void setScreenshotSupport(boolean screenshotSupport)
+	{
+		this.screenshotSupport = screenshotSupport;
 	}
 
 	public String getDefaultsDir()
