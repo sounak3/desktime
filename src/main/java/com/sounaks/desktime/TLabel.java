@@ -11,7 +11,7 @@ public class TLabel extends JLabel
 	private Image image, backupImage;
 	private int position;
 	protected boolean hasImage;
-	protected boolean useTrans;
+	protected boolean forceTrans;
 	public static final int V_TILE  = 1;
 	public static final int H_TILE  = 2;
 	public static final int CENTER  = 4;
@@ -31,14 +31,13 @@ public class TLabel extends JLabel
 	{
 		super(s, 0);
 		hasImage    = (image1 != null);
-		useTrans    = false;
+		forceTrans  = false;
 		image       = image1;
 		backupImage = image1;
 		position    = TLabel.STRETCH;
 		g2          = (Graphics2D)super.getGraphics();
-		setOpaque(!hasImage);
+		setOpaque(false);
 		setVerticalAlignment(0);
-		//setDoubleBuffered(true);
 	}
 
 	public TLabel(String s, Image image1, int i)
@@ -49,16 +48,15 @@ public class TLabel extends JLabel
 			position = i;
 		else
 			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
-		useTrans    = false;
+		forceTrans  = false;
 		image       = image1;
 		backupImage = image1;
 		g2          = (Graphics2D)super.getGraphics();
-		setOpaque(!hasImage);
+		setOpaque(false);
 		setVerticalAlignment(0);
-		//setDoubleBuffered(true);
 	}
 
-	public TLabel(String s, Image image1, int i, boolean useTrans)
+	public TLabel(String s, Image image1, int i, boolean forceTrans)
 	{
 		super(s, 0);
 		hasImage = (image1 != null);
@@ -66,24 +64,22 @@ public class TLabel extends JLabel
 			position = i;
 		else
 			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
-		this.useTrans = useTrans;
-		image         = image1;
-		backupImage   = image1;
-		g2            = (Graphics2D)super.getGraphics();
-		setOpaque(!hasImage);
+		this.forceTrans = forceTrans;
+		image           = image1;
+		backupImage     = image1;
+		g2              = (Graphics2D)super.getGraphics();
+		setOpaque(false);
 		setVerticalAlignment(0);
-		//setDoubleBuffered(true);
 	}
 
 	public TLabel(String s)
 	{
 		super(s, 0);
-		hasImage = false;
-		useTrans = false;
-		g2       = (Graphics2D)super.getGraphics();
-		setOpaque(!hasImage);
+		hasImage        = false;
+		this.forceTrans = false;
+		g2              = (Graphics2D)super.getGraphics();
+		setOpaque(false);
 		setVerticalAlignment(0);
-		//setDoubleBuffered(true);
 	}
 
 	public boolean containsImage()
@@ -91,14 +87,14 @@ public class TLabel extends JLabel
 		return hasImage;
 	}
 	
-	public boolean isTransparent()
+	public boolean isForcedTransparent()
 	{
-		return useTrans;
+		return forceTrans;
 	}
 	
-	public void setTransparency(boolean trans)
+	public void setTransparency(boolean forceTrans)
 	{
-		useTrans = trans;
+		this.forceTrans = forceTrans;
 	}
 
 	public Image getBackImage()
@@ -111,7 +107,7 @@ public class TLabel extends JLabel
 		hasImage    = (image1 != null);
 		image       = image1;
 		backupImage = image1;
-		setOpaque(!hasImage);
+		setOpaque(false);
 		repaint();
 	}
 
@@ -160,7 +156,11 @@ public class TLabel extends JLabel
 			aspectHeight = (double)Math.max(labelHeight, imgHeight) / (double)Math.min(labelHeight, imgHeight);
 			Point pp     = getLocation();
 			SwingUtilities.convertPointToScreen(pp,this);
-			if (!useTrans)
+			if (forceTrans) // For desktop background based image on window position (Transparent effect)
+			{
+				g2.drawImage(image, 0, 0, this);
+			}
+			else
 			{
 				switch (position)
 				{
@@ -229,10 +229,6 @@ public class TLabel extends JLabel
 						}
 						break;
 				}
-			}
-			else // For position based image (Glass)
-			{
-				g2.drawImage(image, 0, 0, this);
 			}
 		}
 		super.paintComponent(g2);

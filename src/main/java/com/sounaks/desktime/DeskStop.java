@@ -14,6 +14,7 @@ import javax.swing.event.*;
 import java.beans.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import javazoom.jl.player.Player;
+import static java.awt.GraphicsDevice.WindowTranslucency.*;
 
 public class DeskStop extends JWindow implements MouseInputListener, ActionListener, ComponentListener
 {
@@ -23,6 +24,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	private Date date;
 	private int locX,locY,locW,locH,cursorX,cursorY,cursorW,cursorH;
 	private TLabel tLabel;
+	private TwilightPanel mainPane;
 	private SimpleDateFormat sd;
 	private FontMetrics metrics;
 	private InitInfo info;
@@ -35,26 +37,34 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 	private Dimension scsize;
 	protected Robot robot;
 	private   boolean refreshNow  = true;
+	private boolean pixelTranslucency, wholeTranslucency, robotSupport;
 	private Pomodoro pom;
 	private Container contentPane;
 	protected final String tipGmt = "<html><b>Currently Displaying:</b> Greenwich Mean Time (GMT) <p>This time is reffered as the world standard time.</html>";
 	protected final String tipCur = "<html><b>Currently Displaying:</b> Time of your location (Time-Zone) <p>The system time should be set correctly according <p>to your time zone.</html>";
 	protected final String tipUpt = "<html><b>Currently Displaying:</b> System Up-Time <p>This time shows for how long your computer is running <p>without a shut-down or log-off.</html>";
 	protected final String tipPom = "<html><b>Currently Displaying:</b> Pomodoro Timer <p>This shows pomodoro timer slots of 25 and 5 minutes or as <p>selected. A bigger break slot of 30 minutes after 4 regular slots.</html>";
+	private static final GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 
 	public DeskStop()
 	{
-		super(GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration());
-		clockThread   = null;
-		refreshThread = null;
-		scsize        = Toolkit.getDefaultToolkit().getScreenSize();
-		tLabel        = new TLabel("Welcome " + System.getProperty("user.name"));
-		tLabel.setBackground(Color.white);
+		super(gd.getDefaultConfiguration());
+		pixelTranslucency = gd.isWindowTranslucencySupported(PERPIXEL_TRANSLUCENT);
+		wholeTranslucency = gd.isWindowTranslucencySupported(TRANSLUCENT);
+		robotSupport      = ExUtils.checkAWTPermission("createRobot") && ExUtils.checkAWTPermission("readDisplayPixels");
+		clockThread       = null;
+		refreshThread     = null;
+		scsize            = Toolkit.getDefaultToolkit().getScreenSize();
+		tLabel            = new TLabel("Welcome " + System.getProperty("user.name"));
 		tLabel.setForeground(Color.black);
 		tLabel.setBorder(BorderFactory.createLineBorder(Color.black, 2));
+		mainPane = new TwilightPanel(new BorderLayout());
+		mainPane.setOpaque(false);
+		mainPane.setBackground(Color.white);
+		mainPane.add(tLabel, BorderLayout.CENTER);
 		contentPane = getContentPane();
 		contentPane.setLayout(new BorderLayout());
-		contentPane.add(tLabel, "Center");
+		contentPane.add(mainPane, BorderLayout.CENTER);
 		pack();
 		setSize(300, 50);
 		setLocation((scsize.width - 200) / 2, (scsize.height - 200) / 2);
@@ -69,6 +79,9 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		}
 		info   = loadProperties();
 		alarms = loadAlarms();
+		info.setPixelAlphaSupport(pixelTranslucency);
+		info.setWindowAlphaSupport(wholeTranslucency);
+		info.setScreenshotSupport(robotSupport);
 		addComponentListener(this);
 		windowLoc    = new Point(0, 0);
 		locX  = (int)info.getLocation().getX();
@@ -147,7 +160,7 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			tLabel.setBackground(null);
 			getRootPane().putClientProperty("Window.shadow", Boolean.TRUE);
 		}
-		else if (info.hasGlassEffect())
+		else if (info.hasGlassEffect() && !pixelTranslucency)
 		{
 			try
 			{
@@ -163,17 +176,38 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 				e.printStackTrace();
 				tLabel.setTransparency(false);
 				tLabel.setBackImage(null);
-				tLabel.setBackground(SystemColor.desktop);
+				mainPane.setBackground(SystemColor.desktop);
 			}
 			tLabel.setText(time);
 			startRefresh();
 		}
 		else
 		{
+			mainPane.setBackground(info.getBackground());
+			if (info.hasGlassEffect()) info.setGlassEffect(false);
+			if (pixelTranslucency)
+			{
+				setOpacity(1.0f);
+				setBackground(new Color(0, 0, 0, 0.00f));
+				mainPane.setAlpha(info.getOpacity());
+			}
+			else
+			{
+				if (!wholeTranslucency) {
+					setOpacity(1.0f);
+					info.setOpacity(1.0f);
+				} else if (info.getOpacity() < 0.2f) {
+					setOpacity(0.2f);
+					info.setOpacity(0.2f);
+				} else {
+					setOpacity(info.getOpacity());
+				}
+				setBackground(info.getBackground());
+				mainPane.setAlpha(1.0f);
+			}
 			tLabel.setText(time);
 			tLabel.setBackImage(null);
-			tLabel.setBackground(info.getBackground());
-			setOpacity(info.getOpacity());
+			tLabel.setTransparency(false);
 			getRootPane().putClientProperty("Window.shadow", Boolean.TRUE);
 			stopRefresh();
 		}
@@ -413,6 +447,9 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 			}
 			System.exit(0);
 		}
+		info.setPixelAlphaSupport(pixelTranslucency);
+		info.setWindowAlphaSupport(wholeTranslucency);
+		info.setScreenshotSupport(robotSupport);
 		refreshNow = true;
 		startRefresh();
 	}

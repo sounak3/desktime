@@ -133,7 +133,7 @@ public class TimeBean implements Serializable
 
 	public void	setAlarmRepeatInterval(int alarmRepeatInterval)
 	{
-		this.alarmRepeatInterval = new Integer(alarmRepeatInterval);
+		this.alarmRepeatInterval = Integer.valueOf(alarmRepeatInterval);
 	}
 	
 	public int getAlarmExecutionOutputType()
@@ -143,7 +143,7 @@ public class TimeBean implements Serializable
 
 	public void	setAlarmExecutionOutputType(int alarmExecutionOutputType)
 	{
-		this.alarmExecutionOutputType = new Integer(alarmExecutionOutputType);
+		this.alarmExecutionOutputType = Integer.valueOf(alarmExecutionOutputType);
 	}
 	
 	public boolean isSystemStartTimeBasedAlarm()
@@ -153,7 +153,7 @@ public class TimeBean implements Serializable
 	
 	public void setSystemStartTimeBasedAlarm(boolean systemStartTimeBasedAlarm)
 	{
-		this.systemStartTimeBasedAlarm = new Boolean(systemStartTimeBasedAlarm);
+		this.systemStartTimeBasedAlarm = Boolean.valueOf(systemStartTimeBasedAlarm);
 	}
 	
 	public String getAlarmSound()
@@ -181,6 +181,6 @@ public class TimeBean implements Serializable
 
 	public void setRepeatMultiple(int repeatMultiple)
 	{
-		this.repeatMultiple = new Integer(repeatMultiple);
+		this.repeatMultiple = Integer.valueOf(repeatMultiple);
 	}
 }

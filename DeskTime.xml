@@ -1,57 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <java version="1.8.0_402" class="java.beans.XMLDecoder">
  <object class="com.sounaks.desktime.InitInfo" id="InitInfo0">
-  <void id="Boolean0" method="get">
-   <string>ROUND_CORNERS</string>
-  </void>
-  <void method="put">
-   <string>POMODORO_LEAD_LABEL</string>
-   <object idref="Boolean0"/>
-  </void>
   <void method="put">
    <string>TIMEZONE</string>
-   <string>IST</string>
-  </void>
-  <void method="put">
-   <string>LINE_COLOR</string>
-   <object class="java.awt.Color">
-    <int>153</int>
-    <int>153</int>
-    <int>0</int>
-    <int>255</int>
-   </object>
-  </void>
-  <void method="put">
-   <string>HOUR_SOUND</string>
-   <string>C:\Users\Sounak\Music\sounds\beep-beep-6151.mp3</string>
-  </void>
-  <void method="put">
-   <string>POMODORO_TASK</string>
-   <string>4 sec breath-in, 6 sec hold, 8 sec breath-out</string>
+   <string>Asia/Calcutta</string>
   </void>
   <void method="put">
    <string>FOREGROUND</string>
    <object class="java.awt.Color">
-    <int>255</int>
-    <int>102</int>
+    <int>204</int>
+    <int>0</int>
     <int>0</int>
     <int>255</int>
    </object>
   </void>
   <void method="put">
-   <string>POMO_BREAK_SOUND</string>
-   <string>C:\Users\Sounak\Music\sounds\bright-phone-ringing-3-152490.mp3</string>
-  </void>
-  <void method="put">
-   <string>UPTIME_HOUR_SOUND</string>
-   <string>C:\Users\Sounak\Music\sounds\ambient-flute-notification-3-185275.mp3</string>
-  </void>
-  <void method="put">
    <string>BACKGROUND</string>
    <object class="java.awt.Color">
+    <int>51</int>
     <int>255</int>
-    <int>204</int>
-    <int>204</int>
+    <int>102</int>
     <int>255</int>
    </object>
   </void>
@@ -60,20 +28,8 @@
    <object class="java.awt.Font">
     <string>Courier New Bold</string>
     <int>0</int>
-    <int>16</int>
+    <int>24</int>
    </object>
-  </void>
-  <void method="put">
-   <string>GLASS_EFFECT</string>
-   <object idref="Boolean0"/>
-  </void>
-  <void method="put">
-   <string>DISPLAY_METHOD</string>
-   <string>UPTIME</string>
-  </void>
-  <void method="put">
-   <string>POMO_REST_SOUND</string>
-   <string>C:\Users\Sounak\Music\sounds\chiptune-alarm-clock-112869.mp3</string>
   </void>
   <void id="Point0" method="get">
    <string>LOCATION</string>
@@ -81,47 +37,31 @@
     <string>x</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>746</int>
+     <int>679</int>
     </void>
    </void>
    <void class="java.awt.Point" method="getField">
     <string>y</string>
     <void method="set">
      <object idref="Point0"/>
-     <int>131</int>
+     <int>137</int>
     </void>
    </void>
   </void>
-  <void id="Boolean1" method="get">
-   <string>NATIVE_LOOK</string>
+  <void id="Boolean0" method="get">
+   <string>POMODORO_LEAD_LABEL</string>
   </void>
   <void method="put">
    <string>USING_IMAGE</string>
-   <object idref="Boolean1"/>
-  </void>
-  <void method="put">
-   <string>UPTIME_FORMAT</string>
-   <string>&apos;Up-Time: &apos;DD&apos;-day(s), &apos;HH&apos;-hour(s), &apos;mm&apos;-minute(s), &apos;ss&apos;-second(s)&apos;</string>
-  </void>
-  <void method="put">
-   <string>POMO_WORK_SOUND</string>
-   <string>C:\Users\Sounak\Music\sounds\beep-warning-6387.mp3</string>
+   <object idref="Boolean0"/>
   </void>
   <void method="put">
    <string>IMAGEFILE</string>
-   <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\cyan-glass.png</string>
+   <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\BabyBlue.JPG</string>
   </void>
   <void method="put">
    <string>OPACITY</string>
-   <float>0.8</float>
-  </void>
-  <void method="put">
-   <string>POMODORO_COUNTDOWN_MODE</string>
-   <object idref="Boolean1"/>
-  </void>
-  <void method="put">
-   <string>IMAGE_STYLE</string>
-   <int>2</int>
+   <float>0.2</float>
   </void>
  </object>
 </java>

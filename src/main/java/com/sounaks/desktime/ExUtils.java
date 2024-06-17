@@ -233,22 +233,15 @@ public class ExUtils
 	public static boolean checkAWTPermission(String permission)
 	{
 		AWTPermission   awtp    = new AWTPermission(permission);
-		Object          context = null;
-		SecurityManager sm      = System.getSecurityManager();
-		if (sm != null)
+		try
 		{
-			try
-			{
-				context = sm.getSecurityContext(); 
-				sm.checkPermission(awtp, context);
-				return true;
-			}
-			catch(SecurityException se)
-			{
-				return false;
-			}
+			awtp.checkGuard(null);
+			return true;
 		}
-		return true;
+		catch(SecurityException se)
+		{
+			return false;
+		}
 	}
 	
 	public static boolean dateCompareUptoSecond(Date dt1, Date dt2)
@@ -283,7 +276,7 @@ public class ExUtils
 		dlg.setVisible(true);
 	}
 
-	public static void runProgram(String command, Component parent) {
+	public static void runProgram(String command[], Component parent) {
 		Runtime   nativePro = Runtime.getRuntime();
 		try
 		{
