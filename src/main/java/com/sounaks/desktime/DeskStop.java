@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 import javazoom.jl.player.Player;
 import static java.awt.GraphicsDevice.WindowTranslucency.*;
 
-public class DeskStop extends JWindow implements MouseInputListener, ActionListener, ComponentListener
+public class DeskStop extends JFrame implements MouseInputListener, ActionListener, ComponentListener
 {
 	protected ClockThread clockThread; 
 	protected Refresher refreshThread;
@@ -65,6 +65,9 @@ public class DeskStop extends JWindow implements MouseInputListener, ActionListe
 		contentPane = getContentPane();
 		contentPane.setLayout(new BorderLayout());
 		contentPane.add(mainPane, BorderLayout.CENTER);
+		setUndecorated(true);
+		setTitle("DeskStop");
+		setType(Type.UTILITY);
 		pack();
 		setSize(300, 50);
 		setLocation((scsize.width - 200) / 2, (scsize.height - 200) / 2);
