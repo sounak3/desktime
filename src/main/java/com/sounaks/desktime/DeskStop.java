@@ -4,14 +4,12 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
 import java.awt.image.*;
-import java.io.*;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
-import java.beans.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import javazoom.jl.player.Player;
 import static java.awt.GraphicsDevice.WindowTranslucency.*;
@@ -30,7 +28,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private InitInfo info;
 	private Vector <TimeBean>alarms;
 	private JPopupMenu pMenu;
-	private JMenuItem fore,back,tim,alm,bdr,exit,about;
+	private JMenuItem fore,back,tim,alm,bdr,exit,about,addPanel,removePanel;
 	private JCheckBoxMenuItem fix1,ontop;
 	private PointerInfo pi;
 	private Point windowLoc;
@@ -45,10 +43,13 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	protected final String tipUpt = "<html><b>Currently Displaying:</b> System Up-Time <p>This time shows for how long your computer is running <p>without a shut-down or log-off.</html>";
 	protected final String tipPom = "<html><b>Currently Displaying:</b> Pomodoro Timer <p>This shows pomodoro timer slots of 25 and 5 minutes or as <p>selected. A bigger break slot of 30 minutes after 4 regular slots.</html>";
 	private static final GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	private static ArrayList<InitInfo> deskstops;
 
-	public DeskStop()
+	public DeskStop(InitInfo info, Vector<TimeBean> alarms)
 	{
 		super(gd.getDefaultConfiguration());
+		this.info         = info;
+		this.alarms       = alarms;
 		pixelTranslucency = gd.isWindowTranslucencySupported(PERPIXEL_TRANSLUCENT);
 		wholeTranslucency = gd.isWindowTranslucencySupported(TRANSLUCENT);
 		robotSupport      = ExUtils.checkAWTPermission("createRobot") && ExUtils.checkAWTPermission("readDisplayPixels");
@@ -80,8 +81,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		{
 			e1.printStackTrace();
 		}
-		info   = loadProperties();
-		alarms = loadAlarms();
+		// info   = loadProperties();
+		// alarms = loadAlarms();
 		info.setPixelAlphaSupport(pixelTranslucency);
 		info.setWindowAlphaSupport(wholeTranslucency);
 		info.setScreenshotSupport(robotSupport);
@@ -116,6 +117,14 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		ontop = new JCheckBoxMenuItem("Always on top");
 		ontop.setBackground(Color.white);
 		ontop.addActionListener(this);
+		addPanel = new JMenuItem("Add new panel");
+		addPanel.setBackground(Color.white);
+		addPanel.addActionListener(this);
+		removePanel = new JMenuItem("Remove this panel");
+		removePanel.setBackground(Color.white);
+		removePanel.addActionListener(this);
+		System.out.println(info.getID());
+		removePanel.setEnabled(info.getID() != 0);
 		about = new JMenuItem("About...");
 		about.setBackground(Color.white);
 		about.addActionListener(this);
@@ -130,6 +139,9 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		pMenu.addSeparator();
 		pMenu.add(fix1);
 		pMenu.add(ontop);
+		pMenu.addSeparator();
+		pMenu.add(addPanel);
+		pMenu.add(removePanel);
 		pMenu.addSeparator();
 		pMenu.add(about);
 		pMenu.add(exit);
@@ -298,76 +310,6 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		}
 	}
 
-	private InitInfo loadProperties()
-	{
-		InitInfo data = new InitInfo();
-		try
-		{
-			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream("DeskTime.xml")));
-			data = (InitInfo)decoder.readObject();
-			decoder.close();
-		}
-		catch (Exception exclusive)
-		{// Ignoring missing file...
-			System.out.println("File missing-\"DeskTime.xml\": " + exclusive.toString());
-			exclusive.printStackTrace();
-		}
-		return data;
-	}
-	
-	private void saveProperties(InitInfo status)
-	{
-		try
-		{
-			XMLEncoder xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream("DeskTime.xml")));
-			xencode.writeObject(status);
-			xencode.close();
-		}
-		catch (FileNotFoundException fne)
-		{
-			System.out.println("Exception while saving properties file-\"DeskTime.xml\": " + fne.toString());
-			fne.printStackTrace();
-		}
-	}
-	
-	private Vector<TimeBean> loadAlarms()
-	{
-		Vector<TimeBean> data = new Vector<TimeBean>();
-		try
-		{
-			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream("Smrala.xml")));
-			Object settingsObj = decoder.readObject();
-			decoder.close();
-			if (settingsObj instanceof Vector) {
-				Vector<?> tmpVec = (Vector<?>)settingsObj;
-				for (int cnt = 0; cnt < tmpVec.size(); cnt++) {
-					if (tmpVec.elementAt(cnt) instanceof TimeBean) data.add((TimeBean)tmpVec.elementAt(cnt));
-				}
-			}
-		}
-		catch (Exception exclusive)
-		{// Ignoring missing file...
-			System.out.println("Exception while loading properties file-\"Smarla.xml\": " + exclusive.getMessage());
-			exclusive.printStackTrace();
-		}
-		return data;
-	}
-	
-	private void saveAlarms(Vector <TimeBean>data)
-	{
-		try
-		{
-			XMLEncoder xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream("Smrala.xml")));
-			xencode.writeObject(data);
-			xencode.close();
-		}
-		catch (FileNotFoundException fne)
-		{
-			System.out.println("Exception while saving alarms file \"Smarla.xml\": " + fne.toString());
-			fne.printStackTrace();
-		}
-	}
-	
 	public void actionPerformed(ActionEvent actionevent)
 	{
 		lastPomTask   = info.getPomodoroTask();   //Since pomodoro change can be triggered with time tab,
@@ -380,8 +322,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.BORDER_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
-			saveAlarms(alarms);
-			saveProperties(info);
+			ExUtils.saveAlarms(alarms);
+			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
 		else if (obj.equals(fore))
@@ -389,8 +331,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.FONT_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
-			saveAlarms(alarms);
-			saveProperties(info);
+			ExUtils.saveAlarms(alarms);
+			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
 		else if (obj.equals(back))
@@ -398,8 +340,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.BACKGROUND_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
-			saveAlarms(alarms);
-			saveProperties(info);
+			ExUtils.saveAlarms(alarms);
+			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
 		else if (obj.equals(tim))
@@ -407,8 +349,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.TIMES_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
-			saveAlarms(alarms);
-			saveProperties(info);
+			ExUtils.saveAlarms(alarms);
+			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
 		else if (obj.equals(alm))
@@ -416,19 +358,19 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.ALARMS_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
-			saveAlarms(alarms);
-			saveProperties(info);
+			ExUtils.saveAlarms(alarms);
+			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
 		else if (obj.equals(fix1))
 		{
 			info.setFixed(fix1.isSelected());
-			saveProperties(info);
+			ExUtils.saveDeskStops(info, deskstops);
 		}
 		else if (obj.equals(ontop))
 		{
 			info.setOnTop(ontop.isSelected());
-			saveProperties(info);
+			ExUtils.saveDeskStops(info, deskstops);
 			setAlwaysOnTop(info.getOnTop());
 		}
 		else if (obj.equals(about))
@@ -449,6 +391,14 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 				e.printStackTrace();
 			}
 			System.exit(0);
+		}
+		else if (obj.equals(addPanel))
+		{
+			DeskStop.createInstance();
+		}
+		else if (obj.equals(removePanel))
+		{
+			DeskStop.removeInstance(this, info);
 		}
 		info.setPixelAlphaSupport(pixelTranslucency);
 		info.setWindowAlphaSupport(wholeTranslucency);
@@ -520,7 +470,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			if (!info.getLocation().equals(newLocation))
 			{
 				info.setLocation(newLocation);
-				saveProperties(info);
+				ExUtils.saveDeskStops(info, deskstops);
 				refreshThread.refreshTransparency();
 			}
 			startRefresh();
@@ -844,9 +794,68 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		}
 	}
 
+	public static void createInstance()
+	{
+		int ids[] = new int[deskstops.size()];
+		int newid = 0;
+		for (int cnt = 0; cnt < deskstops.size(); cnt++) {
+			ids[cnt] = deskstops.get(cnt).getID();
+		}
+		Arrays.sort(ids);
+		for (int cnt = 0; cnt < deskstops.size(); cnt++) {
+			if (cnt != ids[cnt]) {
+				newid = cnt;
+				break;
+			}
+		}
+		InitInfo initInfo = new InitInfo();
+		initInfo.setID(newid > 0 ? newid : deskstops.size());
+		Vector<TimeBean> allTimeBeans = ExUtils.loadAlarms();
+		DeskStop deskstop = new DeskStop(initInfo, allTimeBeans);
+		deskstop.start();
+		deskstops.add(initInfo);
+		ExUtils.saveDeskStops(deskstops);
+	}
+
+	public static void removeInstance(DeskStop deskStop, InitInfo initInfo)
+	{
+		deskStop.clockThread.terminate();
+		for (int cnt = 0; cnt < deskstops.size(); cnt++)
+		{
+			if (deskstops.get(cnt).getID() == initInfo.getID() && initInfo.getID() != 0)
+			{
+				deskstops.remove(cnt);
+				ExUtils.saveDeskStops(deskstops);
+			}
+		}
+		try
+		{
+			deskStop.clockThread.join();
+		} 
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		deskStop.dispose();
+	}
+
 	public static void main(String args[])
 	{
-		DeskStop deskstop = new DeskStop();
-		deskstop.start();
+		deskstops = ExUtils.loadDeskStops();
+		Vector<TimeBean> allTimeBeans = ExUtils.loadAlarms();
+		int count = 0;
+		do {
+			InitInfo initInfo;
+			if (deskstops.isEmpty()) {
+				initInfo = new InitInfo();
+				deskstops.add(initInfo);
+				ExUtils.saveDeskStops(initInfo, deskstops);
+			} else {
+				initInfo = deskstops.get(count);
+			}
+			DeskStop deskstop = new DeskStop(initInfo, allTimeBeans);
+			deskstop.start();
+			count++;
+		} while (count < deskstops.size());
 	}
 }
