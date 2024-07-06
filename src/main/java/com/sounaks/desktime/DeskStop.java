@@ -72,17 +72,15 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		pack();
 		setSize(300, 50);
 		setLocation((scsize.width - 200) / 2, (scsize.height - 200) / 2);
-		setVisible(true);
+		if(info.getID() == 0) setVisible(true);
 		try
 		{
-			Thread.sleep(3000L);
+			if(info.getID() == 0) Thread.sleep(3000L);
 		} 
 		catch (InterruptedException e1)
 		{
 			e1.printStackTrace();
 		}
-		// info   = loadProperties();
-		// alarms = loadAlarms();
 		info.setPixelAlphaSupport(pixelTranslucency);
 		info.setWindowAlphaSupport(wholeTranslucency);
 		info.setScreenshotSupport(robotSupport);
@@ -123,7 +121,6 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		removePanel = new JMenuItem("Remove this panel");
 		removePanel.setBackground(Color.white);
 		removePanel.addActionListener(this);
-		System.out.println(info.getID());
 		removePanel.setEnabled(info.getID() != 0);
 		about = new JMenuItem("About...");
 		about.setBackground(Color.white);
@@ -226,7 +223,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			getRootPane().putClientProperty("Window.shadow", Boolean.TRUE);
 			stopRefresh();
 		}
-		resizingMethod(time);
+		if(info.getID() != 0) setVisible(true);
 		setRoundedCorners(info.hasRoundedCorners());
 		fix1.setSelected(info.isFixed());
 		ontop.setSelected(info.getOnTop());
