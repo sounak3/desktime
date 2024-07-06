@@ -28,7 +28,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private InitInfo info;
 	private Vector <TimeBean>alarms;
 	private JPopupMenu pMenu;
-	private JMenuItem fore,back,tim,alm,bdr,exit,about,addPanel,removePanel;
+	private JMenu addPanel;
+	private JMenuItem fore,back,tim,alm,bdr,exit,about,newItem,dupItem,removePanel;
 	private JCheckBoxMenuItem fix1,ontop;
 	private PointerInfo pi;
 	private Point windowLoc;
@@ -115,9 +116,14 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		ontop = new JCheckBoxMenuItem("Always on top");
 		ontop.setBackground(Color.white);
 		ontop.addActionListener(this);
-		addPanel = new JMenuItem("Add new panel");
+		addPanel = new JMenu("Add panel");
 		addPanel.setBackground(Color.white);
-		addPanel.addActionListener(this);
+		newItem = new JMenuItem("New");
+		newItem.addActionListener(this);
+		dupItem = new JMenuItem("Duplicate");
+		dupItem.addActionListener(this);
+		addPanel.add(newItem);
+		addPanel.add(dupItem);
 		removePanel = new JMenuItem("Remove this panel");
 		removePanel.setBackground(Color.white);
 		removePanel.addActionListener(this);
@@ -389,9 +395,13 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			}
 			System.exit(0);
 		}
-		else if (obj.equals(addPanel))
+		else if (obj.equals(newItem))
 		{
-			DeskStop.createInstance();
+			DeskStop.createInstance(info, false);
+		}
+		else if (obj.equals(dupItem))
+		{
+			DeskStop.createInstance(info, true);
 		}
 		else if (obj.equals(removePanel))
 		{
@@ -791,7 +801,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		}
 	}
 
-	public static void createInstance()
+	public static void createInstance(InitInfo reference, boolean duplicate)
 	{
 		int ids[] = new int[deskstops.size()];
 		int newid = 0;
@@ -805,8 +815,10 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 				break;
 			}
 		}
-		InitInfo initInfo = new InitInfo();
+		InitInfo initInfo = duplicate ? (InitInfo)reference.clone() : new InitInfo();
 		initInfo.setID(newid > 0 ? newid : deskstops.size());
+		Point refLocation = reference.getLocation();
+		initInfo.setLocation(new Point(refLocation.x + 10, refLocation.y + 10));
 		Vector<TimeBean> allTimeBeans = ExUtils.loadAlarms();
 		DeskStop deskstop = new DeskStop(initInfo, allTimeBeans);
 		deskstop.start();
