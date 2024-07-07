@@ -28,9 +28,9 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private InitInfo info;
 	private Vector <TimeBean>alarms;
 	private JPopupMenu pMenu;
-	private JMenu addPanel;
-	private JMenuItem fore,back,tim,alm,bdr,exit,about,newItem,dupItem,removePanel;
-	private JCheckBoxMenuItem fix1,ontop;
+	private JMenu addPanel,mFormat,timeMode,timeZone;
+	private JMenuItem miDigTime,miUptime,miPomo,miSeltz,miDeftz,timSet,zonSet;
+	private JMenuItem fore,back,alm,bdr,exit,about,newItem,dupItem,removePanel,fix1,ontop;
 	private PointerInfo pi;
 	private Point windowLoc;
 	private Dimension scsize;
@@ -45,6 +45,10 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	protected final String tipPom = "<html><b>Currently Displaying:</b> Pomodoro Timer <p>This shows pomodoro timer slots of 25 and 5 minutes or as <p>selected. A bigger break slot of 30 minutes after 4 regular slots.</html>";
 	private static final GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 	private static ArrayList<InitInfo> deskstops;
+	private final ImageIcon plusPng  = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/plus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
+	private final ImageIcon minusPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/minus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
+	private final ImageIcon checkPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/checked-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
+	private final ImageIcon clearPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/unchecked-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
 
 	public DeskStop(InitInfo info, Vector<TimeBean> alarms)
 	{
@@ -94,50 +98,71 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		sd    = new SimpleDateFormat(info.getZonedTimeFormat());
 		date  = new Date();
 		time  = sd.format(date);
+		UIManager.put("PopupMenu.background", Color.WHITE);
+		UIManager.put("MenuItem.background", Color.WHITE);
+		UIManager.put("CheckBoxMenuItem.background", Color.WHITE);
 		pMenu = new JPopupMenu("DeskTime Menu");
-		fore  = new JMenuItem("Font Format...");
-		fore.setBackground(Color.white);
+		mFormat = new JMenu("Format");
+		fore  = new JMenuItem("Font...");
 		fore.addActionListener(this);
 		back  = new JMenuItem("Background...");
-		back.setBackground(Color.white);
 		back.addActionListener(this);
 		bdr   = new JMenuItem("Borders & UI...");
-		bdr.setBackground(Color.white);
 		bdr.addActionListener(this);
-		tim   = new JMenuItem("Time Format...");
-		tim.setBackground(Color.white);
-		tim.addActionListener(this);
+		mFormat.add(fore);
+		mFormat.add(back);
+		mFormat.add(bdr);
+		timeMode = new JMenu("Time Mode");
+		miDigTime   = new JMenuItem("Digital clock");
+		miDigTime.addActionListener(this);
+		miUptime = new JMenuItem("System Up-time");
+		miUptime.addActionListener(this);
+		miPomo   = new JMenuItem("Pomodoro Timer");
+		miPomo.addActionListener(this);
+		timSet   = new JMenuItem("More settings...");
+		timSet.addActionListener(this);
+		timeMode.add(miDigTime);
+		timeMode.add(miUptime);
+		timeMode.add(miPomo);
+		timeMode.addSeparator();
+		timeMode.add(timSet);
+		timeZone = new JMenu("Timezone");
+		miSeltz  = new JMenuItem("Selected");
+		miSeltz.addActionListener(this);
+		miDeftz  = new JMenuItem("System");
+		miDeftz.addActionListener(this);
+		zonSet   = new JMenuItem("More Timezones...");
+		zonSet.addActionListener(this);
+		timeZone.add(miSeltz);
+		timeZone.add(miDeftz);
+		timeZone.addSeparator();
+		timeZone.add(zonSet);
 		alm   = new JMenuItem("Set Alarm...");
-		alm.setBackground(Color.white);
 		alm.addActionListener(this);
-		fix1  = new JCheckBoxMenuItem("Unmovable");
-		fix1.setBackground(Color.white);
+		fix1  = new JMenuItem("Unmovable");
+		fix1.setIcon(info.isFixed() ? checkPng : clearPng);
 		fix1.addActionListener(this);
-		ontop = new JCheckBoxMenuItem("Always on top");
-		ontop.setBackground(Color.white);
+		ontop = new JMenuItem("Always on top");
+		ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
 		ontop.addActionListener(this);
 		addPanel = new JMenu("Add panel");
-		addPanel.setBackground(Color.white);
+		addPanel.setIcon(plusPng);
 		newItem = new JMenuItem("New");
 		newItem.addActionListener(this);
 		dupItem = new JMenuItem("Duplicate");
 		dupItem.addActionListener(this);
 		addPanel.add(newItem);
 		addPanel.add(dupItem);
-		removePanel = new JMenuItem("Remove this panel");
-		removePanel.setBackground(Color.white);
+		removePanel = new JMenuItem("Remove this panel", minusPng);
 		removePanel.addActionListener(this);
 		removePanel.setEnabled(info.getID() != 0);
 		about = new JMenuItem("About...");
-		about.setBackground(Color.white);
 		about.addActionListener(this);
 		exit  = new JMenuItem("Exit");
-		exit.setBackground(Color.white);
 		exit.addActionListener(this);
-		pMenu.add(fore);
-		pMenu.add(back);
-		pMenu.add(bdr);
-		pMenu.add(tim);
+		pMenu.add(timeMode);
+		pMenu.add(timeZone);
+		pMenu.add(mFormat);
 		pMenu.add(alm);
 		pMenu.addSeparator();
 		pMenu.add(fix1);
@@ -149,7 +174,6 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		pMenu.add(about);
 		pMenu.add(exit);
 		pMenu.pack();
-		pMenu.setBackground(Color.white);
 		re_init();
 		tLabel.addMouseListener(this);
 	}
@@ -161,6 +185,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		metrics = tLabel.getFontMetrics(info.getFont());
 		tLabel.setForeground(info.getForeground());
 		tLabel.setBorder(info.getBorder());
+		miSeltz.setText("Selected (" + info.getTimeZone() + ")");
+		miDeftz.setText("System (" + TimeZone.getDefault().getID() + ")");
 		Rectangle screen = new Rectangle(scsize);
 		Point savedLocation = info.getLocation();
 		if (screen.contains(savedLocation))
@@ -231,8 +257,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		}
 		if(info.getID() != 0) setVisible(true);
 		setRoundedCorners(info.hasRoundedCorners());
-		fix1.setSelected(info.isFixed());
-		ontop.setSelected(info.getOnTop());
+		fix1.setIcon(info.isFixed() ? checkPng : clearPng);
+		ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
 		lastPomTask = info.getPomodoroTask();
 		lastPomFormat = info.getPomodoroFormat();
 		timeDisplayConfig();
@@ -347,7 +373,41 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
-		else if (obj.equals(tim))
+		else if (obj.equals(miSeltz))
+		{
+			info.setDisplayMethod("GMTTZ");
+			ExUtils.saveDeskStops(info, deskstops);
+			re_init();
+		}
+		else if (obj.equals(miDeftz))
+		{
+			info.setDisplayMethod("CURTZ");
+			ExUtils.saveDeskStops(info, deskstops);
+			re_init();
+		}
+		else if (obj.equals(miDigTime))
+		{
+			if(info.getTimeZone().equals(TimeZone.getDefault().getID())) {
+				info.setDisplayMethod("CURTZ");
+			} else {
+				info.setDisplayMethod("GMTTZ");
+			}
+			ExUtils.saveDeskStops(info, deskstops);
+			re_init();
+		}
+		else if (obj.equals(miUptime))
+		{
+			info.setDisplayMethod("UPTIME");
+			ExUtils.saveDeskStops(info, deskstops);
+			re_init();
+		}
+		else if (obj.equals(miPomo))
+		{
+			info.setDisplayMethod("POMODORO");
+			ExUtils.saveDeskStops(info, deskstops);
+			re_init();
+		}
+		else if (obj.equals(timSet) || obj.equals(zonSet))
 		{
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.TIMES_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
@@ -367,12 +427,14 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		}
 		else if (obj.equals(fix1))
 		{
-			info.setFixed(fix1.isSelected());
+			info.setFixed(!info.isFixed());
+			fix1.setIcon(info.isFixed() ? checkPng : clearPng);
 			ExUtils.saveDeskStops(info, deskstops);
 		}
 		else if (obj.equals(ontop))
 		{
-			info.setOnTop(ontop.isSelected());
+			info.setOnTop(!info.getOnTop());
+			ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
 			ExUtils.saveDeskStops(info, deskstops);
 			setAlwaysOnTop(info.getOnTop());
 		}
