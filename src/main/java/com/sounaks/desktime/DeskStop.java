@@ -29,7 +29,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private Vector <TimeBean>alarms;
 	private JPopupMenu pMenu;
 	private JMenu addPanel,mFormat,timeMode,timeZone;
-	private JMenuItem miDigTime,miUptime,miPomo,miSeltz,miDeftz,timSet,zonSet;
+	private JMenuItem miDigTime,miUptime,miPomo,miSeltz,miDeftz,timSet,zonSet,impZon[];
 	private JMenuItem fore,back,alm,bdr,exit,about,newItem,dupItem,removePanel,fix1,ontop;
 	private PointerInfo pi;
 	private Point windowLoc;
@@ -39,10 +39,21 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private boolean pixelTranslucency, wholeTranslucency, robotSupport;
 	private Pomodoro pom;
 	private Container contentPane;
-	protected final String tipGmt = "<html><b>Currently Displaying:</b> Greenwich Mean Time (GMT) <p>This time is reffered as the world standard time.</html>";
-	protected final String tipCur = "<html><b>Currently Displaying:</b> Time of your location (Time-Zone) <p>The system time should be set correctly according <p>to your time zone.</html>";
-	protected final String tipUpt = "<html><b>Currently Displaying:</b> System Up-Time <p>This time shows for how long your computer is running <p>without a shut-down or log-off.</html>";
-	protected final String tipPom = "<html><b>Currently Displaying:</b> Pomodoro Timer <p>This shows pomodoro timer slots of 25 and 5 minutes or as <p>selected. A bigger break slot of 30 minutes after 4 regular slots.</html>";
+	private String tipCur = "<html><b>Currently Displaying:</b> Time of your location (Time-Zone) time. <p>(This is with reference to system time and not internet).</html>";
+	private String tipUpt = "<html><b>Currently Displaying:</b> System Up-Time <p>The time your computer is running <p>without a shut-down or log-off.</html>";
+	private String tipPom = "<html><b>Currently Displaying:</b> Pomodoro Timer <p>Timer slots of pomodoro task. <p>One rest slot after 4 repetations of regular slots.</html>";
+	protected final String impZoneList[] = new String[]{
+		"Australia Eastern Standard Time (AET)",
+		"British Summer Time (BST)",
+		"Central European Time (CET)",
+		"Central Standard Time (CST6CDT)",
+		"China Standard Time (CTT)",
+		"Eastern Standard Time (EST5EDT)",
+		"Eastern European Time (EET)",
+		"Pacific Standard Time (PST8PDT)",
+		"India Standard Time (IST)",
+		"Japan Standard Time (JST)",
+		"Coordinated Universal Time (UTC)"};
 	private static final GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 	private static ArrayList<InitInfo> deskstops;
 	private final ImageIcon plusPng  = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/plus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
@@ -127,14 +138,22 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		timeMode.addSeparator();
 		timeMode.add(timSet);
 		timeZone = new JMenu("Timezone");
-		miSeltz  = new JMenuItem("Selected");
+		miSeltz  = new JMenuItem("Last selected");
 		miSeltz.addActionListener(this);
 		miDeftz  = new JMenuItem("System");
 		miDeftz.addActionListener(this);
-		zonSet   = new JMenuItem("More Timezones...");
-		zonSet.addActionListener(this);
 		timeZone.add(miSeltz);
 		timeZone.add(miDeftz);
+		timeZone.addSeparator();
+		impZon = new JMenuItem[impZoneList.length];
+		for (int i = 0; i < impZoneList.length; i++) {
+			impZon[i] = new JMenuItem(impZoneList[i]);
+			impZon[i].addActionListener(this);
+			impZon[i].setActionCommand("TZ-" + impZoneList[i].split("[\\(|\\)]")[1]);
+			timeZone.add(impZon[i]);
+		}
+		zonSet   = new JMenuItem("More Timezones...");
+		zonSet.addActionListener(this);
 		timeZone.addSeparator();
 		timeZone.add(zonSet);
 		alm   = new JMenuItem("Set Alarm...");
@@ -185,8 +204,9 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		metrics = tLabel.getFontMetrics(info.getFont());
 		tLabel.setForeground(info.getForeground());
 		tLabel.setBorder(info.getBorder());
-		miSeltz.setText("Selected (" + info.getTimeZone() + ")");
+		miSeltz.setText("Last selected (" + info.getTimeZone() + ")");
 		miDeftz.setText("System (" + TimeZone.getDefault().getID() + ")");
+		timeZone.setEnabled(info.getDisplayMethod().endsWith("TZ"));
 		Rectangle screen = new Rectangle(scsize);
 		Point savedLocation = info.getLocation();
 		if (screen.contains(savedLocation))
@@ -259,6 +279,9 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		setRoundedCorners(info.hasRoundedCorners());
 		fix1.setIcon(info.isFixed() ? checkPng : clearPng);
 		ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
+		miDigTime.setIcon(info.getDisplayMethod().endsWith("TZ") ? checkPng : clearPng);
+		miUptime.setIcon(info.getDisplayMethod().equals("UPTIME") ? checkPng : clearPng);
+		miPomo.setIcon(info.getDisplayMethod().equals("POMODORO") ? checkPng : clearPng);
 		lastPomTask = info.getPomodoroTask();
 		lastPomFormat = info.getPomodoroFormat();
 		timeDisplayConfig();
@@ -275,7 +298,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			time = sd.format(date = new Date());
 			resizingMethod(time);
 			if (info.hasTooltip())
-				tLabel.setToolTipText(dispString.equals("GMTTZ") ? tipGmt : tipCur);
+				tLabel.setToolTipText(tipCur.replace("Time of your location", info.getTimeZone()));
 			else
 				tLabel.setToolTipText(null);
 		}
@@ -297,7 +320,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 				resizingMethod(lstr3);
 
 			if (info.hasTooltip())
-				tLabel.setToolTipText(tipPom);
+				tLabel.setToolTipText(tipPom.replace("pomodoro task", info.getPomodoroTask()));
 			else
 				tLabel.setToolTipText(null);
 		}
@@ -392,6 +415,12 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			} else {
 				info.setDisplayMethod("GMTTZ");
 			}
+			ExUtils.saveDeskStops(info, deskstops);
+			re_init();
+		}
+		else if (obj instanceof JMenuItem && actionevent.getActionCommand().startsWith("TZ-"))
+		{
+			info.setTimeZone(actionevent.getActionCommand().split("-")[1]);
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
