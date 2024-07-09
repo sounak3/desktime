@@ -9,10 +9,16 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.image.ImageObserver;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
 import java.awt.image.BufferedImage;
 import java.awt.geom.Rectangle2D;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
@@ -478,5 +484,109 @@ public class ExUtils
 	public String getGTKLookAndFeelName()
 	{
 		return "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
+	}
+
+	public static ArrayList<InitInfo> loadDeskStops()
+	{
+		ArrayList<InitInfo> data = new ArrayList<InitInfo>();
+		try
+		{
+			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream("DeskTime.xml")));
+			Object content = decoder.readObject();
+			decoder.close();
+			if (content instanceof ArrayList) {
+				ArrayList<?> tmpArrayList = (ArrayList<?>)content;
+				for (int cnt = 0; cnt < tmpArrayList.size(); cnt++) {
+					if (tmpArrayList.get(cnt) instanceof InitInfo) data.add((InitInfo)tmpArrayList.get(cnt));
+				}
+			}
+		}
+		catch (Exception exclusive)
+		{// Ignoring missing file...
+			System.out.println("File missing-\"DeskTime.xml\": " + exclusive.toString());
+			exclusive.printStackTrace();
+		}
+		return data;
+	}
+	
+	public static void saveDeskStops(InitInfo currInitInfo, ArrayList<InitInfo> currDeskStops)
+	{
+		int id = currInitInfo.getID();
+		int cnt = 0;
+		do {
+			int thisID = 0;
+			if (currDeskStops.isEmpty()) {
+				currDeskStops.add(currInitInfo);
+			} else {
+				thisID = ((InitInfo)currDeskStops.get(cnt)).getID();
+				if (thisID == id) currDeskStops.set(cnt, currInitInfo);
+			}
+			cnt++;
+		} while (cnt < currDeskStops.size());
+
+		try
+		{
+			XMLEncoder xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream("DeskTime.xml")));
+			xencode.writeObject(currDeskStops);
+			xencode.close();
+		}
+		catch (FileNotFoundException fne)
+		{
+			System.out.println("Exception while saving properties file-\"DeskTime.xml\": " + fne.toString());
+			fne.printStackTrace();
+		}
+	}
+
+	public static void saveDeskStops(ArrayList<InitInfo> currDeskStops)
+	{
+		try
+		{
+			XMLEncoder xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream("DeskTime.xml")));
+			xencode.writeObject(currDeskStops);
+			xencode.close();
+		}
+		catch (FileNotFoundException fne)
+		{
+			System.out.println("Exception while saving properties file-\"DeskTime.xml\": " + fne.toString());
+			fne.printStackTrace();
+		}
+	}
+
+	public static Vector<TimeBean> loadAlarms()
+	{
+		Vector<TimeBean> data = new Vector<TimeBean>();
+		try
+		{
+			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream("Smrala.xml")));
+			Object settingsObj = decoder.readObject();
+			decoder.close();
+			if (settingsObj instanceof Vector) {
+				Vector<?> tmpVec = (Vector<?>)settingsObj;
+				for (int cnt = 0; cnt < tmpVec.size(); cnt++) {
+					if (tmpVec.elementAt(cnt) instanceof TimeBean) data.add((TimeBean)tmpVec.elementAt(cnt));
+				}
+			}
+		}
+		catch (Exception exclusive)
+		{// Ignoring missing file...
+			System.out.println("Exception while loading properties file-\"Smarla.xml\": " + exclusive.getMessage());
+			exclusive.printStackTrace();
+		}
+		return data;
+	}
+
+	public static void saveAlarms(Vector <TimeBean>data)
+	{
+		try
+		{
+			XMLEncoder xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream("Smrala.xml")));
+			xencode.writeObject(data);
+			xencode.close();
+		}
+		catch (FileNotFoundException fne)
+		{
+			System.out.println("Exception while saving alarms file \"Smarla.xml\": " + fne.toString());
+			fne.printStackTrace();
+		}
 	}
 }

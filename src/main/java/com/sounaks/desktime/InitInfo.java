@@ -8,14 +8,14 @@ import java.util.*;
 import javax.swing.BorderFactory;
 import javax.swing.border.*;
 
-public class InitInfo extends Hashtable<Object, Object>
+public class InitInfo extends Hashtable<String, Object>
 {
 	File defaultsDir;
 	boolean pixelAlphaSupport, windowAlphaSupport, screenshotSupport;
 
 	public InitInfo()
 	{
-		super(18,0.6f);
+		super(33,0.6f);
 		try {
 			CodeSource codeSrc = InitInfo.class.getProtectionDomain().getCodeSource();
 			File sourceJar = new File(codeSrc.getLocation().toURI());
@@ -58,6 +58,17 @@ public class InitInfo extends Hashtable<Object, Object>
 		put("POMO_WORK_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "beep-warning-6387.mp3");
 		put("POMO_BREAK_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "bright-phone-ringing-3-152490.mp3");
 		put("POMO_REST_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "chiptune-alarm-clock-112869.mp3");
+		put("PANEL_ID", 0);
+	}
+
+	public int getID()
+	{
+		return (int)get("PANEL_ID");
+	}
+
+	public void setID(int id)
+	{
+		put("PANEL_ID", id);
 	}
 
 	public boolean isPixelAlphaSupported()

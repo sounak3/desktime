@@ -4,14 +4,12 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
 import java.awt.image.*;
-import java.io.*;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
-import java.beans.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import javazoom.jl.player.Player;
 import static java.awt.GraphicsDevice.WindowTranslucency.*;
@@ -30,25 +28,46 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private InitInfo info;
 	private Vector <TimeBean>alarms;
 	private JPopupMenu pMenu;
-	private JMenuItem fore,back,tim,alm,bdr,exit,about;
-	private JCheckBoxMenuItem fix1,ontop;
+	private JMenu addPanel,mFormat,timeMode,timeZone;
+	private JMenuItem miDigTime,miUptime,miPomo,miSeltz,miDeftz,timSet,zonSet,impZon[];
+	private JMenuItem fore,back,alm,bdr,exit,about,newItem,dupItem,removePanel,fix1,ontop;
 	private PointerInfo pi;
-	private Point windowLoc;
+	private Point pointerLoc;
 	private Dimension scsize;
 	protected Robot robot;
 	private   boolean refreshNow  = true;
+	private   boolean allowMoveOutOfScreen = false;
+	private   boolean alreadyOutOfScreen = false;
 	private boolean pixelTranslucency, wholeTranslucency, robotSupport;
 	private Pomodoro pom;
 	private Container contentPane;
-	protected final String tipGmt = "<html><b>Currently Displaying:</b> Greenwich Mean Time (GMT) <p>This time is reffered as the world standard time.</html>";
-	protected final String tipCur = "<html><b>Currently Displaying:</b> Time of your location (Time-Zone) <p>The system time should be set correctly according <p>to your time zone.</html>";
-	protected final String tipUpt = "<html><b>Currently Displaying:</b> System Up-Time <p>This time shows for how long your computer is running <p>without a shut-down or log-off.</html>";
-	protected final String tipPom = "<html><b>Currently Displaying:</b> Pomodoro Timer <p>This shows pomodoro timer slots of 25 and 5 minutes or as <p>selected. A bigger break slot of 30 minutes after 4 regular slots.</html>";
+	private String tipCur = "<html><b>Currently Displaying:</b> Time of your location (Time-Zone) time. <p>(This is with reference to system time and not internet).</html>";
+	private String tipUpt = "<html><b>Currently Displaying:</b> System Up-Time <p>The time your computer is running <p>without a shut-down or log-off.</html>";
+	private String tipPom = "<html><b>Currently Displaying:</b> Pomodoro Timer <p>Timer slots of pomodoro task. <p>One rest slot after 4 repetations of regular slots.</html>";
+	protected final String impZoneList[] = new String[]{
+		"Australia Eastern Standard Time (AET)",
+		"British Summer Time (BST)",
+		"Central European Time (CET)",
+		"Central Standard Time (CST6CDT)",
+		"China Standard Time (CTT)",
+		"Eastern Standard Time (EST5EDT)",
+		"Eastern European Time (EET)",
+		"Pacific Standard Time (PST8PDT)",
+		"India Standard Time (IST)",
+		"Japan Standard Time (JST)",
+		"Coordinated Universal Time (UTC)"};
 	private static final GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	private static ArrayList<InitInfo> deskstops;
+	private final ImageIcon plusPng  = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/plus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
+	private final ImageIcon minusPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/minus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
+	private final ImageIcon checkPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/checked-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
+	private final ImageIcon clearPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/unchecked-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
 
-	public DeskStop()
+	public DeskStop(InitInfo info, Vector<TimeBean> alarms)
 	{
 		super(gd.getDefaultConfiguration());
+		this.info         = info;
+		this.alarms       = alarms;
 		pixelTranslucency = gd.isWindowTranslucencySupported(PERPIXEL_TRANSLUCENT);
 		wholeTranslucency = gd.isWindowTranslucencySupported(TRANSLUCENT);
 		robotSupport      = ExUtils.checkAWTPermission("createRobot") && ExUtils.checkAWTPermission("readDisplayPixels");
@@ -71,22 +90,20 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		pack();
 		setSize(300, 50);
 		setLocation((scsize.width - 200) / 2, (scsize.height - 200) / 2);
-		setVisible(true);
+		if(info.getID() == 0) setVisible(true);
 		try
 		{
-			Thread.sleep(3000L);
+			if(info.getID() == 0) Thread.sleep(3000L);
 		} 
 		catch (InterruptedException e1)
 		{
 			e1.printStackTrace();
 		}
-		info   = loadProperties();
-		alarms = loadAlarms();
 		info.setPixelAlphaSupport(pixelTranslucency);
 		info.setWindowAlphaSupport(wholeTranslucency);
 		info.setScreenshotSupport(robotSupport);
 		addComponentListener(this);
-		windowLoc    = new Point(0, 0);
+		pointerLoc    = new Point(0, 0);
 		locX  = (int)info.getLocation().getX();
 		locY  = (int)info.getLocation().getY();
 		cursorX  = cursorY = 0;
@@ -94,47 +111,90 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		sd    = new SimpleDateFormat(info.getZonedTimeFormat());
 		date  = new Date();
 		time  = sd.format(date);
+		UIManager.put("PopupMenu.background", Color.WHITE);
+		UIManager.put("MenuItem.background", Color.WHITE);
+		UIManager.put("CheckBoxMenuItem.background", Color.WHITE);
 		pMenu = new JPopupMenu("DeskTime Menu");
-		fore  = new JMenuItem("Font Format...");
-		fore.setBackground(Color.white);
+		mFormat = new JMenu("Format");
+		fore  = new JMenuItem("Font...");
 		fore.addActionListener(this);
 		back  = new JMenuItem("Background...");
-		back.setBackground(Color.white);
 		back.addActionListener(this);
 		bdr   = new JMenuItem("Borders & UI...");
-		bdr.setBackground(Color.white);
 		bdr.addActionListener(this);
-		tim   = new JMenuItem("Time Format...");
-		tim.setBackground(Color.white);
-		tim.addActionListener(this);
+		mFormat.add(fore);
+		mFormat.add(back);
+		mFormat.add(bdr);
+		timeMode = new JMenu("Time Mode");
+		miDigTime   = new JMenuItem("Digital clock");
+		miDigTime.addActionListener(this);
+		miUptime = new JMenuItem("System Up-time");
+		miUptime.addActionListener(this);
+		miPomo   = new JMenuItem("Pomodoro Timer");
+		miPomo.addActionListener(this);
+		timSet   = new JMenuItem("More settings...");
+		timSet.addActionListener(this);
+		timeMode.add(miDigTime);
+		timeMode.add(miUptime);
+		timeMode.add(miPomo);
+		timeMode.addSeparator();
+		timeMode.add(timSet);
+		timeZone = new JMenu("Timezone");
+		miSeltz  = new JMenuItem("Last selected");
+		miSeltz.addActionListener(this);
+		miDeftz  = new JMenuItem("System");
+		miDeftz.addActionListener(this);
+		timeZone.add(miSeltz);
+		timeZone.add(miDeftz);
+		timeZone.addSeparator();
+		impZon = new JMenuItem[impZoneList.length];
+		for (int i = 0; i < impZoneList.length; i++) {
+			impZon[i] = new JMenuItem(impZoneList[i]);
+			impZon[i].addActionListener(this);
+			impZon[i].setActionCommand("TZ-" + impZoneList[i].split("[\\(|\\)]")[1]);
+			timeZone.add(impZon[i]);
+		}
+		zonSet   = new JMenuItem("More Timezones...");
+		zonSet.addActionListener(this);
+		timeZone.addSeparator();
+		timeZone.add(zonSet);
 		alm   = new JMenuItem("Set Alarm...");
-		alm.setBackground(Color.white);
 		alm.addActionListener(this);
-		fix1  = new JCheckBoxMenuItem("Unmovable");
-		fix1.setBackground(Color.white);
+		fix1  = new JMenuItem("Unmovable");
+		fix1.setIcon(info.isFixed() ? checkPng : clearPng);
 		fix1.addActionListener(this);
-		ontop = new JCheckBoxMenuItem("Always on top");
-		ontop.setBackground(Color.white);
+		ontop = new JMenuItem("Always on top");
+		ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
 		ontop.addActionListener(this);
+		addPanel = new JMenu("Add panel");
+		addPanel.setIcon(plusPng);
+		newItem = new JMenuItem("New");
+		newItem.addActionListener(this);
+		dupItem = new JMenuItem("Duplicate");
+		dupItem.addActionListener(this);
+		addPanel.add(newItem);
+		addPanel.add(dupItem);
+		removePanel = new JMenuItem("Remove this panel", minusPng);
+		removePanel.addActionListener(this);
+		removePanel.setEnabled(info.getID() != 0);
 		about = new JMenuItem("About...");
-		about.setBackground(Color.white);
 		about.addActionListener(this);
 		exit  = new JMenuItem("Exit");
-		exit.setBackground(Color.white);
 		exit.addActionListener(this);
-		pMenu.add(fore);
-		pMenu.add(back);
-		pMenu.add(bdr);
-		pMenu.add(tim);
+		pMenu.add(timeMode);
+		pMenu.add(timeZone);
+		pMenu.add(mFormat);
 		pMenu.add(alm);
 		pMenu.addSeparator();
 		pMenu.add(fix1);
 		pMenu.add(ontop);
 		pMenu.addSeparator();
+		pMenu.add(addPanel);
+		pMenu.add(removePanel);
+		pMenu.addSeparator();
 		pMenu.add(about);
 		pMenu.add(exit);
 		pMenu.pack();
-		pMenu.setBackground(Color.white);
 		re_init();
 		tLabel.addMouseListener(this);
 	}
@@ -146,6 +206,9 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		metrics = tLabel.getFontMetrics(info.getFont());
 		tLabel.setForeground(info.getForeground());
 		tLabel.setBorder(info.getBorder());
+		miSeltz.setText("Last selected (" + info.getTimeZone() + ")");
+		miDeftz.setText("System (" + TimeZone.getDefault().getID() + ")");
+		timeZone.setEnabled(info.getDisplayMethod().endsWith("TZ"));
 		Rectangle screen = new Rectangle(scsize);
 		Point savedLocation = info.getLocation();
 		if (screen.contains(savedLocation))
@@ -214,10 +277,13 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			getRootPane().putClientProperty("Window.shadow", Boolean.TRUE);
 			stopRefresh();
 		}
-		resizingMethod(time);
+		if(info.getID() != 0) setVisible(true);
 		setRoundedCorners(info.hasRoundedCorners());
-		fix1.setSelected(info.isFixed());
-		ontop.setSelected(info.getOnTop());
+		fix1.setIcon(info.isFixed() ? checkPng : clearPng);
+		ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
+		miDigTime.setIcon(info.getDisplayMethod().endsWith("TZ") ? checkPng : clearPng);
+		miUptime.setIcon(info.getDisplayMethod().equals("UPTIME") ? checkPng : clearPng);
+		miPomo.setIcon(info.getDisplayMethod().equals("POMODORO") ? checkPng : clearPng);
 		lastPomTask = info.getPomodoroTask();
 		lastPomFormat = info.getPomodoroFormat();
 		timeDisplayConfig();
@@ -234,7 +300,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			time = sd.format(date = new Date());
 			resizingMethod(time);
 			if (info.hasTooltip())
-				tLabel.setToolTipText(dispString.equals("GMTTZ") ? tipGmt : tipCur);
+				tLabel.setToolTipText(tipCur.replace("Time of your location", info.getTimeZone()));
 			else
 				tLabel.setToolTipText(null);
 		}
@@ -256,7 +322,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 				resizingMethod(lstr3);
 
 			if (info.hasTooltip())
-				tLabel.setToolTipText(tipPom);
+				tLabel.setToolTipText(tipPom.replace("pomodoro task", info.getPomodoroTask()));
 			else
 				tLabel.setToolTipText(null);
 		}
@@ -298,76 +364,6 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		}
 	}
 
-	private InitInfo loadProperties()
-	{
-		InitInfo data = new InitInfo();
-		try
-		{
-			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream("DeskTime.xml")));
-			data = (InitInfo)decoder.readObject();
-			decoder.close();
-		}
-		catch (Exception exclusive)
-		{// Ignoring missing file...
-			System.out.println("File missing-\"DeskTime.xml\": " + exclusive.toString());
-			exclusive.printStackTrace();
-		}
-		return data;
-	}
-	
-	private void saveProperties(InitInfo status)
-	{
-		try
-		{
-			XMLEncoder xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream("DeskTime.xml")));
-			xencode.writeObject(status);
-			xencode.close();
-		}
-		catch (FileNotFoundException fne)
-		{
-			System.out.println("Exception while saving properties file-\"DeskTime.xml\": " + fne.toString());
-			fne.printStackTrace();
-		}
-	}
-	
-	private Vector<TimeBean> loadAlarms()
-	{
-		Vector<TimeBean> data = new Vector<TimeBean>();
-		try
-		{
-			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream("Smrala.xml")));
-			Object settingsObj = decoder.readObject();
-			decoder.close();
-			if (settingsObj instanceof Vector) {
-				Vector<?> tmpVec = (Vector<?>)settingsObj;
-				for (int cnt = 0; cnt < tmpVec.size(); cnt++) {
-					if (tmpVec.elementAt(cnt) instanceof TimeBean) data.add((TimeBean)tmpVec.elementAt(cnt));
-				}
-			}
-		}
-		catch (Exception exclusive)
-		{// Ignoring missing file...
-			System.out.println("Exception while loading properties file-\"Smarla.xml\": " + exclusive.getMessage());
-			exclusive.printStackTrace();
-		}
-		return data;
-	}
-	
-	private void saveAlarms(Vector <TimeBean>data)
-	{
-		try
-		{
-			XMLEncoder xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream("Smrala.xml")));
-			xencode.writeObject(data);
-			xencode.close();
-		}
-		catch (FileNotFoundException fne)
-		{
-			System.out.println("Exception while saving alarms file \"Smarla.xml\": " + fne.toString());
-			fne.printStackTrace();
-		}
-	}
-	
 	public void actionPerformed(ActionEvent actionevent)
 	{
 		lastPomTask   = info.getPomodoroTask();   //Since pomodoro change can be triggered with time tab,
@@ -380,8 +376,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.BORDER_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
-			saveAlarms(alarms);
-			saveProperties(info);
+			ExUtils.saveAlarms(alarms);
+			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
 		else if (obj.equals(fore))
@@ -389,8 +385,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.FONT_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
-			saveAlarms(alarms);
-			saveProperties(info);
+			ExUtils.saveAlarms(alarms);
+			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
 		else if (obj.equals(back))
@@ -398,17 +394,57 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.BACKGROUND_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
-			saveAlarms(alarms);
-			saveProperties(info);
+			ExUtils.saveAlarms(alarms);
+			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
-		else if (obj.equals(tim))
+		else if (obj.equals(miSeltz))
+		{
+			info.setDisplayMethod("GMTTZ");
+			ExUtils.saveDeskStops(info, deskstops);
+			re_init();
+		}
+		else if (obj.equals(miDeftz))
+		{
+			info.setDisplayMethod("CURTZ");
+			ExUtils.saveDeskStops(info, deskstops);
+			re_init();
+		}
+		else if (obj.equals(miDigTime))
+		{
+			if(info.getTimeZone().equals(TimeZone.getDefault().getID())) {
+				info.setDisplayMethod("CURTZ");
+			} else {
+				info.setDisplayMethod("GMTTZ");
+			}
+			ExUtils.saveDeskStops(info, deskstops);
+			re_init();
+		}
+		else if (obj instanceof JMenuItem && actionevent.getActionCommand().startsWith("TZ-"))
+		{
+			info.setTimeZone(actionevent.getActionCommand().split("-")[1]);
+			ExUtils.saveDeskStops(info, deskstops);
+			re_init();
+		}
+		else if (obj.equals(miUptime))
+		{
+			info.setDisplayMethod("UPTIME");
+			ExUtils.saveDeskStops(info, deskstops);
+			re_init();
+		}
+		else if (obj.equals(miPomo))
+		{
+			info.setDisplayMethod("POMODORO");
+			ExUtils.saveDeskStops(info, deskstops);
+			re_init();
+		}
+		else if (obj.equals(timSet) || obj.equals(zonSet))
 		{
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.TIMES_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
-			saveAlarms(alarms);
-			saveProperties(info);
+			ExUtils.saveAlarms(alarms);
+			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
 		else if (obj.equals(alm))
@@ -416,19 +452,21 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.ALARMS_TAB, info, alarms);
 			info         = trackChanges.INFORMATION;
 			alarms       = trackChanges.ALARMS;
-			saveAlarms(alarms);
-			saveProperties(info);
+			ExUtils.saveAlarms(alarms);
+			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
 		else if (obj.equals(fix1))
 		{
-			info.setFixed(fix1.isSelected());
-			saveProperties(info);
+			info.setFixed(!info.isFixed());
+			fix1.setIcon(info.isFixed() ? checkPng : clearPng);
+			ExUtils.saveDeskStops(info, deskstops);
 		}
 		else if (obj.equals(ontop))
 		{
-			info.setOnTop(ontop.isSelected());
-			saveProperties(info);
+			info.setOnTop(!info.getOnTop());
+			ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
+			ExUtils.saveDeskStops(info, deskstops);
 			setAlwaysOnTop(info.getOnTop());
 		}
 		else if (obj.equals(about))
@@ -449,6 +487,18 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 				e.printStackTrace();
 			}
 			System.exit(0);
+		}
+		else if (obj.equals(newItem))
+		{
+			DeskStop.createInstance(info, false);
+		}
+		else if (obj.equals(dupItem))
+		{
+			DeskStop.createInstance(info, true);
+		}
+		else if (obj.equals(removePanel))
+		{
+			DeskStop.removeInstance(this, info);
 		}
 		info.setPixelAlphaSupport(pixelTranslucency);
 		info.setWindowAlphaSupport(wholeTranslucency);
@@ -494,12 +544,19 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			cursorW = getWidth() - ((int)currPoint.getX());
 			cursorH = getHeight() - ((int)currPoint.getY());
 			// As sometimes unremoved listenenrs cause buggy movement.
-			for (MouseMotionListener mListener : tLabel.getMouseMotionListeners()) {
-				if (!(mListener instanceof ToolTipManager))
-					tLabel.removeMouseMotionListener(mListener);
+			for (MouseMotionListener mListener : tLabel.getMouseMotionListeners())
+			{
+				if (!(mListener instanceof ToolTipManager)) tLabel.removeMouseMotionListener(mListener);
 			}
-			if (!info.isFixed())
-				tLabel.addMouseMotionListener(this);
+			if (!info.isFixed()) tLabel.addMouseMotionListener(this);
+			if (cursorX <= scsize.width && cursorY <= scsize.height)
+			{
+				locX = getLocation().x;
+				locY = getLocation().y;
+				locW = scsize.width - (locX + getWidth());
+				locH = scsize.height - (locY + getHeight());
+				alreadyOutOfScreen = locX < 0 || locY < 0 || locW < 0 || locH < 0;
+			}	
 		}
 	}
 
@@ -520,7 +577,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			if (!info.getLocation().equals(newLocation))
 			{
 				info.setLocation(newLocation);
-				saveProperties(info);
+				ExUtils.saveDeskStops(info, deskstops);
 				refreshThread.refreshTransparency();
 			}
 			startRefresh();
@@ -530,15 +587,19 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	public void mouseDragged(MouseEvent mouseevent)
 	{
 		pi = MouseInfo.getPointerInfo();
-		windowLoc = pi.getLocation();
-		if (Math.abs(windowLoc.getX()) <= (double)scsize.width && Math.abs(windowLoc.getY()) <= (double)scsize.height)
+		pointerLoc = pi.getLocation();
+		if (Math.abs(pointerLoc.getX()) <= (double)scsize.width && Math.abs(pointerLoc.getY()) <= (double)scsize.height)
 		{
-			locX = (int)windowLoc.getX() - cursorX;
-			locY = (int)windowLoc.getY() - cursorY;
-			locW = (int)scsize.width - ((int)windowLoc.getX() + cursorW);
-			locH = (int)scsize.height - ((int)windowLoc.getY() + cursorH);
-			if (locX >= 0 && locY >= 0 && locW >= 0 && locH >= 0)
+			locX = (int)pointerLoc.getX() - cursorX;
+			locY = (int)pointerLoc.getY() - cursorY;
+			locW = (int)scsize.width - ((int)pointerLoc.getX() + cursorW);
+			locH = (int)scsize.height - ((int)pointerLoc.getY() + cursorH);
+			if (allowMoveOutOfScreen || locX >= 0 && locY >= 0 && locW >= 0 && locH >= 0)
+			{
 				setLocation(locX, locY);
+				alreadyOutOfScreen = false;
+			}
+			else if (alreadyOutOfScreen) setLocation(locX, locY);
 		}
 		refreshNow = false;
 		stopRefresh();
@@ -844,9 +905,70 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		}
 	}
 
+	public static void createInstance(InitInfo reference, boolean duplicate)
+	{
+		int ids[] = new int[deskstops.size()];
+		int newid = 0;
+		for (int cnt = 0; cnt < deskstops.size(); cnt++) {
+			ids[cnt] = deskstops.get(cnt).getID();
+		}
+		Arrays.sort(ids);
+		for (int cnt = 0; cnt < deskstops.size(); cnt++) {
+			if (cnt != ids[cnt]) {
+				newid = cnt;
+				break;
+			}
+		}
+		InitInfo initInfo = duplicate ? (InitInfo)reference.clone() : new InitInfo();
+		initInfo.setID(newid > 0 ? newid : deskstops.size());
+		Point refLocation = reference.getLocation();
+		initInfo.setLocation(new Point(refLocation.x + 10, refLocation.y + 10));
+		Vector<TimeBean> allTimeBeans = ExUtils.loadAlarms();
+		DeskStop deskstop = new DeskStop(initInfo, allTimeBeans);
+		deskstop.start();
+		deskstops.add(initInfo);
+		ExUtils.saveDeskStops(deskstops);
+	}
+
+	public static void removeInstance(DeskStop deskStop, InitInfo initInfo)
+	{
+		deskStop.clockThread.terminate();
+		for (int cnt = 0; cnt < deskstops.size(); cnt++)
+		{
+			if (deskstops.get(cnt).getID() == initInfo.getID() && initInfo.getID() != 0)
+			{
+				deskstops.remove(cnt);
+				ExUtils.saveDeskStops(deskstops);
+			}
+		}
+		try
+		{
+			deskStop.clockThread.join();
+		} 
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		deskStop.dispose();
+	}
+
 	public static void main(String args[])
 	{
-		DeskStop deskstop = new DeskStop();
-		deskstop.start();
+		deskstops = ExUtils.loadDeskStops();
+		Vector<TimeBean> allTimeBeans = ExUtils.loadAlarms();
+		int count = 0;
+		do {
+			InitInfo initInfo;
+			if (deskstops.isEmpty()) {
+				initInfo = new InitInfo();
+				deskstops.add(initInfo);
+				ExUtils.saveDeskStops(initInfo, deskstops);
+			} else {
+				initInfo = deskstops.get(count);
+			}
+			DeskStop deskstop = new DeskStop(initInfo, allTimeBeans);
+			deskstop.start();
+			count++;
+		} while (count < deskstops.size());
 	}
 }

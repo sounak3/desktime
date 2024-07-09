@@ -1,67 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <java version="1.8.0_402" class="java.beans.XMLDecoder">
- <object class="com.sounaks.desktime.InitInfo" id="InitInfo0">
-  <void method="put">
-   <string>TIMEZONE</string>
-   <string>Asia/Calcutta</string>
-  </void>
-  <void method="put">
-   <string>FOREGROUND</string>
-   <object class="java.awt.Color">
-    <int>204</int>
-    <int>0</int>
-    <int>0</int>
-    <int>255</int>
-   </object>
-  </void>
-  <void method="put">
-   <string>BACKGROUND</string>
-   <object class="java.awt.Color">
-    <int>51</int>
-    <int>255</int>
-    <int>102</int>
-    <int>255</int>
-   </object>
-  </void>
-  <void method="put">
-   <string>FONT</string>
-   <object class="java.awt.Font">
-    <string>Courier New Bold</string>
-    <int>0</int>
-    <int>24</int>
-   </object>
-  </void>
-  <void id="Point0" method="get">
-   <string>LOCATION</string>
-   <void class="java.awt.Point" method="getField">
-    <string>x</string>
-    <void method="set">
-     <object idref="Point0"/>
-     <int>701</int>
+ <object class="java.util.ArrayList">
+  <void method="add">
+   <object class="com.sounaks.desktime.InitInfo" id="InitInfo0">
+    <void method="put">
+     <string>IMAGEFILE</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\BabyBlue.JPG</string>
     </void>
-   </void>
-   <void class="java.awt.Point" method="getField">
-    <string>y</string>
-    <void method="set">
-     <object idref="Point0"/>
-     <int>106</int>
+    <void method="put">
+     <string>UPTIME_FORMAT</string>
+     <string>&apos;Up-Time: &apos;DD&apos;-day(s), &apos;HH&apos;-hour(s), &apos;mm&apos;-minute(s), &apos;ss&apos;-second(s)&apos;</string>
     </void>
-   </void>
-  </void>
-  <void id="Boolean0" method="get">
-   <string>POMODORO_LEAD_LABEL</string>
-  </void>
-  <void method="put">
-   <string>USING_IMAGE</string>
-   <object idref="Boolean0"/>
-  </void>
-  <void method="put">
-   <string>IMAGEFILE</string>
-   <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\BabyBlue.JPG</string>
-  </void>
-  <void method="put">
-   <string>OPACITY</string>
-   <float>0.2</float>
+    <void method="put">
+     <string>TIMEZONE</string>
+     <string>CET</string>
+    </void>
+    <void id="Integer0" method="get">
+     <string>PANEL_ID</string>
+    </void>
+    <void method="put">
+     <string>FONT</string>
+     <object class="java.awt.Font">
+      <string>Courier New Bold</string>
+      <object idref="Integer0"/>
+      <int>16</int>
+     </object>
+    </void>
+    <void id="Point0" method="get">
+     <string>LOCATION</string>
+     <void class="java.awt.Point" method="getField">
+      <string>x</string>
+      <void method="set">
+       <object idref="Point0"/>
+       <int>936</int>
+      </void>
+     </void>
+     <void class="java.awt.Point" method="getField">
+      <string>y</string>
+      <void method="set">
+       <object idref="Point0"/>
+       <int>56</int>
+      </void>
+     </void>
+    </void>
+   </object>
   </void>
  </object>
 </java>
