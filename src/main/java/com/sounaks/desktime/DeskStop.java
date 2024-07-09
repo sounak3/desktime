@@ -32,10 +32,12 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private JMenuItem miDigTime,miUptime,miPomo,miSeltz,miDeftz,timSet,zonSet,impZon[];
 	private JMenuItem fore,back,alm,bdr,exit,about,newItem,dupItem,removePanel,fix1,ontop;
 	private PointerInfo pi;
-	private Point windowLoc;
+	private Point pointerLoc;
 	private Dimension scsize;
 	protected Robot robot;
 	private   boolean refreshNow  = true;
+	private   boolean allowMoveOutOfScreen = false;
+	private   boolean alreadyOutOfScreen = false;
 	private boolean pixelTranslucency, wholeTranslucency, robotSupport;
 	private Pomodoro pom;
 	private Container contentPane;
@@ -101,7 +103,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		info.setWindowAlphaSupport(wholeTranslucency);
 		info.setScreenshotSupport(robotSupport);
 		addComponentListener(this);
-		windowLoc    = new Point(0, 0);
+		pointerLoc    = new Point(0, 0);
 		locX  = (int)info.getLocation().getX();
 		locY  = (int)info.getLocation().getY();
 		cursorX  = cursorY = 0;
@@ -542,12 +544,19 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			cursorW = getWidth() - ((int)currPoint.getX());
 			cursorH = getHeight() - ((int)currPoint.getY());
 			// As sometimes unremoved listenenrs cause buggy movement.
-			for (MouseMotionListener mListener : tLabel.getMouseMotionListeners()) {
-				if (!(mListener instanceof ToolTipManager))
-					tLabel.removeMouseMotionListener(mListener);
+			for (MouseMotionListener mListener : tLabel.getMouseMotionListeners())
+			{
+				if (!(mListener instanceof ToolTipManager)) tLabel.removeMouseMotionListener(mListener);
 			}
-			if (!info.isFixed())
-				tLabel.addMouseMotionListener(this);
+			if (!info.isFixed()) tLabel.addMouseMotionListener(this);
+			if (cursorX <= scsize.width && cursorY <= scsize.height)
+			{
+				locX = getLocation().x;
+				locY = getLocation().y;
+				locW = scsize.width - (locX + getWidth());
+				locH = scsize.height - (locY + getHeight());
+				alreadyOutOfScreen = locX < 0 || locY < 0 || locW < 0 || locH < 0;
+			}	
 		}
 	}
 
@@ -578,15 +587,19 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	public void mouseDragged(MouseEvent mouseevent)
 	{
 		pi = MouseInfo.getPointerInfo();
-		windowLoc = pi.getLocation();
-		if (Math.abs(windowLoc.getX()) <= (double)scsize.width && Math.abs(windowLoc.getY()) <= (double)scsize.height)
+		pointerLoc = pi.getLocation();
+		if (Math.abs(pointerLoc.getX()) <= (double)scsize.width && Math.abs(pointerLoc.getY()) <= (double)scsize.height)
 		{
-			locX = (int)windowLoc.getX() - cursorX;
-			locY = (int)windowLoc.getY() - cursorY;
-			locW = (int)scsize.width - ((int)windowLoc.getX() + cursorW);
-			locH = (int)scsize.height - ((int)windowLoc.getY() + cursorH);
-			if (locX >= 0 && locY >= 0 && locW >= 0 && locH >= 0)
+			locX = (int)pointerLoc.getX() - cursorX;
+			locY = (int)pointerLoc.getY() - cursorY;
+			locW = (int)scsize.width - ((int)pointerLoc.getX() + cursorW);
+			locH = (int)scsize.height - ((int)pointerLoc.getY() + cursorH);
+			if (allowMoveOutOfScreen || locX >= 0 && locY >= 0 && locW >= 0 && locH >= 0)
+			{
 				setLocation(locX, locY);
+				alreadyOutOfScreen = false;
+			}
+			else if (alreadyOutOfScreen) setLocation(locX, locY);
 		}
 		refreshNow = false;
 		stopRefresh();
