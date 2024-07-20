@@ -9,56 +9,53 @@ public class TLabel extends JLabel
 
 	private Graphics2D g2;
 	private Image image, backupImage;
-	private int position;
+	private int position, inuse, analogClockOptions;
 	protected boolean hasImage;
 	protected boolean forceTrans;
-	public static final int V_TILE  = 1;
-	public static final int H_TILE  = 2;
-	public static final int CENTER  = 4;
-	public static final int STRETCH = 8;
-	public static final int FIT     = 16;
-	public static final int TILE    = 32;
-	private int inuse;
-	private int labelWidth;
-	private int labelHeight;
-	private int imgWidth;
-	private int imgHeight;
+	public static final int V_TILE        = 1;
+	public static final int H_TILE        = 2;
+	public static final int CENTER        = 4;
+	public static final int STRETCH       = 8;
+	public static final int FIT           = 16;
+	public static final int TILE          = 32;
+	public static final int SHOW_AM_PM    = 1000;
+	public static final int SHOW_TIMEZONE = 2000;
+	public static final int SHOW_AM_PM_TZ = 4000;
+	public final int gap                  = 5;
+	private int labelWidth, labelHeight, imgWidth, imgHeight;
 	private double aspectWidth;
 	private double aspectHeight;
 	private Dimension newWH;
+	private int time_hr, time_mn, time_sc;
+	private boolean clockMode;
+	private String time_zn, time_ampm;
+	private FontMetrics fm;
+	private Font anaClkFnt;
 
 	public TLabel(String s, Image image1)
 	{
-		super(s, 0);
+		this(s);
 		hasImage    = (image1 != null);
-		forceTrans  = false;
 		image       = image1;
 		backupImage = image1;
 		position    = TLabel.STRETCH;
-		g2          = (Graphics2D)super.getGraphics();
-		setOpaque(false);
-		setVerticalAlignment(0);
 	}
 
 	public TLabel(String s, Image image1, int i)
 	{
-		super(s, 0);
+		this(s);
 		hasImage = (image1 != null);
 		if (i == 4 || i == 2 || i == 1 || i == 8 || i == 16 || i == 32)
 			position = i;
 		else
 			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
-		forceTrans  = false;
 		image       = image1;
 		backupImage = image1;
-		g2          = (Graphics2D)super.getGraphics();
-		setOpaque(false);
-		setVerticalAlignment(0);
 	}
 
 	public TLabel(String s, Image image1, int i, boolean forceTrans)
 	{
-		super(s, 0);
+		this(s);
 		hasImage = (image1 != null);
 		if (i == 4 || i == 2 || i == 1 || i == 8 || i == 16 || i == 32)
 			position = i;
@@ -67,19 +64,79 @@ public class TLabel extends JLabel
 		this.forceTrans = forceTrans;
 		image           = image1;
 		backupImage     = image1;
-		g2              = (Graphics2D)super.getGraphics();
-		setOpaque(false);
-		setVerticalAlignment(0);
 	}
 
 	public TLabel(String s)
 	{
 		super(s, 0);
-		hasImage        = false;
-		this.forceTrans = false;
-		g2              = (Graphics2D)super.getGraphics();
+		hasImage   = false;
+		forceTrans = false;
+		g2         = (Graphics2D)super.getGraphics();
+		fm         = getFontMetrics(getFont());
+		anaClkFnt  = getFont().deriveFont(getFont().getSize() >= 10 ? getFont().getSize() - 4 : getFont().getSize());
 		setOpaque(false);
 		setVerticalAlignment(0);
+		time_hr   = 10;
+		time_mn   = 10;
+		time_sc   = 5;
+		time_ampm = "";
+		time_zn   = "";
+		clockMode = false;
+	}
+
+	public void setTime(int hour, int min, int sec, String ampm, String timeZone)
+	{
+		time_hr         = hour;
+		time_mn         = min;
+		time_sc         = sec;
+		time_ampm       = ampm;
+		time_zn         = timeZone;
+		repaint();
+	}
+
+	public void setTime(String hour, String min, String sec, String ampm, String timeZone)
+	{
+		time_hr = Integer.parseInt(hour);
+		time_mn = Integer.parseInt(min);
+		time_sc = Integer.parseInt(sec);
+		this.setTime(time_hr, time_mn, time_sc, ampm, timeZone);
+	}
+
+	public void setAnalogClockOptions(int clockOptions)
+	{
+		analogClockOptions = clockOptions;
+	}
+
+	public int getAnalogClockOptions()
+	{
+		return analogClockOptions;
+	}
+
+	public boolean isClockMode()
+	{
+		return clockMode;
+	}
+
+	public void setClockMode(boolean analog)
+	{
+		clockMode = analog;
+	}
+
+	private void drawRadius(double r1, double r2, int degrees)
+	{
+		int xCenter = (labelWidth - 2 * gap) / 2;
+		int yCenter = (labelHeight - 2 * gap)/ 2;
+		int radius  = Math.min(xCenter, yCenter);
+		int diff    = Math.abs(xCenter - yCenter);
+		double radians = (degrees - 90) * 2 * Math.PI / 360;  // 0 deg = 12:00
+		double xr = Math.cos(radians);
+		double yr = Math.sin(radians);
+		int xr1 = (int)(radius * xr * r1) + gap;  // line endpoints relative to center
+		int yr1 = (int)(radius * yr * r1) + gap;
+		int xr2 = (int)(radius * xr * r2) + gap;
+		int yr2 = (int)(radius * yr * r2) + gap;
+		if (xCenter > yCenter) g2.drawLine(radius + xr1 + diff, radius + yr1, radius + xr2 + diff, radius + yr2);
+		else g2.drawLine(radius + xr1, radius + yr1 + diff, radius + xr2, radius + yr2 + diff);
 	}
 
 	public boolean containsImage()
@@ -144,12 +201,13 @@ public class TLabel extends JLabel
 	protected void paintComponent(Graphics g)
 	{
 		g2 = (Graphics2D)g;
+		labelWidth   = getWidth();
+		labelHeight  = getHeight();
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+
 		if (hasImage)
 		{
-			labelWidth   = getWidth();
-			labelHeight  = getHeight();
 			imgWidth     = image.getWidth(this);
 			imgHeight    = image.getHeight(this);
 			aspectWidth  = (double)Math.max(labelWidth, imgWidth) / (double)Math.min(labelWidth, imgWidth);
@@ -231,6 +289,54 @@ public class TLabel extends JLabel
 				}
 			}
 		}
+
+		if (clockMode) {
+			int xCenter = (labelWidth - 2 * gap) / 2;
+			int yCenter = (labelHeight - 2 * gap)/ 2;
+			int radius  = Math.min(xCenter, yCenter);
+			float stroke  = (float)radius / 50;
+
+			g2.setColor(getForeground());
+			g2.setStroke(new BasicStroke(stroke * 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			g2.drawOval(xCenter - radius + gap, yCenter - radius + gap, 2 * radius, 2 * radius);
+			for (int i = 0; i < 360; i+=30)
+				drawRadius(0.9, 1.0, i);
+
+			g2.setFont(anaClkFnt);
+			switch (analogClockOptions) {
+				case TLabel.SHOW_AM_PM:
+				g2.drawString(time_ampm, xCenter + gap - fm.stringWidth(time_ampm)/2, yCenter + gap + yCenter / 2);
+				break;
+
+				case TLabel.SHOW_TIMEZONE:
+				g2.drawString(time_zn, xCenter + gap - Math.round(fm.stringWidth(time_zn)/2), gap + Math.round(yCenter / 2));
+				break;
+
+				case TLabel.SHOW_AM_PM_TZ:
+				g2.drawString(time_ampm, xCenter + gap - fm.stringWidth(time_ampm)/2, yCenter + gap + yCenter / 2);
+				g2.drawString(time_zn, xCenter + gap - Math.round(fm.stringWidth(time_zn)/2), gap + Math.round(yCenter / 2));
+				break;
+
+				default:
+				g2.drawString(time_zn, xCenter + gap - Math.round(fm.stringWidth(time_zn)/2), gap + yCenter / 2);
+				break;
+			}
+			// if (visibility == TLabel.SHOW_AM_PM || visibility == TLabel.SHOW_AM_PM_TZ)
+			// 	g2.drawString(time_ampm, xCenter + gap - fm.stringWidth(time_ampm)/2, yCenter + gap + yCenter / 2);
+			// if (visibility == TLabel.SHOW_TIMEZONE || visibility == TLabel.SHOW_AM_PM_TZ)
+			// 	g2.drawString(time_zn, xCenter + gap - Math.round(fm.stringWidth(time_zn)/2), gap + yCenter / 2);
+
+			g2.setStroke(new BasicStroke(stroke * 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			drawRadius(0, 0.7, time_sc * 6);  // Second hand
+			g2.setStroke(new BasicStroke(stroke * 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			drawRadius(0, 0.8, time_mn * 6 + time_sc / 10);  // Minutes
+			g2.setStroke(new BasicStroke(stroke * 3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			drawRadius(0, 0.5, time_hr * 30 + time_mn / 2);
+			int doubleStroke = Math.round(2 * stroke);
+			g2.fillOval(gap + xCenter - doubleStroke, gap + yCenter - doubleStroke , 2 * doubleStroke, 2 * doubleStroke);
+		}
+
 		super.paintComponent(g2);
+		g2.dispose();
 	}
 }

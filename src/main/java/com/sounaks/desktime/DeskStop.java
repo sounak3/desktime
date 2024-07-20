@@ -29,16 +29,14 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private Vector <TimeBean>alarms;
 	private JPopupMenu pMenu;
 	private JMenu addPanel,mFormat,timeMode,timeZone;
-	private JMenuItem miDigTime,miUptime,miPomo,miSeltz,miDeftz,timSet,zonSet,impZon[];
-	private JMenuItem fore,back,alm,bdr,exit,about,newItem,dupItem,removePanel,fix1,ontop;
+	private JMenuItem miAnaTime,miDigTime,miUptime,miPomo,miSeltz,miDeftz,timSet,zonSet,impZon[];
+	private JMenuItem fore,back,alm,bdr,exit,about,newItem,dupItem,removePanel,miMovable,ontop;
 	private PointerInfo pi;
 	private Point pointerLoc;
 	private Dimension scsize;
 	protected Robot robot;
-	private   boolean refreshNow  = true;
-	private   boolean allowMoveOutOfScreen = false;
-	private   boolean alreadyOutOfScreen = false;
-	private boolean pixelTranslucency, wholeTranslucency, robotSupport;
+	private boolean refreshNow = true;
+	private boolean pixelTranslucency, wholeTranslucency, robotSupport, allowMoveOutOfScreen, alreadyOutOfScreen;
 	private Pomodoro pom;
 	private Container contentPane;
 	private String tipCur = "<html><b>Currently Displaying:</b> Time of your location (Time-Zone) time. <p>(This is with reference to system time and not internet).</html>";
@@ -128,6 +126,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		timeMode = new JMenu("Time Mode");
 		miDigTime   = new JMenuItem("Digital clock");
 		miDigTime.addActionListener(this);
+		miAnaTime   = new JMenuItem("Analog clock");
+		miAnaTime.addActionListener(this);
 		miUptime = new JMenuItem("System Up-time");
 		miUptime.addActionListener(this);
 		miPomo   = new JMenuItem("Pomodoro Timer");
@@ -135,6 +135,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		timSet   = new JMenuItem("More settings...");
 		timSet.addActionListener(this);
 		timeMode.add(miDigTime);
+		timeMode.add(miAnaTime);
 		timeMode.add(miUptime);
 		timeMode.add(miPomo);
 		timeMode.addSeparator();
@@ -160,9 +161,9 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		timeZone.add(zonSet);
 		alm   = new JMenuItem("Set Alarm...");
 		alm.addActionListener(this);
-		fix1  = new JMenuItem("Unmovable");
-		fix1.setIcon(info.isFixed() ? checkPng : clearPng);
-		fix1.addActionListener(this);
+		miMovable  = new JMenuItem("Movable");
+		miMovable.setIcon(info.isFixed() ? clearPng : checkPng);
+		miMovable.addActionListener(this);
 		ontop = new JMenuItem("Always on top");
 		ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
 		ontop.addActionListener(this);
@@ -186,7 +187,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		pMenu.add(mFormat);
 		pMenu.add(alm);
 		pMenu.addSeparator();
-		pMenu.add(fix1);
+		pMenu.add(miMovable);
 		pMenu.add(ontop);
 		pMenu.addSeparator();
 		pMenu.add(addPanel);
@@ -279,9 +280,10 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		}
 		if(info.getID() != 0) setVisible(true);
 		setRoundedCorners(info.hasRoundedCorners());
-		fix1.setIcon(info.isFixed() ? checkPng : clearPng);
+		miMovable.setIcon(info.isFixed() ? clearPng : checkPng);
 		ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
-		miDigTime.setIcon(info.getDisplayMethod().endsWith("TZ") ? checkPng : clearPng);
+		miDigTime.setIcon(info.getDisplayMethod().endsWith("TZ") && !info.isAnalogClock() ? checkPng : clearPng);
+		miAnaTime.setIcon(info.getDisplayMethod().endsWith("TZ") && info.isAnalogClock() ? checkPng : clearPng);
 		miUptime.setIcon(info.getDisplayMethod().equals("UPTIME") ? checkPng : clearPng);
 		miPomo.setIcon(info.getDisplayMethod().equals("POMODORO") ? checkPng : clearPng);
 		lastPomTask = info.getPomodoroTask();
@@ -298,7 +300,18 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			sd   = new SimpleDateFormat(info.getZonedTimeFormat());
 			sd.setTimeZone(dispString.equals("GMTTZ") ? TimeZone.getTimeZone(info.getTimeZone()) : TimeZone.getDefault());
 			time = sd.format(date = new Date());
-			resizingMethod(time);
+			if (info.isAnalogClock())
+			{
+				tLabel.setText("");
+				tLabel.setClockMode(true);
+				resizingMethod("");
+			}
+			else
+			{
+				tLabel.setText(time);
+				tLabel.setClockMode(false);
+				resizingMethod(time);
+			}
 			if (info.hasTooltip())
 				tLabel.setToolTipText(tipCur.replace("Time of your location", info.getTimeZone()));
 			else
@@ -307,6 +320,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		else if (dispString.equals("POMODORO"))
 		{
 			// Only create new pomodoro object if earlier was not present, else refer existing one.
+			tLabel.setClockMode(false);
 			if (pom == null || !lastPomTask.equals(info.getPomodoroTask()) || !lastPomFormat.equals(info.getPomodoroFormat()))
 				pom  = new Pomodoro(info.getPomodoroTask());
 			time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(info.isPomodoroCountdown()), info.getPomodoroFormat(), pom.getRunningLabel(), info.isPomodoroLeadingLabel());
@@ -328,6 +342,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		}
 		else if (dispString.equals("UPTIME"))
 		{
+			tLabel.setClockMode(false);
 			time = ExUtils.formatUptime(Duration.ofNanos(System.nanoTime()), info.getUpTimeFormat());
 			resizingMethod(time);
 			if (info.hasTooltip())
@@ -339,14 +354,19 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 
 	private void resizingMethod(String lstr)
 	{
-		if (lstr == null || lstr.isEmpty())
-			lstr = time;
-		char mChar[] = new char[lstr.length()];
-		for (int k = 0; k < lstr.length(); k++)
+		int dialToFontRatio = 15;
+		int strLength = 0;
+		// if (lstr == null || lstr.isEmpty())
+		// 	lstr = time;
+		if (info.isAnalogClock() && info.getDisplayMethod().endsWith("TZ")) strLength = dialToFontRatio;
+		else strLength = lstr.length();
+		char mChar[] = new char[strLength];
+		for (int k = 0; k < strLength; k++)
 			mChar[k] ='8'; // Coz its the medium char generally :)
 		int k = Math.round(metrics.stringWidth(new String(mChar)));
 		int i = Math.round(metrics.stringWidth(lstr)) + 10;
 		int j = Math.round(metrics.getHeight()) + 5;
+		if (info.isAnalogClock() && info.getDisplayMethod().endsWith("TZ")) j = i > k ? i : k;
 		tLabel.setSize(i > k ? i : k, j);  // normal string or string of '8'
 		setSize(i > k ? i : k, j);  // whichever gr8er;
 	}
@@ -410,13 +430,14 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
-		else if (obj.equals(miDigTime))
+		else if (obj.equals(miDigTime) || obj.equals(miAnaTime))
 		{
 			if(info.getTimeZone().equals(TimeZone.getDefault().getID())) {
 				info.setDisplayMethod("CURTZ");
 			} else {
 				info.setDisplayMethod("GMTTZ");
 			}
+			info.setAnalogClock(obj.equals(miAnaTime));
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
@@ -456,10 +477,10 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
-		else if (obj.equals(fix1))
+		else if (obj.equals(miMovable))
 		{
 			info.setFixed(!info.isFixed());
-			fix1.setIcon(info.isFixed() ? checkPng : clearPng);
+			miMovable.setIcon(info.isFixed() ? clearPng : checkPng);
 			ExUtils.saveDeskStops(info, deskstops);
 		}
 		else if (obj.equals(ontop))
@@ -643,6 +664,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			String   curLabel    = "";
 			Player   runPlayer   = null;
 			int      soundRunSec = 60;
+			SimpleDateFormat clk = new SimpleDateFormat("zzz':'hh':'mm':'ss':'a");
+			String clockTime[]   = new String[5];
 			if(pom != null) 
 				curLabel = pom.getRunningLabel();
 			for (Thread thread = Thread.currentThread(); clockThread == thread && timerun;)
@@ -655,6 +678,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 					{
 						Duration uptimeNow = Duration.ofNanos(System.nanoTime());
 						time = ExUtils.formatUptime(uptimeNow, info.getUpTimeFormat());
+						tLabel.setText(time);
 						gcal.setTime(startTime);
 						gcal.add(Calendar.SECOND, (int)uptimeNow.getSeconds());
 						date = gcal.getTime();
@@ -672,6 +696,15 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 						gcal.setTime(date);
 						int curMin = gcal.get(Calendar.MINUTE);
 						int curSec = gcal.get(Calendar.SECOND);
+						if (info.isAnalogClock())
+						{
+							clk.setTimeZone(sd.getTimeZone());
+							clockTime = clk.format(date).split(":");
+							tLabel.setText("");
+							tLabel.setTime(clockTime[1], clockTime[2], clockTime[3], clockTime[4], clockTime[0]);
+						}
+						else
+							tLabel.setText(time);
 						if (curMin == 0 && curSec == 0)
 						{
 							if (runPlayer != null) SoundPlayer.stopAudio(runPlayer);
@@ -684,6 +717,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 						if (pom == null || !lastPomTask.equals(info.getPomodoroTask()) || !lastPomFormat.equals(info.getPomodoroFormat()))
 							pom  = new Pomodoro(info.getPomodoroTask());
 						time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(info.isPomodoroCountdown()), info.getPomodoroFormat(), pom.getRunningLabel(), info.isPomodoroLeadingLabel());
+						tLabel.setText(time);
 						if (!curLabel.equals(pom.getRunningLabel())) // compare with stored label as below
 						{
 							if (runPlayer != null) SoundPlayer.stopAudio(runPlayer);
@@ -702,7 +736,6 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 						}
 						curLabel = pom.getRunningLabel();
 					}
-					tLabel.setText(time);
 					checkTimeAndRunAlarm(date);
 					Thread.sleep(1000L);
 				}

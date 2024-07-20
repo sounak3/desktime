@@ -12,8 +12,25 @@
      <string>&apos;Up-Time: &apos;DD&apos;-day(s), &apos;HH&apos;-hour(s), &apos;mm&apos;-minute(s), &apos;ss&apos;-second(s)&apos;</string>
     </void>
     <void method="put">
+     <string>ZTIME_FORMAT</string>
+     <string>K:mm a, z</string>
+    </void>
+    <void method="put">
+     <string>DISPLAY_METHOD</string>
+     <string>GMTTZ</string>
+    </void>
+    <void method="put">
+     <string>BACKGROUND</string>
+     <object class="java.awt.Color">
+      <int>102</int>
+      <int>255</int>
+      <int>255</int>
+      <int>255</int>
+     </object>
+    </void>
+    <void method="put">
      <string>TIMEZONE</string>
-     <string>CET</string>
+     <string>CST6CDT</string>
     </void>
     <void id="Integer0" method="get">
      <string>PANEL_ID</string>
@@ -26,22 +43,46 @@
       <int>16</int>
      </object>
     </void>
+    <void id="Boolean0" method="get">
+     <string>SLOW_TRANS</string>
+    </void>
+    <void method="put">
+     <string>USING_IMAGE</string>
+     <object idref="Boolean0"/>
+    </void>
     <void id="Point0" method="get">
      <string>LOCATION</string>
      <void class="java.awt.Point" method="getField">
       <string>x</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>936</int>
+       <int>725</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>56</int>
+       <int>186</int>
       </void>
      </void>
+    </void>
+    <void method="put">
+     <string>BORDER</string>
+     <object class="javax.swing.border.LineBorder">
+      <object class="java.awt.Color" id="Color0">
+       <int>255</int>
+       <int>0</int>
+       <int>0</int>
+       <int>255</int>
+      </object>
+      <int>2</int>
+      <boolean>false</boolean>
+     </object>
+    </void>
+    <void method="put">
+     <string>LINE_COLOR</string>
+     <object idref="Color0"/>
     </void>
    </object>
   </void>

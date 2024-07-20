@@ -42,6 +42,7 @@ public class InitInfo extends Hashtable<String, Object>
 		put("ZTIME_FORMAT", "zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy");
 		put("POMODORO_TASK", "25 min. work, 5 min. break, 30 min. rest");
 		put("TIMEZONE", "GMT");
+		put("ANALOG_CLOCK", false);
 		put("TOOLTIP", true);
 		put("NATIVE_LOOK", false);
 		put("FIXED", false);
@@ -59,6 +60,16 @@ public class InitInfo extends Hashtable<String, Object>
 		put("POMO_BREAK_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "bright-phone-ringing-3-152490.mp3");
 		put("POMO_REST_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "chiptune-alarm-clock-112869.mp3");
 		put("PANEL_ID", 0);
+	}
+
+	public boolean isAnalogClock()
+	{
+		return ((Boolean)get("ANALOG_CLOCK")).booleanValue();
+	}
+
+	public void setAnalogClock(boolean analog)
+	{
+		put("ANALOG_CLOCK", analog);
 	}
 
 	public int getID()

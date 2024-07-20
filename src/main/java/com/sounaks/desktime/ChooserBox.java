@@ -17,18 +17,18 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JTabbedPane tabPane;
 	private ListChooser cFontList,cFontStyleList,cFontSizeList;
 	private JButton resetFont,selFontCol,resFontCol;
-	private TLabel fontPreview;
+	private TLabel fontPreview,jLDigiPreview,jLAnaPreview;
 	private BorderPreview borderPreview;
 	private JRadioButton bRaised,bLowered,eRaised,eLowered,lBorder;
-	private JCheckBox nBorder,fixPlace,enTooltip,nativeLook,roundBdr;
+	private JCheckBox nBorder,cbMovable,enTooltip,nativeLook,roundBdr;
 	private JButton selLineCol,resLineCol;
 	private JComboBox<String> comboTz, comboDateFmt, comboPomodoro, comboPomFmt;
 	private JRadioButton selTimeZone,sysUpTime,pomodoroTime;
 	private JLabel layLabel, jLUptimeTxt, jLHourTxt, jLMinTxt, jLSecTxt, tzLabel;
-	private JCheckBox tzCb, cbPomLabel, cbPomCountdown, cbShowDays;
+	private JCheckBox analogCb, tzCb, cbPomLabel, cbPomCountdown, cbShowDays;
 	private JComboBox<String> dSymbol, uSymbol, hSymbol, mSymbol, sSymbol;
 	private JButton resetDefs,helpFormat;
-	private JLabel transSlide,previewLabel,jLDateFormat,jLPomFormat;
+	private JLabel transSlide,jLDateFormat,jLPomFormat;
 	private JSlider transLevel;
 	private JCheckBox useImg,useCol,useTrans,slowUpd;
 	private ImageFileList imgFileList;
@@ -39,7 +39,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JLabel jLAlmSame, jLAlmDays, jLAlmHrs;
 	private SoundPlayer sndHour, sndUptime, sndWork, sndBrk, sndRest, sndToRun;
 	private JButton add,remove,edit,test;
-	private JPanel bottomCards;
+	private JPanel bottomCards, digitalPanel, analogPanel;
 	private JComboBox<String> period, dateOrWeek;
 	private JCheckBox rept,runSnd,runMsg;
 	private JTextField alarmName;
@@ -116,14 +116,14 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		resLineCol = new JButton("Reset", new ButtonIcon(ButtonIcon.RECTANGLE, getBackground()));
 		resLineCol.setActionCommand("Default Line Color");
 		JSeparator jseparator2 = new JSeparator();
-		fixPlace   = new JCheckBox("Unmovable");
+		cbMovable   = new JCheckBox("Movable");
 		roundBdr   = new JCheckBox("Round Corners");
 		enTooltip  = new JCheckBox("Mouse-over Time info");
 		nativeLook = new JCheckBox("Check to view this in system's look and feel");
 		jpanel1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Looks and Borders"));
 		//All configurations for Time Conf. Panel as follows:
 		JPanel    jpanel2      = new JPanel(new GridBagLayout());
-		Component component1   = Box.createHorizontalStrut(160);
+		// Component component1   = Box.createHorizontalStrut(160);
 		pomodoroTime = new JRadioButton("Pomodoro tasks");
 		pomodoroTime.setActionCommand("POMODORO_RADIO_BUTTON");
 		pomodoroTime.setToolTipText("<html>Select from well known pomodoro timer schedules (in minutes).<p>The schedules repeats itself once completed.</html>");
@@ -139,11 +139,22 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		buttongroup1.add(selTimeZone);
 		buttongroup1.add(sysUpTime);
 		Component timePaneRadSpace = Box.createHorizontalStrut(17);
-		previewLabel = new JLabel("", JLabel.CENTER);
-		previewLabel.setVerticalAlignment(JLabel.CENTER);
-		previewLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+		jLDigiPreview = new TLabel("");
+		jLDigiPreview.setVerticalAlignment(JLabel.CENTER);
+		jLAnaPreview  = new TLabel("");
+		digitalPanel    = new JPanel();
+		analogPanel    = new JPanel(new BorderLayout());
+		JPanel topPanePr = new JPanel(new BorderLayout());
+		digitalPanel.add(jLDigiPreview);
+		digitalPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+		analogPanel.add(jLAnaPreview, BorderLayout.CENTER);
+		analogPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+		topPanePr.add(toolPane1, BorderLayout.LINE_START);
+		topPanePr.add(digitalPanel, BorderLayout.CENTER);
+		analogCb = new JCheckBox("Analog clock");
+		analogCb.setActionCommand("AnalogClock");
 		tzLabel = new JLabel("Select Timezone");
-		tzCb    = new JCheckBox("Use local timezone");
+		tzCb    = new JCheckBox("Use local time");
 		tzCb.setActionCommand("LocalTz");
 		tzLabel.setLabelFor(tzCb);
 		comboTz   = new JComboBox<String>(new DefaultComboBoxModel<String>(TimeZone.getAvailableIDs()));
@@ -361,31 +372,31 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel1, resLineCol, 		2, 8, 1, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, jseparator2, 		0, 9, 5, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, enTooltip, 		0, 10, 2, 1, 0.33D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, fixPlace, 		2, 10, 1, 1, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, cbMovable, 		2, 10, 1, 1, 0.33D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, roundBdr, 		3, 10, 2, 1, 0.33D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, nativeLook, 		0, 11, 5, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, component1,	 	1, 1, 1, 1, 1.0D, 1.0D, this);
-			ExUtils.addComponent(jpanel2, previewLabel, 	0, 2, 5, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, topPanePr,	 	0, 2, 4, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, analogPanel,		 	4, 2, 1, 3, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, selTimeZone, 		0, 3, 2, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, tzCb,		 		2, 3, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, toolPane1, 		4, 3, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, timePaneRadSpace, 0, 2, 1, 1, 0.0D, 0.2D, this);
-			ExUtils.addComponent(jpanel2, tzLabel, 			1, 4, 1, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, comboTz, 			2, 4, 3, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jLDateFormat, 	1, 5, 1, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, comboDateFmt, 	2, 5, 3, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, analogCb,		 	2, 3, 2, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLDateFormat, 	1, 4, 1, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, comboDateFmt, 	2, 4, 2, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, timePaneRadSpace, 0, 5, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, tzLabel, 			1, 5, 1, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, comboTz, 			2, 5, 2, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, tzCb,		 		4, 5, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, jseparator3, 		1, 6, 4, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, sysUpTime, 		0, 7, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, cbShowDays, 		2, 7, 2, 1, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, sysUpTime, 		0, 7, 2, 1, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, cbShowDays, 		2, 7, 2, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, dSymbol,	 		4, 7, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jLUptimeTxt, 		1, 8, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, uSymbol, 			2, 8, 1, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jLHourTxt, 		3, 8, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, hSymbol, 			4, 8, 1, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jLMinTxt, 		1, 9, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, mSymbol, 			2, 9, 1, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jLSecTxt, 		3, 9, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, sSymbol, 			4, 9, 1, 1, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLUptimeTxt, 		1, 8, 1, 1, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, uSymbol, 			2, 8, 1, 1, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLHourTxt, 		3, 8, 1, 1, 0.01D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, hSymbol, 			4, 8, 1, 1, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLMinTxt, 		1, 9, 1, 1, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, mSymbol, 			2, 9, 1, 1, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLSecTxt, 		3, 9, 1, 1, 0.01D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, sSymbol, 			4, 9, 1, 1, 0.33D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, jseparator4, 		1, 10, 4, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, pomodoroTime, 	0, 11, 2, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, comboPomodoro, 	2, 11, 3, 1, 0.0D, 0.0D, this);
@@ -480,7 +491,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		chooserbox.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		chooserbox.revalidate();
 		chooserbox.pack();
-		chooserbox.setSize(450, 470);
+		chooserbox.setSize(chooserbox.getPreferredSize().width, 480);
 		chooserbox.setResizable(false);
 		Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
 		chooserbox.setLocation((dimension.width - chooserbox.getWidth()) / 2, (dimension.height - chooserbox.getHeight()) / 2);
@@ -584,10 +595,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		{
 			nBorder.setSelected(true);
 		}
-		fixPlace.setSelected(initinfo.isFixed());
+		cbMovable.setSelected(!initinfo.isFixed());
 		roundBdr.setSelected(initinfo.hasRoundedCorners());
 		enTooltip.setSelected(initinfo.hasTooltip());
 		nativeLook.setSelected(initinfo.hasNativeLook());
+		analogCb.setSelected(initinfo.isAnalogClock());
 		String dispM = initinfo.getDisplayMethod();
 		String privT = "";
 		pom          = new Pomodoro(initinfo.getPomodoroTask());
@@ -605,8 +617,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		if (dispM.equals("GMTTZ") || dispM.equals("CURTZ")) {
 			selTimeZone.setSelected(true);
 			SimpleDateFormat sd = new SimpleDateFormat(initinfo.getZonedTimeFormat());
-			sd.setTimeZone(TimeZone.getTimeZone(comboTz.getItemAt(comboTz.getSelectedIndex())));
-			privT = sd.format(new Date());
+			TimeZone tempTz = TimeZone.getTimeZone(comboTz.getItemAt(comboTz.getSelectedIndex()));
+			sd.setTimeZone(tempTz);
+			Calendar toUpdate = Calendar.getInstance(tempTz);
+			privT = sd.format(toUpdate.getTime());
+			jLAnaPreview.setTime(10, 10, 5, "AM", TimeZone.getDefault().getID());
+			jLAnaPreview.setAnalogClockOptions(TLabel.SHOW_AM_PM_TZ);
 		}
 		else if (dispM.equals("UPTIME")) {
 			sysUpTime.setSelected(true);
@@ -617,7 +633,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			pomodoroTime.setSelected(true);
 			privT = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(initinfo.isPomodoroCountdown()), initinfo.getPomodoroFormat(), pom.getRunningLabel(), initinfo.isPomodoroLeadingLabel());
 		}
-		previewLabel.setText(privT);
+		jLDigiPreview.setText(privT);
 		String s1    = initinfo.getUpTimeFormat();
 		String arr[] = s1.split("\'");
 		if (initinfo.isDayShowing())
@@ -652,7 +668,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 
 	private final JPanel getToolbarPanel()
 	{
-		JPanel smallPane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		JPanel smallPane = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		Image defaultPng = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/default-icon.png"))).getImage();
 		resetDefs  = new JButton(new ImageIcon(defaultPng.getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
 		resetDefs.setActionCommand("Reset To Defaults");
@@ -721,6 +737,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		tzCb.setEnabled(selTimeZone.isSelected());
 		comboTz.setEnabled(selTimeZone.isSelected());
 		comboDateFmt.setEnabled(selTimeZone.isSelected());
+		analogCb.setEnabled(selTimeZone.isSelected());
 		cbShowDays.setEnabled(sysUpTime.isSelected());
 		dSymbol.setEnabled(cbShowDays.isSelected());
 		jLUptimeTxt.setEnabled(sysUpTime.isSelected());
@@ -733,6 +750,19 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		sSymbol.setEnabled(sysUpTime.isSelected());
 		selLineCol.setEnabled(lBorder.isSelected());
 		resLineCol.setEnabled(lBorder.isSelected());
+		if (analogCb.isEnabled() && analogCb.isSelected()) {
+			digitalPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
+			analogPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+			jLDigiPreview.setEnabled(false);
+			jLAnaPreview.setEnabled(true);
+			jLAnaPreview.setClockMode(true);
+		} else {
+			digitalPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+			analogPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
+			jLDigiPreview.setEnabled(true);
+			jLAnaPreview.setEnabled(false);
+		}
+		
 		try
 		{
 			if (nativeLook.isSelected())
@@ -968,7 +998,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		if (lBorder.isSelected())
 			information.setLineColor(((ButtonIcon)selLineCol.getIcon()).getEnabledColor());
 		information.setTooltip(enTooltip.isSelected());
-		information.setFixed(fixPlace.isSelected());
+		information.setFixed(!cbMovable.isSelected());
 		information.setRoundCorners(roundBdr.isSelected());
 		information.setNativeLook(nativeLook.isSelected());
 		information.setHourSound(sndHour.getAudioFileName());
@@ -991,6 +1021,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				information.setDisplayMethod("CURTZ");
 			else
 				information.setDisplayMethod("GMTTZ");
+			information.setAnalogClock(analogCb.isSelected());
 			information.setTimeZone(comboTz.getItemAt(comboTz.getSelectedIndex()));
 			information.setZonedTimeFormat(comboDateFmt.getSelectedItem().toString());
 		}
@@ -1157,7 +1188,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				pom   = new Pomodoro(comboPomodoro.getSelectedItem().toString());
 				privT = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(cbPomCountdown.isSelected()), pttn, pom.getRunningLabel(), cbPomLabel.isSelected());
 			}
-			previewLabel.setText(privT);
+			jLDigiPreview.setText(privT);
 			exceptionActive = false;
 		}
 		catch (Exception exception)
@@ -1235,6 +1266,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			((ButtonIcon)selLineCol.getIcon()).setEnabledColor(resLineCol.getBackground());
 			if (lBorder.isSelected())
 				borderPreview.setPreview(BorderFactory.createLineBorder(resLineCol.getBackground(), 2));
+		}
+		else if (comm.equals("AnalogClock"))
+		{
+			jLAnaPreview.setPreferredSize(analogPanel.getSize());
+			jLAnaPreview.setClockMode(analogCb.isSelected());
+			jLAnaPreview.setTime(10, 10, 5, "AM", TimeZone.getDefault().getID());
 		}
 		else if (comm.equals("LocalTz"))
 		{
@@ -1449,7 +1486,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			String tzId = comboTz.getItemAt(comboTz.getSelectedIndex());
 			tzCb.setSelected(tzId.equals(TimeZone.getDefault().getID()));
 			sd.setTimeZone(TimeZone.getTimeZone(tzId));
-			previewLabel.setText(sd.format(new Date()));
+			jLDigiPreview.setText(sd.format(new Date()));
 		}
 		else if (ie.getStateChange() == ItemEvent.SELECTED && (source.equals(comboDateFmt) ||
 			source.equals(comboPomodoro) || source.equals(comboPomFmt) || source.equals(uSymbol) ||
