@@ -43,6 +43,7 @@ public class InitInfo extends Hashtable<String, Object>
 		put("POMODORO_TASK", "25 min. work, 5 min. break, 30 min. rest");
 		put("TIMEZONE", "GMT");
 		put("ANALOG_CLOCK", false);
+		put("ANALOG_CLOCK_OPTS", TLabel.SHOW_NONE);
 		put("TOOLTIP", true);
 		put("NATIVE_LOOK", false);
 		put("FIXED", false);
@@ -70,6 +71,16 @@ public class InitInfo extends Hashtable<String, Object>
 	public void setAnalogClock(boolean analog)
 	{
 		put("ANALOG_CLOCK", analog);
+	}
+
+	public int getAnalogClockOption()
+	{
+		return ((Integer)get("ANALOG_CLOCK_OPTS")).intValue();
+	}
+
+	public void setAnalogClockOption(int analogOption)
+	{
+		put("ANALOG_CLOCK_OPTS", analogOption);
 	}
 
 	public int getID()

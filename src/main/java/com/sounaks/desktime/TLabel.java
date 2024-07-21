@@ -18,9 +18,10 @@ public class TLabel extends JLabel
 	public static final int STRETCH       = 8;
 	public static final int FIT           = 16;
 	public static final int TILE          = 32;
+	public static final int SHOW_NONE     = 0;
 	public static final int SHOW_AM_PM    = 1000;
 	public static final int SHOW_TIMEZONE = 2000;
-	public static final int SHOW_AM_PM_TZ = 4000;
+	public static final int SHOW_AM_PM_TZ = 3000;
 	public final int gap                  = 5;
 	private int labelWidth, labelHeight, imgWidth, imgHeight;
 	private double aspectWidth;
@@ -72,8 +73,8 @@ public class TLabel extends JLabel
 		hasImage   = false;
 		forceTrans = false;
 		g2         = (Graphics2D)super.getGraphics();
-		fm         = getFontMetrics(getFont());
-		anaClkFnt  = getFont().deriveFont(getFont().getSize() >= 10 ? getFont().getSize() - 4 : getFont().getSize());
+		anaClkFnt  = getFont().deriveFont(getFont().getSize() >= 12 ? (float)getFont().getSize() - 2 : 10.0f);
+		fm         = getFontMetrics(anaClkFnt);
 		setOpaque(false);
 		setVerticalAlignment(0);
 		time_hr   = 10;
@@ -82,6 +83,13 @@ public class TLabel extends JLabel
 		time_ampm = "";
 		time_zn   = "";
 		clockMode = false;
+	}
+
+	@Override
+	public void setFont(Font font) {
+		super.setFont(font);
+		anaClkFnt  = font.deriveFont(font.getSize() >= 12 ? (float)font.getSize() - 2 : 10.0f);
+		fm         = getFontMetrics(anaClkFnt);
 	}
 
 	public void setTime(int hour, int min, int sec, String ampm, String timeZone)
@@ -105,6 +113,7 @@ public class TLabel extends JLabel
 	public void setAnalogClockOptions(int clockOptions)
 	{
 		analogClockOptions = clockOptions;
+		repaint();
 	}
 
 	public int getAnalogClockOptions()
@@ -296,7 +305,7 @@ public class TLabel extends JLabel
 			int radius  = Math.min(xCenter, yCenter);
 			float stroke  = (float)radius / 50;
 
-			g2.setColor(getForeground());
+			g2.setColor(isEnabled() ? getForeground() : Color.LIGHT_GRAY);
 			g2.setStroke(new BasicStroke(stroke * 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			g2.drawOval(xCenter - radius + gap, yCenter - radius + gap, 2 * radius, 2 * radius);
 			for (int i = 0; i < 360; i+=30)
@@ -309,22 +318,17 @@ public class TLabel extends JLabel
 				break;
 
 				case TLabel.SHOW_TIMEZONE:
-				g2.drawString(time_zn, xCenter + gap - Math.round(fm.stringWidth(time_zn)/2), gap + Math.round(yCenter / 2));
+				g2.drawString(time_zn, xCenter + gap - Math.round(fm.stringWidth(time_zn)/2), gap + Math.round(yCenter * 0.60));
 				break;
 
 				case TLabel.SHOW_AM_PM_TZ:
 				g2.drawString(time_ampm, xCenter + gap - fm.stringWidth(time_ampm)/2, yCenter + gap + yCenter / 2);
-				g2.drawString(time_zn, xCenter + gap - Math.round(fm.stringWidth(time_zn)/2), gap + Math.round(yCenter / 2));
+				g2.drawString(time_zn, xCenter + gap - Math.round(fm.stringWidth(time_zn)/2), gap + Math.round(yCenter * 0.60));
 				break;
 
 				default:
-				g2.drawString(time_zn, xCenter + gap - Math.round(fm.stringWidth(time_zn)/2), gap + yCenter / 2);
 				break;
 			}
-			// if (visibility == TLabel.SHOW_AM_PM || visibility == TLabel.SHOW_AM_PM_TZ)
-			// 	g2.drawString(time_ampm, xCenter + gap - fm.stringWidth(time_ampm)/2, yCenter + gap + yCenter / 2);
-			// if (visibility == TLabel.SHOW_TIMEZONE || visibility == TLabel.SHOW_AM_PM_TZ)
-			// 	g2.drawString(time_zn, xCenter + gap - Math.round(fm.stringWidth(time_zn)/2), gap + yCenter / 2);
 
 			g2.setStroke(new BasicStroke(stroke * 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			drawRadius(0, 0.7, time_sc * 6);  // Second hand
@@ -337,6 +341,5 @@ public class TLabel extends JLabel
 		}
 
 		super.paintComponent(g2);
-		g2.dispose();
 	}
 }

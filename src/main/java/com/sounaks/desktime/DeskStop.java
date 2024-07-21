@@ -207,6 +207,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		metrics = tLabel.getFontMetrics(info.getFont());
 		tLabel.setForeground(info.getForeground());
 		tLabel.setBorder(info.getBorder());
+		tLabel.setAnalogClockOptions(info.getAnalogClockOption());
 		miSeltz.setText("Last selected (" + info.getTimeZone() + ")");
 		miDeftz.setText("System (" + TimeZone.getDefault().getID() + ")");
 		timeZone.setEnabled(info.getDisplayMethod().endsWith("TZ"));
