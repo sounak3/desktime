@@ -2,6 +2,7 @@ package com.sounaks.desktime;
 
 import java.awt.*;
 import java.awt.image.*;
+
 import javax.swing.*;
 
 public class TLabel extends JLabel
@@ -9,6 +10,7 @@ public class TLabel extends JLabel
 
 	private Graphics2D g2;
 	private Image image, backupImage;
+	private Dimension fitDim, thumbDim;
 	private int position, inuse, analogClockOptions;
 	protected boolean hasImage;
 	protected boolean forceTrans;
@@ -21,7 +23,11 @@ public class TLabel extends JLabel
 	public static final int SHOW_NONE     = 0;
 	public static final int SHOW_AM_PM    = 1000;
 	public static final int SHOW_TIMEZONE = 2000;
-	public static final int SHOW_AM_PM_TZ = 3000;
+	public static final int ANALOG_BORDER = 100;
+	public static final int MAJOR_TICK    = 200;
+	public static final int HOUR_TICK     = 400;
+	public static final int MINUTE_TICK   = 800;
+
 	public final int gap                  = 5;
 	private int labelWidth, labelHeight, imgWidth, imgHeight;
 	private double aspectWidth;
@@ -42,29 +48,23 @@ public class TLabel extends JLabel
 		position    = TLabel.STRETCH;
 	}
 
-	public TLabel(String s, Image image1, int i)
+	public TLabel(String s, Image image1, int position)
 	{
-		this(s);
-		hasImage = (image1 != null);
-		if (i == 4 || i == 2 || i == 1 || i == 8 || i == 16 || i == 32)
-			position = i;
+		this(s, image1);
+		if (position == 4 || position == 2 || position == 1 || position == 8 || position == 16 || position == 32)
+			this.position = position;
 		else
 			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
-		image       = image1;
-		backupImage = image1;
 	}
 
-	public TLabel(String s, Image image1, int i, boolean forceTrans)
+	public TLabel(String s, Image image1, int position, boolean forceTrans)
 	{
-		this(s);
-		hasImage = (image1 != null);
-		if (i == 4 || i == 2 || i == 1 || i == 8 || i == 16 || i == 32)
-			position = i;
+		this(s, image1);
+		if (position == 4 || position == 2 || position == 1 || position == 8 || position == 16 || position == 32)
+			this.position = position;
 		else
 			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
 		this.forceTrans = forceTrans;
-		image           = image1;
-		backupImage     = image1;
 	}
 
 	public TLabel(String s)
@@ -177,6 +177,14 @@ public class TLabel extends JLabel
 		repaint();
 	}
 
+	private Dimension getScaledDimension(Dimension imgSize, Dimension destRect)
+	{
+		double wRatio = destRect.getWidth() / imgSize.getWidth();
+		double hRatio = destRect.getHeight() / imgSize.getHeight();
+		double ratio = Math.min(wRatio, hRatio);
+		return new Dimension((int)(imgSize.width * ratio), (int)(imgSize.height * ratio));
+	}
+
 	public void setImagePosition(int i)
 	{
 		if (i == 4 || i == 2 || i == 1 || i == 8 || i == 16 || i == 32)
@@ -207,6 +215,37 @@ public class TLabel extends JLabel
 		return resultImg;
 	}
 
+	public static Color brighter(Color color, double fraction)
+	{
+        int red   = (int) Math.round(Math.min(255, color.getRed() + 255 * fraction));
+        int green = (int) Math.round(Math.min(255, color.getGreen() + 255 * fraction));
+        int blue  = (int) Math.round(Math.min(255, color.getBlue() + 255 * fraction));
+        int alpha = color.getAlpha();
+        return new Color(red, green, blue, alpha);
+    }
+
+	public static Color darker(Color color, double fraction)
+	{
+        int red   = (int) Math.round(Math.max(0, color.getRed() - 255 * fraction));
+        int green = (int) Math.round(Math.max(0, color.getGreen() - 255 * fraction));
+        int blue  = (int) Math.round(Math.max(0, color.getBlue() - 255 * fraction));
+        int alpha = color.getAlpha();
+        return new Color(red, green, blue, alpha);
+    }
+
+	public static Color getInvertedColor(Color colour)
+	{
+		int color = colour.getRGB();
+		int R = color & 255;
+		int G = (color >> 8) & 255;
+		int B = (color >> 16) & 255;
+		int A = (color >> 24) & 255;
+		R = 255 - R;
+		G = 255 - G;
+		B = 255 - B;
+		return new Color(R + (G << 8) + ( B << 16) + ( A << 24));
+	}
+
 	protected void paintComponent(Graphics g)
 	{
 		g2 = (Graphics2D)g;
@@ -221,6 +260,8 @@ public class TLabel extends JLabel
 			imgHeight    = image.getHeight(this);
 			aspectWidth  = (double)Math.max(labelWidth, imgWidth) / (double)Math.min(labelWidth, imgWidth);
 			aspectHeight = (double)Math.max(labelHeight, imgHeight) / (double)Math.min(labelHeight, imgHeight);
+			fitDim       = getScaledDimension(new Dimension(imgWidth, imgHeight), new Dimension(labelWidth, labelHeight));
+			thumbDim     = getScaledDimension(new Dimension(imgWidth, imgHeight), new Dimension(30, 30));
 			Point pp     = getLocation();
 			SwingUtilities.convertPointToScreen(pp,this);
 			if (forceTrans) // For desktop background based image on window position (Transparent effect)
@@ -277,22 +318,15 @@ public class TLabel extends JLabel
 							g2.drawImage(image, (labelWidth - imgWidth) / 2, (labelHeight - imgHeight) / 2, imgWidth, imgHeight, this);
 						break;
 					case TLabel.FIT: // For image Resize to Fit
-						if (imgWidth > labelWidth && imgHeight > labelHeight)
-							g2.drawImage(image, 0, 0, labelWidth, labelHeight, this);
-						else if (imgWidth > labelWidth && imgHeight <= labelHeight)
-							g2.drawImage(image, 0, (labelHeight - imgHeight) / 2, labelWidth, imgHeight, this);
-						else if (imgWidth <= labelWidth && imgHeight > labelHeight)
-							g2.drawImage(image, (labelWidth - imgWidth) / 2, 0, imgWidth, labelHeight, this);
-						else if (imgWidth < labelWidth && imgHeight < labelHeight)
-							g2.drawImage(image, (labelWidth - imgWidth) / 2, (labelHeight - imgHeight) / 2, imgWidth, imgHeight, this);
+						g2.drawImage(image, (labelWidth - fitDim.width) / 2, (labelHeight - fitDim.height) / 2, fitDim.width, fitDim.height, this);
 						break;
 					case TLabel.TILE: // For image Tile
-						int k = (int)Math.ceil((double)labelWidth / (double)imgWidth);
-						int l = (int)Math.ceil((double)labelHeight / (double)imgHeight);
+						int k = (int)Math.ceil((double)labelWidth / (double)thumbDim.width);
+						int l = (int)Math.ceil((double)labelHeight / (double)thumbDim.height);
 						for (int i1 = 0; i1 < l; i1++)
 						{
 							for (int j1 = 0; j1 < k; j1++)
-								g2.drawImage(image, j1 * imgWidth, i1 * imgHeight, imgWidth, imgHeight, this);
+								g2.drawImage(image, j1 * thumbDim.width, i1 * thumbDim.height, thumbDim.width, thumbDim.height, this);
 						}
 						break;
 				}
@@ -300,43 +334,125 @@ public class TLabel extends JLabel
 		}
 
 		if (clockMode) {
-			int xCenter = (labelWidth - 2 * gap) / 2;
-			int yCenter = (labelHeight - 2 * gap)/ 2;
-			int radius  = Math.min(xCenter, yCenter);
-			float stroke  = (float)radius / 50;
+			int     xCenter   = (labelWidth - 2 * gap) / 2;
+			int     yCenter   = (labelHeight - 2 * gap)/ 2;
+			int     radius    = Math.min(xCenter, yCenter);
+			float   stroke    = (float)radius / 50;
+			boolean ampm      = false;
+			boolean tzone     = false;
+			boolean clkBdr    = false;
+			boolean majHrTick = false;
+			boolean hrTick    = false;
+			boolean minTick   = false;
 
 			g2.setColor(isEnabled() ? getForeground() : Color.LIGHT_GRAY);
 			g2.setStroke(new BasicStroke(stroke * 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			g2.drawOval(xCenter - radius + gap, yCenter - radius + gap, 2 * radius, 2 * radius);
-			for (int i = 0; i < 360; i+=30)
-				drawRadius(0.9, 1.0, i);
-
+			
 			g2.setFont(anaClkFnt);
 			switch (analogClockOptions) {
 				case TLabel.SHOW_AM_PM:
-				g2.drawString(time_ampm, xCenter + gap - fm.stringWidth(time_ampm)/2, yCenter + gap + yCenter / 2);
+				ampm = true;
 				break;
 
 				case TLabel.SHOW_TIMEZONE:
-				g2.drawString(time_zn, xCenter + gap - Math.round(fm.stringWidth(time_zn)/2), gap + Math.round(yCenter * 0.60));
+				tzone = true;
 				break;
 
-				case TLabel.SHOW_AM_PM_TZ:
-				g2.drawString(time_ampm, xCenter + gap - fm.stringWidth(time_ampm)/2, yCenter + gap + yCenter / 2);
-				g2.drawString(time_zn, xCenter + gap - Math.round(fm.stringWidth(time_zn)/2), gap + Math.round(yCenter * 0.60));
+				case (TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE):
+				ampm = tzone = true;
+				break;
+
+				case TLabel.ANALOG_BORDER:
+				clkBdr = true;
+				break;
+
+				case (TLabel.ANALOG_BORDER + TLabel.SHOW_AM_PM):
+				clkBdr = ampm = true;
+				break;
+
+				case (TLabel.ANALOG_BORDER + TLabel.SHOW_TIMEZONE):
+				clkBdr = tzone = true;
+				break;
+
+				case (TLabel.ANALOG_BORDER + TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE):
+				clkBdr = tzone = ampm = true;
+				break;
+
+				case TLabel.ANALOG_BORDER + TLabel.MAJOR_TICK:
+				clkBdr = majHrTick = true;
+				break;
+
+				case (TLabel.ANALOG_BORDER + TLabel.MAJOR_TICK + TLabel.SHOW_AM_PM):
+				clkBdr = majHrTick = ampm = true;
+				break;
+
+				case (TLabel.ANALOG_BORDER + TLabel.MAJOR_TICK + TLabel.SHOW_TIMEZONE):
+				clkBdr = majHrTick = tzone = true;
+				break;
+
+				case (TLabel.ANALOG_BORDER + TLabel.MAJOR_TICK + TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE):
+				clkBdr = majHrTick = tzone = ampm = true;
+				break;
+
+				case TLabel.ANALOG_BORDER + TLabel.HOUR_TICK:
+				clkBdr = hrTick = true;
+				break;
+
+				case (TLabel.ANALOG_BORDER + TLabel.HOUR_TICK + TLabel.SHOW_AM_PM):
+				clkBdr = hrTick = ampm = true;
+				break;
+
+				case (TLabel.ANALOG_BORDER + TLabel.HOUR_TICK + TLabel.SHOW_TIMEZONE):
+				clkBdr = hrTick = tzone = true;
+				break;
+
+				case (TLabel.ANALOG_BORDER + TLabel.HOUR_TICK + TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE):
+				clkBdr = hrTick = tzone = ampm = true;
+				break;
+
+				case TLabel.ANALOG_BORDER + TLabel.MINUTE_TICK:
+				clkBdr = minTick = true;
+				break;
+
+				case (TLabel.ANALOG_BORDER + TLabel.MINUTE_TICK + TLabel.SHOW_AM_PM):
+				clkBdr = minTick = ampm = true;
+				break;
+
+				case (TLabel.ANALOG_BORDER + TLabel.MINUTE_TICK + TLabel.SHOW_TIMEZONE):
+				clkBdr = minTick = tzone = true;
+				break;
+
+				case (TLabel.ANALOG_BORDER + TLabel.MINUTE_TICK + TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE):
+				clkBdr = minTick = tzone = ampm = true;
 				break;
 
 				default:
 				break;
 			}
 
-			g2.setStroke(new BasicStroke(stroke * 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			drawRadius(0, 0.7, time_sc * 6);  // Second hand
+			if (ampm) g2.drawString(time_ampm, xCenter + gap - fm.stringWidth(time_ampm)/2, yCenter + gap + yCenter / 2);
+			if (tzone) g2.drawString(time_zn, xCenter + gap - Math.round(fm.stringWidth(time_zn)/2), gap + Math.round(yCenter * 0.60));
+			for (int i = 0; i < 360; i++)
+			{
+				if (i % 90 == 0 && majHrTick) drawRadius(0.85, 0.97, i);
+				if (i % 30 == 0 && hrTick) drawRadius(0.9, 0.97, i);
+				if (minTick)
+				{
+					if (i % 30 == 0) drawRadius(0.9, 0.97, i);
+					if (i % 6 == 0) drawRadius(0.95, 0.97, i);
+				}
+			}
+
+			g2.setColor(TLabel.darker(getForeground(), 0.50));
+			if (clkBdr) g2.drawOval(xCenter - radius + gap, yCenter - radius + gap, 2 * radius, 2 * radius);
 			g2.setStroke(new BasicStroke(stroke * 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			drawRadius(0, 0.8, time_mn * 6 + time_sc / 10);  // Minutes
+			drawRadius(-0.1, 0.8, time_mn * 6 + time_sc / 10);  // Minutes
 			g2.setStroke(new BasicStroke(stroke * 3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			drawRadius(0, 0.5, time_hr * 30 + time_mn / 2);
-			int doubleStroke = Math.round(2 * stroke);
+			drawRadius(-0.1, 0.5, time_hr * 30 + time_mn / 2);  // Hours
+			g2.setColor(TLabel.getInvertedColor(getForeground()));
+			g2.setStroke(new BasicStroke(stroke * 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			drawRadius(0, 0.7, time_sc * 6);  // Seconds
+			int doubleStroke = Math.round(3 * stroke);
 			g2.fillOval(gap + xCenter - doubleStroke, gap + yCenter - doubleStroke , 2 * doubleStroke, 2 * doubleStroke);
 		}
 

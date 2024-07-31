@@ -23,7 +23,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private int locX,locY,locW,locH,cursorX,cursorY,cursorW,cursorH;
 	private TLabel tLabel;
 	private TwilightPanel mainPane;
-	private SimpleDateFormat sd;
+	private SimpleDateFormat sd, clk;
 	private FontMetrics metrics;
 	private InitInfo info;
 	private Vector <TimeBean>alarms;
@@ -107,6 +107,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		cursorX  = cursorY = 0;
 		cursorW  = cursorH = 0;
 		sd    = new SimpleDateFormat(info.getZonedTimeFormat());
+		clk   = new SimpleDateFormat("zzz':'hh':'mm':'ss':'a");
 		date  = new Date();
 		time  = sd.format(date);
 		UIManager.put("PopupMenu.background", Color.WHITE);
@@ -221,7 +222,24 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		{
 			tLabel.setText(time);
 			tLabel.setTransparency(false);
-			setOpacity(1.0f);
+			if (pixelTranslucency)
+			{
+				setOpacity(1.0f);
+				setBackground(new Color(0, 0, 0, 0.00f));
+				mainPane.setAlpha(0.0f);
+			}
+			else
+			{
+				if (!wholeTranslucency) {
+					setOpacity(1.0f);
+					info.setOpacity(1.0f);
+				} else {
+					setOpacity(0.2f);
+					info.setOpacity(0.2f);
+				}
+				setBackground(info.getBackground());
+				mainPane.setAlpha(1.0f);
+			}
 			stopRefresh();
 			tLabel.setBackImage((new ImageIcon(info.getImageFile().toString())).getImage());
 			tLabel.setImagePosition(info.getImageStyle());
@@ -428,6 +446,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		else if (obj.equals(miDeftz))
 		{
 			info.setDisplayMethod("CURTZ");
+			info.setTimeZone(TimeZone.getDefault().getID());
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
@@ -444,7 +463,9 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		}
 		else if (obj instanceof JMenuItem && actionevent.getActionCommand().startsWith("TZ-"))
 		{
-			info.setTimeZone(actionevent.getActionCommand().split("-")[1]);
+			String tzId = actionevent.getActionCommand().split("-")[1];
+			info.setDisplayMethod(TimeZone.getTimeZone(tzId).hasSameRules(TimeZone.getDefault()) ? "CURTZ" : "GMTTZ");
+			info.setTimeZone(tzId);
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
@@ -665,7 +686,6 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			String   curLabel    = "";
 			Player   runPlayer   = null;
 			int      soundRunSec = 60;
-			SimpleDateFormat clk = new SimpleDateFormat("zzz':'hh':'mm':'ss':'a");
 			String clockTime[]   = new String[5];
 			if(pom != null) 
 				curLabel = pom.getRunningLabel();
