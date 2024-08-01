@@ -18,6 +18,13 @@
      <string>ANALOG_CLOCK_OPTS</string>
      <int>3900</int>
     </void>
+    <void id="Boolean1" method="get">
+     <string>SLOW_TRANS</string>
+    </void>
+    <void method="put">
+     <string>TOOLTIP</string>
+     <object idref="Boolean1"/>
+    </void>
     <void method="put">
      <string>TIMEZONE</string>
      <string>Asia/Calcutta</string>
@@ -33,20 +40,29 @@
       <int>16</int>
      </object>
     </void>
+    <void method="put">
+     <string>FOREGROUND</string>
+     <object class="java.awt.Color">
+      <int>0</int>
+      <int>51</int>
+      <int>51</int>
+      <int>255</int>
+     </object>
+    </void>
     <void id="Point0" method="get">
      <string>LOCATION</string>
      <void class="java.awt.Point" method="getField">
       <string>x</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>1001</int>
+       <int>942</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>60</int>
+       <int>71</int>
       </void>
      </void>
     </void>

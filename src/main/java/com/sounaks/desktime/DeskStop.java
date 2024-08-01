@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 import javazoom.jl.player.Player;
 import static java.awt.GraphicsDevice.WindowTranslucency.*;
 
-public class DeskStop extends JFrame implements MouseInputListener, ActionListener, ComponentListener
+public class DeskStop extends JFrame implements MouseInputListener, ActionListener, ComponentListener, ChangeListener
 {
 	protected ClockThread clockThread; 
 	protected Refresher refreshThread;
@@ -28,7 +28,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private InitInfo info;
 	private Vector <TimeBean>alarms;
 	private JPopupMenu pMenu;
-	private JMenu addPanel,mFormat,timeMode,timeZone;
+	private JMenu addPanel,mFormat,timeMode,timeZone,mSize;
+	private JSlider sizer;
 	private JMenuItem miAnaTime,miDigTime,miUptime,miPomo,miSeltz,miDeftz,timSet,zonSet,impZon[];
 	private JMenuItem fore,back,alm,bdr,exit,about,newItem,dupItem,removePanel,miMovable,ontop;
 	private PointerInfo pi;
@@ -54,6 +55,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		"India Standard Time (IST)",
 		"Japan Standard Time (JST)",
 		"Coordinated Universal Time (UTC)"};
+	private final int ai[] = {6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 64, 72, 80};
 	private static final GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 	private static ArrayList<InitInfo> deskstops;
 	private final ImageIcon plusPng  = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/plus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
@@ -162,6 +164,20 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		timeZone.add(zonSet);
 		alm   = new JMenuItem("Set Alarm...");
 		alm.addActionListener(this);
+		Hashtable<Integer, JLabel> ht = new Hashtable<Integer, JLabel>();
+		for (int i = 0; i < ai.length; i++)
+			ht.put(i, new JLabel(String.valueOf(ai[i])));
+		sizer = new JSlider(JSlider.VERTICAL, 0, ai.length - 1, 5);
+		sizer.setLabelTable(ht);
+		sizer.setMajorTickSpacing(4);
+		sizer.setMinorTickSpacing(1);
+		sizer.setPaintLabels(true);
+		sizer.setPaintTicks(true);
+		sizer.setSnapToTicks(true);
+		sizer.addChangeListener(this);
+		mSize = new JMenu("Resize");
+		sizer.setPreferredSize(new Dimension(sizer.getPreferredSize().width + 20, sizer.getPreferredSize().height + 40));
+		mSize.add(sizer);
 		miMovable  = new JMenuItem("Movable");
 		miMovable.setIcon(info.isFixed() ? clearPng : checkPng);
 		miMovable.addActionListener(this);
@@ -188,6 +204,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		pMenu.add(mFormat);
 		pMenu.add(alm);
 		pMenu.addSeparator();
+		pMenu.add(mSize);
 		pMenu.add(miMovable);
 		pMenu.add(ontop);
 		pMenu.addSeparator();
@@ -555,6 +572,11 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		if (SwingUtilities.isRightMouseButton(mouseevent) || mouseevent.getClickCount() == 2)
 		{ //Whenever this menu appears a mouseExited event occurs calling method
 			refreshNow = false; // refreshThreadTransparency which forces popup to disappear. So refreshNow=false.
+			int x = info.getFont().getSize();
+			for (int i = 0; i < ai.length; i++)
+			{
+				if (ai[i] == x) sizer.setValue(i);
+			}
 			ExUtils.showPopup(pMenu, this, (Component)mouseevent.getSource(), mouseevent.getPoint(), scsize);
 		}
 	}
@@ -668,6 +690,18 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	@Override
 	public void componentHidden(ComponentEvent e)
 	{
+	}
+
+	public void stateChanged(ChangeEvent ce)
+	{
+		Font derived = info.getFont().deriveFont((float)ai[sizer.getValue()]);
+		if (derived.getSize() != info.getFont().getSize()) {
+			tLabel.setFont(derived);
+			metrics = tLabel.getFontMetrics(derived);
+			resizingMethod(info.isAnalogClock() ? "" : time);
+			info.setFont(derived);
+			ExUtils.saveDeskStops(info, deskstops);
+		}
 	}
 
 	class ClockThread extends Thread
