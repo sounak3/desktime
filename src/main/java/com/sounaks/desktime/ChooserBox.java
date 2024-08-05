@@ -25,10 +25,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JComboBox<AnalogClockFormat> comboClockFmt, comboDialBdr;
 	private JRadioButton selTimeZone,sysUpTime,pomodoroTime;
 	private JLabel layLabel, jLDayTxt, jLUptimeTxt, jLHourTxt, jLMinTxt, jLSecTxt, tzLabel;
-	private JCheckBox analogCb2, analogCb1, tzCb, cbPomLabel, cbPomCountdown, cbShowDays;
+	private JCheckBox analogCb2, analogCb1, analogCb0, tzCb, cbPomLabel, cbPomCountdown, cbShowDays;
 	private JComboBox<String> dSymbol, uSymbol, hSymbol, mSymbol, sSymbol;
-	private JButton resetDefs,helpFormat;
-	private JLabel transSlide,jLDateFormat,jLPomFormat;
+	private JButton resetDefs,helpFormat,resetImgDir;
+	private JLabel jlTransSlide,jLDateFormat,jLPomFormat, thickLabel;
 	private JSlider transLevel;
 	private JCheckBox useImg,useCol,useTrans,slowUpd;
 	private ImageFileList imgFileList;
@@ -38,15 +38,16 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JLabel jLAlmSame, jLAlmDays, jLAlmHrs;
 	private SoundPlayer sndHour, sndUptime, sndWork, sndBrk, sndRest, sndToRun;
 	private JButton add,remove,edit,test;
-	private JPanel bottomCards, digitalPanel, analogPanel, cardComboPanel, borderPanel;
+	private JPanel bottomCards, digitalPanel, analogPanel, cardComboPanel, borderPanel, picPanel;
 	private JComboBox<String> period, dateOrWeek;
 	private JCheckBox rept,runSnd,runMsg;
 	private JTextField alarmName;
 	private JRadioButton optStartOn, optStartAfter;
-	private JSpinner timeSpinner1, timeSpinner2, countSpinner1, countSpinner2;
+	private JSpinner timeSpinner1, timeSpinner2, countSpinner1, countSpinner2, thickSpinner;
 	private DateChooser chooseDate;
 	private int opmode   = ChooserBox.ALARM_DISCARD;
 	private int selIndex = -1;
+	private int intThick = 2;
 	private boolean exceptionActive = false;
 	private JButton ok,cancel;
 	private Pomodoro pom;
@@ -142,8 +143,20 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		JSeparator jseparator1  = new JSeparator();
 		Component component    = Box.createHorizontalStrut(8);
 		selLineCol = new JButton("Line Border Color", new ButtonIcon(ButtonIcon.RECTANGLE, Color.BLACK));
-		resLineCol = new JButton("Reset", new ButtonIcon(ButtonIcon.RECTANGLE, getBackground()));
+		resLineCol = new JButton("Reset", new ButtonIcon(ButtonIcon.RECTANGLE, Color.BLACK));
 		resLineCol.setActionCommand("Default Line Color");
+		JPanel    thickPanel = new JPanel();
+		BoxLayout thkly      = new BoxLayout(thickPanel, BoxLayout.X_AXIS);
+		thickPanel.setLayout(thkly);
+		thickLabel   = new JLabel("Thickness", JLabel.RIGHT);
+		thickSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1));
+		thickSpinner.addChangeListener(this);
+		thickPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+		thickLabel.setLabelFor(thickSpinner);
+		thickPanel.add(thickLabel);
+		thickPanel.add(Box.createRigidArea(new Dimension(5, 0)));
+		thickPanel.add(thickSpinner);
+		thickPanel.add(Box.createHorizontalGlue());
 		anaDials = new Vector<AnalogClockFormat>();
 		anaDials.add(new AnalogClockFormat(TLabel.SHOW_NONE, "No dial border"));
 		anaDials.add(new AnalogClockFormat(TLabel.ANALOG_BORDER, "Show dial border only"));
@@ -167,7 +180,13 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		selTimeZone = new JRadioButton("Current Time");
 		selTimeZone.setActionCommand("TIME_RADIO_BUTTON");
 		selTimeZone.setToolTipText("<html>This setting displays the current time in selected time zone<p>in the date-time format selected below.</html>");
-		JPanel toolPane1 = getToolbarPanel();
+		JPanel toolPane1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		Image defaultPng = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/default-icon.png"))).getImage();
+		Image helpPng    = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/help-icon.png"))).getImage();
+		resetDefs   = createSmallButton(defaultPng, "Reset to default values", this);
+		helpFormat  = createSmallButton(helpPng, "Help on date time format characters", this);
+		toolPane1.add(resetDefs);
+		toolPane1.add(helpFormat);
 		sysUpTime   = new JRadioButton("System Up-Time");
 		sysUpTime.setActionCommand("UPTIME_RADIO_BUTTON");
 		sysUpTime.setToolTipText("<html>This setting displays the time elapsed since your system<p>had started without a log off or shut down.</html>");
@@ -290,19 +309,44 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		JScrollPane jscrollpane1 = new JScrollPane();
 		jscrollpane1.getViewport().setView(imgFileList);
 		Component component4 = Box.createHorizontalStrut(140);
-		selectDir = new JButton("Choose Image Directory", new ButtonIcon(ButtonIcon.LEFT_ARROW, Color.BLACK));
-		picLabel  = new TLabel("No Preview", null, TLabel.FIT);
-		picLabel.setBorder(BorderFactory.createBevelBorder(1));
+		picPanel  = new JPanel();
+		SpringLayout picLayout = new SpringLayout();
+		picPanel.setLayout(picLayout);
+		picLabel  = new TLabel("Preview", null, TLabel.FIT);
+		picLabel.setFont(new Font(picLabel.getFont().getFamily(),	Font.BOLD, 16));
+		picLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		picPanel.add(picLabel);
+		picLayout.putConstraint(SpringLayout.HORIZONTAL_CENTER, picLabel, 0, SpringLayout.HORIZONTAL_CENTER, picPanel);
+		picLayout.putConstraint(SpringLayout.VERTICAL_CENTER, picLabel, 0, SpringLayout.VERTICAL_CENTER, picPanel);
+		picPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+		JPanel toolPane2 = new JPanel();
+		BoxLayout bly = new BoxLayout(toolPane2, BoxLayout.X_AXIS);
+		toolPane2.setLayout(bly);
+		Image folderPng = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/folder-icon.png"))).getImage();
+		selectDir   = createSmallButton(folderPng, "Choose Image Directory", this);
+		resetImgDir = createSmallButton(defaultPng, "Reset to default images", this);
+		analogCb0 = new JCheckBox("Analog mode");
+		analogCb0.setActionCommand("AnalogClock");
+		analogCb0.addActionListener(this);
 		layLabel  = new JLabel("Layout");
-		String layouts[] = {"Tile Vertically", "Tile Horizontally", "Tile", "Stretch to Fit", "Resize to Fit", "Center"};
+		String layouts[] = {TLabel.V_TILE_TEXT, TLabel.H_TILE_TEXT, TLabel.TILE_TEXT, TLabel.STRETCH_TEXT, TLabel.FIT_TEXT, TLabel.CENTER_TEXT};
 		comboTLayout = new JComboBox<String>(layouts);
 		layLabel.setLabelFor(comboTLayout);
 		comboTLayout.addItemListener(this);
+		toolPane2.add(selectDir);
+		toolPane2.add(Box.createRigidArea(new Dimension(5, 0)));
+		toolPane2.add(resetImgDir);
+		toolPane2.add(Box.createRigidArea(new Dimension(5, 0)));
+		toolPane2.add(analogCb0);
+		toolPane2.add(Box.createHorizontalGlue());
+		toolPane2.add(layLabel);
+		toolPane2.add(Box.createRigidArea(new Dimension(5, 0)));
+		toolPane2.add(comboTLayout);
 		selBackCol = new JButton("Choose Background Color", new ButtonIcon(ButtonIcon.RECTANGLE, Color.BLACK));
 		resBackCol = new JButton("Default Color", new ButtonIcon(ButtonIcon.RECTANGLE, getBackground()));
-		transSlide = new JLabel("Opacity [ Low \u2192 High ]");
+		jlTransSlide = new JLabel("Opacity [ Low \u2192 High ]");
 		transLevel = new JSlider(4, 20, 10);
-		transSlide.setLabelFor(transLevel);
+		jlTransSlide.setLabelFor(transLevel);
 		transLevel.setMajorTickSpacing(1);
 		transLevel.setSnapToTicks(true);
 		transLevel.addChangeListener(this);
@@ -405,9 +449,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel1, eLowered, 		0, 5, 2, 1, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, jseparator1, 		0, 6, 5, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, lBorder, 			0, 7, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, component, 		0, 8, 1, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, selLineCol, 		1, 8, 1, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, resLineCol, 		2, 8, 1, 1, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, component, 		0, 8, 1, 1, 0.25D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, selLineCol, 		1, 8, 1, 1, 0.25D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, resLineCol, 		2, 8, 1, 1, 0.25D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, thickPanel, 		3, 8, 1, 1, 0.25D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, jseparator2, 		0, 9, 5, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, enTooltip, 		0, 10, 2, 1, 0.33D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, cbMovable, 		2, 10, 1, 1, 0.33D, 0.0D, this);
@@ -416,7 +461,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel2, topPanePr,	 	0, 2, 4, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, analogPanel,		4, 2, 1, 3, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, selTimeZone, 		0, 3, 2, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, analogCb2,		 	2, 3, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, analogCb2,		2, 3, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, jLDateFormat, 	1, 4, 1, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, cardComboPanel, 	2, 4, 2, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, timePaneRadSpace, 0, 5, 1, 1, 0.0D, 0.0D, this);
@@ -446,16 +491,14 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel3, useImg, 			0, 0, 4, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, component2, 		0, 1, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, jscrollpane1, 	1, 1, 1, 3, 0.0D, 0.8D, this);
-			ExUtils.addComponent(jpanel3, selectDir, 		2, 1, 2, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, toolPane2, 		2, 1, 2, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, component3,		0, 2, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, component4,		1, 2, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, picLabel, 		2, 2, 2, 1, 0.0D, 0.8D, this);
-			ExUtils.addComponent(jpanel3, layLabel, 		2, 3, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, comboTLayout, 	3, 3, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, picPanel, 		2, 2, 2, 2, 0.0D, 0.8D, this);
 			ExUtils.addComponent(jpanel3, useCol, 			0, 5, 4, 1, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, selBackCol, 		1, 6, 2, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, resBackCol, 		3, 6, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, transSlide, 		1, 7, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, jlTransSlide, 		1, 7, 1, 1, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel3, transLevel, 		2, 7, 2, 1, 1.0D, 0.0D, this);
 			if (!initinfo.isPixelAlphaSupported() && initinfo.isScreenshotSupported())
 			{
@@ -552,32 +595,14 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		fontPreview.setForeground(color);
 		useImg.setSelected(initinfo.isUsingImage());
 		useCol.setSelected(!initinfo.isUsingImage());
-
-		File imgFile = initinfo.getImageFile();
-		int selectIndex = -1;
-		try {
-			imgFileList.setDefaultImagesDir(initinfo.getDefaultsDir() + "/images");
-			imgFileList.setDirectory(imgFile);
-			selectIndex = imgFileList.getNextMatch(imgFile.toString(), 0, Position.Bias.Forward);
-		} catch (IllegalArgumentException e) {
-			System.out.println("Selected image " + imgFile.toString() + " Not found in list.");
-			e.printStackTrace();
-		} catch (URISyntaxException e) {
-			System.out.println("Source jar file URL not formatted according to to RFC2396.");
-			e.printStackTrace();
-		}
-		if (selectIndex != -1)
-			imgFileList.setSelectedValue(imgFile, true);
-		else
-			imgFileList.setSelectedIndex(0);
-		imgFileList.ensureIndexIsVisible(imgFileList.getSelectedIndex());
-
+		imgFileList.setDefaultImagesDir(initinfo.getDefaultsDir() + "/images");
+		updateImagesList(initinfo.getImageFile());
 		useTrans.setSelected(initinfo.hasGlassEffect());
 		slowUpd.setSelected(initinfo.isSlowTransUpdating());
 		if (initinfo.getImageFile().isFile())
 		{
 			picLabel.setBackImage((new ImageIcon(initinfo.getImageFile().toString())).getImage());
-			picLabel.setText("");
+			picLabel.setText("Preview");
 			setTransparentBackground();
 		}
 		else
@@ -585,29 +610,29 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			picLabel.setText("No Preview");
 			picLabel.setBackImage(null);
 		}
-		picLabel.setImagePosition(initinfo.getImageStyle());
+		picLabel.setImageLayout(initinfo.getImageStyle());
 		switch (initinfo.getImageStyle())
 		{
 			case TLabel.FIT:
-				comboTLayout.setSelectedItem("Resize to Fit"); break;
+				comboTLayout.setSelectedItem(TLabel.FIT_TEXT); break;
 			case TLabel.CENTER:
-				comboTLayout.setSelectedItem("Center"); break;
+				comboTLayout.setSelectedItem(TLabel.CENTER_TEXT); break;
 			case TLabel.TILE:
-				comboTLayout.setSelectedItem("Tile"); break;
+				comboTLayout.setSelectedItem(TLabel.TILE_TEXT); break;
 			case TLabel.STRETCH:
-				comboTLayout.setSelectedItem("Stretch to Fit"); break;
+				comboTLayout.setSelectedItem(TLabel.STRETCH_TEXT); break;
 			case TLabel.V_TILE:
-				comboTLayout.setSelectedItem("Tile Vertically"); break;
+				comboTLayout.setSelectedItem(TLabel.V_TILE_TEXT); break;
 			case TLabel.H_TILE:
-				comboTLayout.setSelectedItem("Tile Horizontally"); break;	
+				comboTLayout.setSelectedItem(TLabel.H_TILE_TEXT); break;	
 			default:
-				comboTLayout.setSelectedItem("Resize to Fit"); break;
+				comboTLayout.setSelectedItem(TLabel.FIT_TEXT); break;
 		}
 		color = initinfo.getBackground();
 		((ButtonIcon)selBackCol.getIcon()).setEnabledColor(color);
 		transLevel.setMinimum(initinfo.isPixelAlphaSupported() ? 0 : 4);
 		transLevel.setValue(Math.round(initinfo.getOpacity() * 20));
-		transSlide.setText("Opacity [ " + Math.round(initinfo.getOpacity() * 100) + " % ]");
+		jlTransSlide.setText("Opacity [ " + Math.round(initinfo.getOpacity() * 100) + " % ]");
 		Border border = initinfo.getBorder();
 		bdrPreview.setBorder(border);
 		if (border instanceof BevelBorder)
@@ -629,6 +654,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			lBorder.setSelected(true);
 			Color color1 = ((LineBorder)border).getLineColor();
 			((ButtonIcon)selLineCol.getIcon()).setEnabledColor(color1);
+			intThick = ((LineBorder)border).getThickness();
+			thickSpinner.setValue(intThick);
 		}
 		else
 		{
@@ -638,12 +665,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		roundBdr.setSelected(initinfo.hasRoundedCorners());
 		enTooltip.setSelected(initinfo.hasTooltip());
 		nativeLook.setSelected(initinfo.hasNativeLook());
+		analogCb0.setSelected(initinfo.isAnalogClock());
 		analogCb1.setSelected(initinfo.isAnalogClock());
 		analogCb2.setSelected(initinfo.isAnalogClock());
-		bdrPreview.setText(analogCb1.isSelected() ? "" : "Preview");
-		if (analogCb1.isSelected()) bdrPreview.setPreferredSize(new Dimension(100, 100));
-		else bdrPreview.setPreferredSize(new Dimension(100, 30));
-		bdrPreview.setClockMode(analogCb1.isSelected());
 		int anaClkOpts = Math.floorDiv(initinfo.getAnalogClockOption(), 1000) * 1000;
 		int anaBdrOpts = initinfo.getAnalogClockOption() % 1000;
 		for (AnalogClockFormat formats : anaFormats) {
@@ -730,24 +754,34 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		jLAnaPreview.setTime(10, 10, 5, "AM", anaFormat.format(new Date()));
 	}
 
-	private final JPanel getToolbarPanel()
+	private JButton createSmallButton(Image buttonImg, String buttonText, ActionListener actListenter)
 	{
-		JPanel smallPane = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		Image defaultPng = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/default-icon.png"))).getImage();
-		resetDefs  = new JButton(new ImageIcon(defaultPng.getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
-		resetDefs.setActionCommand("Reset To Defaults");
-		resetDefs.setToolTipText("Reset to default values");
-		resetDefs.setMargin(new Insets(2, 5, 2, 5));
-		resetDefs.addActionListener(this);
-		Image helpPng = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/help-icon.png"))).getImage();
-		helpFormat  = new JButton(new ImageIcon(helpPng.getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
-		helpFormat.setActionCommand("Help On Format");
-		helpFormat.setToolTipText("Help on date time format characters.");
-		helpFormat.setMargin(new Insets(2, 5, 2, 5));
-		helpFormat.addActionListener(this);
-		smallPane.add(resetDefs);
-		smallPane.add(helpFormat);
-		return smallPane;
+		JButton smallbutton  = new JButton(new ImageIcon(buttonImg.getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
+		smallbutton.setActionCommand(buttonText);
+		smallbutton.setToolTipText(buttonText);
+		smallbutton.setMargin(new Insets(2, 5, 2, 5));
+		smallbutton.addActionListener(actListenter);
+		return smallbutton;
+	}
+
+	private void updateImagesList(File imgFile)
+	{
+		int selectIndex = -1;
+		try {
+			imgFileList.setDirectory(imgFile);
+			selectIndex = imgFileList.getNextMatch(imgFile.toString(), 0, Position.Bias.Forward);
+		} catch (IllegalArgumentException e) {
+			System.out.println("Selected image " + imgFile.toString() + " Not found in list.");
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			System.out.println("Source jar file URL not formatted according to to RFC2396.");
+			e.printStackTrace();
+		}
+		if (selectIndex != -1)
+			imgFileList.setSelectedValue(imgFile, true);
+		else
+			imgFileList.setSelectedIndex(0);
+		imgFileList.ensureIndexIsVisible(imgFileList.getSelectedIndex());
 	}
 
 	private String getAlarmDescription()
@@ -783,13 +817,14 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	{
 		imgFileList.setEnabled(useImg.isSelected());
 		selectDir.setEnabled(useImg.isSelected());
+		resetImgDir.setEnabled(useImg.isSelected());
 		picLabel.setEnabled(useImg.isSelected());
 		layLabel.setEnabled(useImg.isSelected());
 		comboTLayout.setEnabled(useImg.isSelected());
 		selBackCol.setEnabled(useCol.isSelected());
 		resBackCol.setEnabled(useCol.isSelected());
 		transLevel.setEnabled(useCol.isSelected() && (information.isWindowAlphaSupported() || information.isPixelAlphaSupported()));
-		transSlide.setEnabled(useCol.isSelected() && (information.isWindowAlphaSupported() || information.isPixelAlphaSupported()));
+		jlTransSlide.setEnabled(useCol.isSelected() && (information.isWindowAlphaSupported() || information.isPixelAlphaSupported()));
 		slowUpd.setEnabled(useTrans.isSelected());
 		comboPomodoro.setEnabled(pomodoroTime.isSelected());
 		jLPomFormat.setEnabled(pomodoroTime.isSelected());
@@ -799,6 +834,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		tzLabel.setEnabled(selTimeZone.isSelected());
 		tzCb.setEnabled(selTimeZone.isSelected());
 		comboTz.setEnabled(selTimeZone.isSelected());
+		analogCb0.setEnabled(selTimeZone.isSelected());
 		analogCb1.setEnabled(selTimeZone.isSelected());
 		analogCb2.setEnabled(selTimeZone.isSelected());
 		cbShowDays.setEnabled(sysUpTime.isSelected());
@@ -814,7 +850,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		sSymbol.setEnabled(sysUpTime.isSelected());
 		selLineCol.setEnabled(lBorder.isSelected());
 		resLineCol.setEnabled(lBorder.isSelected());
-		if ((analogCb1.isEnabled() || analogCb2.isEnabled()) && analogCb2.isSelected()) {
+		thickLabel.setEnabled(lBorder.isSelected());
+		thickSpinner.setEnabled(lBorder.isSelected());
+		if ((analogCb0.isEnabled() || analogCb1.isEnabled() || analogCb2.isEnabled()) && analogCb2.isSelected()) {
+			analogCb0.setSelected(true);
 			analogCb1.setSelected(true);
 			analogCb2.setSelected(true);
 			digitalPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
@@ -823,6 +862,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			jLAnaPreview.setEnabled(true);
 			((CardLayout)cardComboPanel.getLayout()).show(cardComboPanel, "ClockFormat");
 		} else {
+			analogCb0.setSelected(false);
 			analogCb1.setSelected(false);
 			analogCb2.setSelected(false);
 			digitalPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
@@ -831,6 +871,18 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			jLAnaPreview.setEnabled(false);
 			((CardLayout)cardComboPanel.getLayout()).show(cardComboPanel, "DateFormat");
 		}
+		bdrPreview.setText(analogCb1.isSelected() ? "" : "Preview");
+		bdrPreview.setClockMode(analogCb1.isSelected());
+		picLabel.setText(analogCb0.isSelected() ? "" : "Preview");
+		picLabel.setClockMode(analogCb0.isSelected());
+		if (analogCb1.isSelected()) {
+			bdrPreview.setPreferredSize(new Dimension(100, 100));
+			picLabel.setPreferredSize(new Dimension(100, 100));
+		} else {
+			bdrPreview.setPreferredSize(new Dimension(100, 30));
+			picLabel.setPreferredSize(new Dimension(200, 30));
+		}
+		comboDialBdr.setEnabled(analogCb1.isSelected());
 		
 		try
 		{
@@ -1060,7 +1112,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			File testfile=(File)imgFileList.getSelectedValue();
 			information.setImageFile(testfile.getAbsolutePath());
 		}
-		information.setImageStyle(picLabel.getImagePosition());
+		information.setImageStyle(picLabel.getImageLayout());
 		information.setBackground(((ButtonIcon)selBackCol.getIcon()).getEnabledColor());
 		information.setOpacity((float)transLevel.getValue() / 20);
 		information.setBorder(bdrPreview.getBorder());
@@ -1090,7 +1142,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				information.setDisplayMethod("CURTZ");
 			else
 				information.setDisplayMethod("GMTTZ");
-			information.setAnalogClock(analogCb1.isSelected() || analogCb2.isSelected());
+			information.setAnalogClock(analogCb0.isSelected() || analogCb1.isSelected() || analogCb2.isSelected());
 			information.setAnalogClockOption(comboClockFmt.getItemAt(comboClockFmt.getSelectedIndex()).getId() + comboDialBdr.getItemAt(comboDialBdr.getSelectedIndex()).getId());
 			information.setTimeZone(comboTz.getItemAt(comboTz.getSelectedIndex()));
 			information.setZonedTimeFormat(comboDateFmt.getSelectedItem().toString());
@@ -1309,7 +1361,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		}
 		else if (comm.equals("Line Border") && lBorder.isSelected())
 		{
-			bdrPreview.setBorder(BorderFactory.createLineBorder(((ButtonIcon)selLineCol.getIcon()).getEnabledColor(), 2));
+			thickSpinner.setValue(intThick);
+			bdrPreview.setBorder(BorderFactory.createLineBorder(((ButtonIcon)selLineCol.getIcon()).getEnabledColor(), intThick));
 		}
 		else if (comm.equals("Don't Use Any Border") && nBorder.isSelected())
 		{
@@ -1322,21 +1375,25 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			if (color4 == null)
 				color4 = color1;
 			((ButtonIcon)selLineCol.getIcon()).setEnabledColor(color4);
-			bdrPreview.setBorder(BorderFactory.createLineBorder(color4, 2));
+			bdrPreview.setBorder(BorderFactory.createLineBorder(color4, intThick));
 		}
 		else if (comm.equals("Default Line Color") && lBorder.isSelected())
 		{
 			((ButtonIcon)selLineCol.getIcon()).setEnabledColor(resLineCol.getBackground());
-			bdrPreview.setBorder(BorderFactory.createLineBorder(resLineCol.getBackground(), 2));
+			bdrPreview.setBorder(BorderFactory.createLineBorder(resLineCol.getBackground(), intThick));
 		}
 		else if (comm.equals("AnalogClock"))
 		{
-			if (actionevent.getSource().equals(analogCb2)) analogCb1.setSelected(analogCb2.isSelected());
-			if (actionevent.getSource().equals(analogCb1)) analogCb2.setSelected(analogCb1.isSelected());
-			bdrPreview.setText(analogCb1.isSelected() ? "" : "Preview");
-			bdrPreview.setClockMode(analogCb1.isSelected());
-			if (analogCb1.isSelected()) bdrPreview.setPreferredSize(new Dimension(100, 100));
-			else bdrPreview.setPreferredSize(new Dimension(100, 30));
+			if (actionevent.getSource().equals(analogCb2)) {
+				analogCb1.setSelected(analogCb2.isSelected());
+				analogCb0.setSelected(analogCb2.isSelected());
+			} else if (actionevent.getSource().equals(analogCb1)) {
+				analogCb2.setSelected(analogCb1.isSelected());
+				analogCb0.setSelected(analogCb2.isSelected());
+			} else if (actionevent.getSource().equals(analogCb0)) {
+				analogCb1.setSelected(analogCb0.isSelected());
+				analogCb2.setSelected(analogCb0.isSelected());
+			}
 			jLAnaPreview.setPreferredSize(analogPanel.getSize());
 			updateAnalogClockTimezone(TimeZone.getTimeZone(comboTz.getItemAt(comboTz.getSelectedIndex())));
 		}
@@ -1362,7 +1419,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		{
 			validateTimeFormat();
 		}
-		else if (comm.equals("Reset To Defaults"))
+		else if (comm.equals("Reset to default values"))
 		{
 			if (selTimeZone.isSelected())
 			{
@@ -1387,7 +1444,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				cbPomCountdown.setSelected(false);
 			}
 		}
-		else if (comm.equals("Help On Format"))
+		else if (comm.equals("Help on date time format characters"))
 		{
 			if (!exceptionActive)
 				new FormatHelp(this);
@@ -1407,6 +1464,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 					e.printStackTrace();
 				}
 			}
+		}
+		else if (comm.equals("Reset to default images"))
+		{
+			updateImagesList(new File("."));
 		}
 		else if (comm.equals("Choose Background Color"))
 		{
@@ -1531,20 +1592,20 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		{
 			String comm = ie.getItem().toString();
 			switch (comm) {
-				case "Tile Vertically":
-					picLabel.setImagePosition(TLabel.V_TILE); break;
-				case "Tile":
-					picLabel.setImagePosition(TLabel.TILE); break;
-				case "Tile Horizontally":
-					picLabel.setImagePosition(TLabel.H_TILE); break;
-				case "Center":
-					picLabel.setImagePosition(TLabel.CENTER); break;
-				case "Resize to Fit":
-					picLabel.setImagePosition(TLabel.FIT); break;
-				case "Stretch to Fit":
-					picLabel.setImagePosition(TLabel.STRETCH); break;
+				case TLabel.V_TILE_TEXT:
+					picLabel.setImageLayout(TLabel.V_TILE); break;
+				case TLabel.TILE_TEXT:
+					picLabel.setImageLayout(TLabel.TILE); break;
+				case TLabel.H_TILE_TEXT:
+					picLabel.setImageLayout(TLabel.H_TILE); break;
+				case TLabel.CENTER_TEXT:
+					picLabel.setImageLayout(TLabel.CENTER); break;
+				case TLabel.FIT_TEXT:
+					picLabel.setImageLayout(TLabel.FIT); break;
+				case TLabel.STRETCH_TEXT:
+					picLabel.setImageLayout(TLabel.STRETCH); break;
 				default:
-					picLabel.setImagePosition(TLabel.FIT); break;
+					picLabel.setImageLayout(TLabel.FIT); break;
 			}
 		}
 		else if (ie.getStateChange() == ItemEvent.SELECTED && source.equals(comboTz))
@@ -1603,7 +1664,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			else
 			{
 				picLabel.setBackImage((new ImageIcon(imgFileList.getSelectedValue().toString())).getImage());
-				picLabel.setText("");
+				picLabel.setText(analogCb0.isSelected() ? "" : "Preview");
+				// Bugfix: Remove dial ticks showing over image by default.
+				if (information.getAnalogClockOption() % 1000 != 0 && analogCb1.isSelected()) comboDialBdr.setSelectedItem(anaDials.get(0));
 			}
 		}
 		else if (srcList.equals(cFontList) || srcList.equals(cFontStyleList) || srcList.equals(cFontSizeList))
@@ -1614,9 +1677,18 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 
 	public void stateChanged(ChangeEvent ce)
 	{
-		String opacityPercent = Math.round((float)transLevel.getValue() / 20 * 100) + " %";
-		transSlide.setText("Opacity [ " + opacityPercent + " ]");
-		transLevel.setToolTipText(opacityPercent);
+		Object cSrc = ce.getSource();
+		if (cSrc.equals(thickSpinner)) {
+			Border currBorder = bdrPreview.getBorder();
+			if(currBorder instanceof LineBorder) {
+				intThick = (int)thickSpinner.getValue();
+				bdrPreview.setBorder(new LineBorder(((LineBorder)currBorder).getLineColor(), intThick));
+			}
+		} else if (cSrc.equals(transLevel)) {
+			String opacityPercent = Math.round((float)transLevel.getValue() / 20 * 100) + " %";
+			jlTransSlide.setText("Opacity [ " + opacityPercent + " ]");
+			transLevel.setToolTipText(opacityPercent);
+		}
 	}
 
 	private class ValidateTimeAid implements Runnable {
