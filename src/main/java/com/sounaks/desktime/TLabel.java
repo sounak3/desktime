@@ -11,9 +11,15 @@ public class TLabel extends JLabel
 	private Graphics2D g2;
 	private Image image, backupImage;
 	private Dimension fitDim, thumbDim;
-	private int position, inuse, analogClockOptions;
+	private int imgLayout, inuse, analogClockOptions;
 	protected boolean hasImage;
 	protected boolean forceTrans;
+	public static final String V_TILE_TEXT  = "Tile Vertically";
+	public static final String H_TILE_TEXT  = "Tile Horizontally";
+	public static final String CENTER_TEXT  = "Center";
+	public static final String STRETCH_TEXT = "Stretch to Fit";
+	public static final String FIT_TEXT     = "Fit - Maintain aspect ratio";
+	public static final String TILE_TEXT    = "Tile";
 	public static final int V_TILE        = 1;
 	public static final int H_TILE        = 2;
 	public static final int CENTER        = 4;
@@ -45,14 +51,14 @@ public class TLabel extends JLabel
 		hasImage    = (image1 != null);
 		image       = image1;
 		backupImage = image1;
-		position    = TLabel.STRETCH;
+		imgLayout    = TLabel.STRETCH;
 	}
 
 	public TLabel(String s, Image image1, int position)
 	{
 		this(s, image1);
 		if (position == 4 || position == 2 || position == 1 || position == 8 || position == 16 || position == 32)
-			this.position = position;
+			this.imgLayout = position;
 		else
 			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
 	}
@@ -61,7 +67,7 @@ public class TLabel extends JLabel
 	{
 		this(s, image1);
 		if (position == 4 || position == 2 || position == 1 || position == 8 || position == 16 || position == 32)
-			this.position = position;
+			this.imgLayout = position;
 		else
 			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
 		this.forceTrans = forceTrans;
@@ -185,18 +191,18 @@ public class TLabel extends JLabel
 		return new Dimension((int)(imgSize.width * ratio), (int)(imgSize.height * ratio));
 	}
 
-	public void setImagePosition(int i)
+	public void setImageLayout(int layout)
 	{
-		if (i == 4 || i == 2 || i == 1 || i == 8 || i == 16 || i == 32)
-			position = i;
+		if (layout == 4 || layout == 2 || layout == 1 || layout == 8 || layout == 16 || layout == 32)
+			imgLayout = layout;
 		else
 			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
 		repaint();
 	}
 
-	public int getImagePosition()
+	public int getImageLayout()
 	{
-		return position;
+		return imgLayout;
 	}
 
 	public void setEnabled(boolean enabled)
@@ -270,7 +276,7 @@ public class TLabel extends JLabel
 			}
 			else
 			{
-				switch (position)
+				switch (imgLayout)
 				{
 					case TLabel.STRETCH: // For image Stretch to Fit;
 						g2.drawImage(image, 0, 0, getWidth(), getHeight(), this);

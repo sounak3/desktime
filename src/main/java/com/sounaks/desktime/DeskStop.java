@@ -69,6 +69,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		this.info         = info;
 		this.alarms       = alarms;
 		pixelTranslucency = gd.isWindowTranslucencySupported(PERPIXEL_TRANSLUCENT);
+		// pixelTranslucency = false;
 		wholeTranslucency = gd.isWindowTranslucencySupported(TRANSLUCENT);
 		robotSupport      = ExUtils.checkAWTPermission("createRobot") && ExUtils.checkAWTPermission("readDisplayPixels");
 		clockThread       = null;
@@ -247,19 +248,25 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			}
 			else
 			{
-				if (!wholeTranslucency) {
+				if (wholeTranslucency) {
+					setOpacity(info.getOpacity());
+				} else {
 					setOpacity(1.0f);
 					info.setOpacity(1.0f);
-				} else {
-					setOpacity(0.2f);
-					info.setOpacity(0.2f);
 				}
 				setBackground(info.getBackground());
 				mainPane.setAlpha(1.0f);
 			}
 			stopRefresh();
+			boolean lastClockMode = tLabel.isClockMode();
+			boolean newClockMode  = info.isAnalogClock();
 			tLabel.setBackImage((new ImageIcon(info.getImageFile().toString())).getImage());
-			tLabel.setImagePosition(info.getImageStyle());
+			// Bugfix: set image style as tile-horizontal when changing from analog to others and stretch when vice versa.
+			if (lastClockMode == newClockMode) tLabel.setImageLayout(info.getImageStyle());
+			else if (lastClockMode) tLabel.setImageLayout(TLabel.H_TILE);
+			else tLabel.setImageLayout(TLabel.STRETCH);
+
+			info.setImageStyle(tLabel.getImageLayout());
 			tLabel.setBackground(null);
 			getRootPane().putClientProperty("Window.shadow", Boolean.TRUE);
 		}
@@ -489,12 +496,14 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		else if (obj.equals(miUptime))
 		{
 			info.setDisplayMethod("UPTIME");
+			info.setAnalogClock(false);
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
 		else if (obj.equals(miPomo))
 		{
 			info.setDisplayMethod("POMODORO");
+			info.setAnalogClock(false);
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
