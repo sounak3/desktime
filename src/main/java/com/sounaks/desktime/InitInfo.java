@@ -30,6 +30,7 @@ public class InitInfo extends Hashtable<String, Object>
 		put("FONT", new Font("Courier New", Font.BOLD, 16));
 		put("BACKGROUND", Color.white);
 		put("OPACITY", 1.0F);
+		put("FORE_TRANSLUCENT", true);
 		put("FOREGROUND", Color.black);
 		put("LINE_COLOR", Color.black);
 		put("BORDER", BorderFactory.createEmptyBorder());
@@ -52,7 +53,7 @@ public class InitInfo extends Hashtable<String, Object>
 		put("IMAGEFILE", defaultsDir.getAbsolutePath() + "/images/" + "BabyBlue.JPG");
 		put("IMAGE_STYLE", ExUtils.STRETCH);
 		put("ON_TOP", true);
-		put("ROUND_CORNERS", true);
+		put("ROUND_CORNERS", 0);
 		put("SLOW_TRANS", false);
 		// put("ALARM_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "Alarm-chosic_com.mp3");
 		put("HOUR_SOUND", defaultsDir.getAbsolutePath() + "/sounds/" + "beep-beep-6151.mp3");
@@ -101,6 +102,16 @@ public class InitInfo extends Hashtable<String, Object>
 	public void setPixelAlphaSupport(boolean pixelAlphaSupport)
 	{
 		this.pixelAlphaSupport = pixelAlphaSupport;
+	}
+
+	public boolean isForegroundTranslucent()
+	{
+		return ((Boolean)get("FORE_TRANSLUCENT")).booleanValue();
+	}
+
+	public void setForegroundTranslucent(boolean translucent)
+	{
+		put("FORE_TRANSLUCENT", translucent);
 	}
 
 	public boolean isWindowAlphaSupported()
@@ -382,12 +393,12 @@ public class InitInfo extends Hashtable<String, Object>
 		put("IMAGE_STYLE", i);
 	}
 
-	public boolean hasRoundedCorners()
+	public int getRoundCorners()
 	{
-		return ((Boolean)get("ROUND_CORNERS")).booleanValue();
+		return ((Integer)get("ROUND_CORNERS")).intValue();
 	}
 
-	public void setRoundCorners(boolean roundCorners)
+	public void setRoundCorners(int roundCorners)
 	{
 		put("ROUND_CORNERS", roundCorners);
 	}

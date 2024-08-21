@@ -12,6 +12,7 @@ public class TLabel extends JLabel
 	private Image image, backupImage;
 	private Dimension fitDim, thumbDim;
 	private int imgLayout, inuse, analogClockOptions;
+	private float imageAlpha;
 	protected boolean hasImage;
 	protected boolean forceTrans;
 	public static final String V_TILE_TEXT  = "Tile Vertically";
@@ -78,9 +79,10 @@ public class TLabel extends JLabel
 		super(s, 0);
 		hasImage   = false;
 		forceTrans = false;
-		g2         = (Graphics2D)super.getGraphics();
+		g2         = (Graphics2D)getGraphics();
 		anaClkFnt  = getFont().deriveFont(getFont().getSize() >= 12 ? (float)getFont().getSize() - 2 : 10.0f);
 		fm         = getFontMetrics(anaClkFnt);
+		imageAlpha = 1.0f;
 		setOpaque(false);
 		setVerticalAlignment(0);
 		time_hr   = 10;
@@ -89,6 +91,14 @@ public class TLabel extends JLabel
 		time_ampm = "";
 		time_zn   = "";
 		clockMode = false;
+	}
+
+	public void setImageAlpha(float imageAlpha) {
+		this.imageAlpha = imageAlpha;
+	}
+
+	public float getImageAlpha() {
+		return imageAlpha;
 	}
 
 	@Override
@@ -276,6 +286,8 @@ public class TLabel extends JLabel
 			}
 			else
 			{
+				Composite compositeBackup = g2.getComposite();
+				g2.setComposite(AlphaComposite.Src.derive(getImageAlpha()));
 				switch (imgLayout)
 				{
 					case TLabel.STRETCH: // For image Stretch to Fit;
@@ -335,7 +347,11 @@ public class TLabel extends JLabel
 								g2.drawImage(image, j1 * thumbDim.width, i1 * thumbDim.height, thumbDim.width, thumbDim.height, this);
 						}
 						break;
+					default: // default is stretch to fit
+						g2.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+						break;
 				}
+				g2.setComposite(compositeBackup);
 			}
 		}
 
