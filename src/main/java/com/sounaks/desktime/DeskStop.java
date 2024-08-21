@@ -28,10 +28,11 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private InitInfo info;
 	private Vector <TimeBean>alarms;
 	private JPopupMenu pMenu;
-	private JMenu addPanel,mFormat,timeMode,timeZone,mSize;
-	private JSlider sizer;
-	private JMenuItem miAnaTime,miDigTime,miUptime,miPomo,miSeltz,miDeftz,timSet,zonSet,impZon[];
-	private JMenuItem fore,back,alm,bdr,exit,about,newItem,dupItem,removePanel,miMovable,ontop;
+	private JMenu addPanel,mFormat,timeMode,timeZone,mSize,mOpacityLevel, mRoundCorners;
+	private JSlider sizer, opacityLevel;
+	private JMenuItem miAnaTime,miDigTime,miUptime,miPomo,miSeltz,miDeftz,timSet,zonSet,mAllOpacity;
+	private JMenuItem fore,back,alm,bdr,exit,about,newItem,dupItem,removePanel,miMovable,ontop,sysClk;
+	private JMenuItem impZon[], tMenuItem[];
 	private PointerInfo pi;
 	private Point pointerLoc;
 	private Dimension scsize;
@@ -118,12 +119,40 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		UIManager.put("CheckBoxMenuItem.background", Color.WHITE);
 		pMenu = new JPopupMenu("DeskTime Menu");
 		mFormat = new JMenu("Format");
-		fore  = new JMenuItem("Font...");
+		mRoundCorners = new JMenu("Rounded corners");
+		tMenuItem = new JMenuItem[ExUtils.ROUND_CORNERS.values().length];
+		int mCnt = 0;
+		for (ExUtils.ROUND_CORNERS corner : ExUtils.ROUND_CORNERS.values()) {
+			ImageIcon selectedIco = info.getRoundCorners() == corner.getRoundType() ? checkPng : clearPng;
+			tMenuItem[mCnt] = new JMenuItem(ExUtils.toCamelCase(corner.name()), selectedIco);
+			tMenuItem[mCnt].setActionCommand(corner.name());
+			tMenuItem[mCnt].addActionListener(this);
+			mRoundCorners.add(tMenuItem[mCnt]);
+			mCnt++;
+		}
+		mOpacityLevel = new JMenu("Opacity level");
+		opacityLevel  = new JSlider(JSlider.VERTICAL, 4, 20, 10);
+		opacityLevel.setPreferredSize(new Dimension(opacityLevel.getPreferredSize().width + 40, opacityLevel.getPreferredSize().height + 40));
+		opacityLevel.setMajorTickSpacing(4);
+		opacityLevel.setMinorTickSpacing(1);
+		opacityLevel.setPaintTicks(true);
+		opacityLevel.setSnapToTicks(true);
+		opacityLevel.addChangeListener(this);
+		mOpacityLevel.add(opacityLevel);
+		mAllOpacity = new JMenuItem("Blend foreground opacity");
+		mAllOpacity.setIcon(info.isForegroundTranslucent() ? checkPng : clearPng);
+		mAllOpacity.addActionListener(this);
+		mAllOpacity.setEnabled(pixelTranslucency);
+		fore  = new JMenuItem("Font & Foreground...");
 		fore.addActionListener(this);
-		back  = new JMenuItem("Background...");
+		back  = new JMenuItem("Background & Dials...");
 		back.addActionListener(this);
-		bdr   = new JMenuItem("Borders & UI...");
+		bdr   = new JMenuItem("Borders & Clock UI...");
 		bdr.addActionListener(this);
+		mFormat.add(mRoundCorners);
+		mFormat.add(mOpacityLevel);
+		mFormat.add(mAllOpacity);
+		mFormat.addSeparator();
 		mFormat.add(fore);
 		mFormat.add(back);
 		mFormat.add(bdr);
@@ -163,8 +192,10 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		zonSet.addActionListener(this);
 		timeZone.addSeparator();
 		timeZone.add(zonSet);
-		alm   = new JMenuItem("Set Alarm...");
+		sysClk = new JMenuItem("System Clock");
+		alm    = new JMenuItem("Set Alarm...");
 		alm.addActionListener(this);
+		sysClk.addActionListener(this);
 		Hashtable<Integer, JLabel> ht = new Hashtable<Integer, JLabel>();
 		for (int i = 0; i < ai.length; i++)
 			ht.put(i, new JLabel(String.valueOf(ai[i])));
@@ -185,7 +216,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		ontop = new JMenuItem("Always on top");
 		ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
 		ontop.addActionListener(this);
-		addPanel = new JMenu("Add panel");
+		addPanel = new JMenu("Add clock panel");
 		addPanel.setIcon(plusPng);
 		newItem = new JMenuItem("New");
 		newItem.addActionListener(this);
@@ -204,6 +235,17 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		pMenu.add(timeZone);
 		pMenu.add(mFormat);
 		pMenu.add(alm);
+		switch (ExUtils.getOS()) {
+			case WINDOWS:
+			case LINUX:
+				pMenu.add(sysClk);
+				break;
+			case MAC:
+				// to be included later
+				break;
+			default:
+				break;
+		}
 		pMenu.addSeparator();
 		pMenu.add(mSize);
 		pMenu.add(miMovable);
@@ -223,6 +265,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	{
 		setAlwaysOnTop(info.getOnTop());
 		tLabel.setFont(info.getFont());
+		tLabel.setCursor(info.isFixed() ? Cursor.getDefaultCursor() : Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 		metrics = tLabel.getFontMetrics(info.getFont());
 		tLabel.setForeground(info.getForeground());
 		tLabel.setBorder(info.getBorder());
@@ -240,23 +283,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		{
 			tLabel.setText(time);
 			tLabel.setTransparency(false);
-			if (pixelTranslucency)
-			{
-				setOpacity(1.0f);
-				setBackground(new Color(0, 0, 0, 0.00f));
-				mainPane.setAlpha(0.0f);
-			}
-			else
-			{
-				if (wholeTranslucency) {
-					setOpacity(info.getOpacity());
-				} else {
-					setOpacity(1.0f);
-					info.setOpacity(1.0f);
-				}
-				setBackground(info.getBackground());
-				mainPane.setAlpha(1.0f);
-			}
+			opacityMethod(info.isUsingImage());
 			stopRefresh();
 			boolean lastClockMode = tLabel.isClockMode();
 			boolean newClockMode  = info.isAnalogClock();
@@ -295,26 +322,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		{
 			mainPane.setBackground(info.getBackground());
 			if (info.hasGlassEffect()) info.setGlassEffect(false);
-			if (pixelTranslucency)
-			{
-				setOpacity(1.0f);
-				setBackground(new Color(0, 0, 0, 0.00f));
-				mainPane.setAlpha(info.getOpacity());
-			}
-			else
-			{
-				if (!wholeTranslucency) {
-					setOpacity(1.0f);
-					info.setOpacity(1.0f);
-				} else if (info.getOpacity() < 0.2f) {
-					setOpacity(0.2f);
-					info.setOpacity(0.2f);
-				} else {
-					setOpacity(info.getOpacity());
-				}
-				setBackground(info.getBackground());
-				mainPane.setAlpha(1.0f);
-			}
+			opacityMethod(info.isUsingImage());
 			tLabel.setText(time);
 			tLabel.setBackImage(null);
 			tLabel.setTransparency(false);
@@ -322,13 +330,16 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			stopRefresh();
 		}
 		if(info.getID() != 0) setVisible(true);
-		setRoundedCorners(info.hasRoundedCorners());
+		setRoundedCorners(info.getRoundCorners());
 		miMovable.setIcon(info.isFixed() ? clearPng : checkPng);
 		ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
 		miDigTime.setIcon(info.getDisplayMethod().endsWith("TZ") && !info.isAnalogClock() ? checkPng : clearPng);
 		miAnaTime.setIcon(info.getDisplayMethod().endsWith("TZ") && info.isAnalogClock() ? checkPng : clearPng);
 		miUptime.setIcon(info.getDisplayMethod().equals("UPTIME") ? checkPng : clearPng);
 		miPomo.setIcon(info.getDisplayMethod().equals("POMODORO") ? checkPng : clearPng);
+		mAllOpacity.setIcon(info.isForegroundTranslucent() ? checkPng : clearPng);
+		opacityLevel.setMinimum(info.isPixelAlphaSupported() && !info.isForegroundTranslucent() ? 0 : 4);
+		opacityLevel.setValue(Math.round(info.getOpacity() * 20));
 		lastPomTask = info.getPomodoroTask();
 		lastPomFormat = info.getPomodoroFormat();
 		timeDisplayConfig();
@@ -414,12 +425,48 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		setSize(i > k ? i : k, j);  // whichever gr8er;
 	}
 
-	private void setRoundedCorners(boolean isRound)
+	private void opacityMethod(boolean containsImage)
+	{
+		if (pixelTranslucency && !info.isForegroundTranslucent())
+		{
+			setOpacity(1.0f);
+			setBackground(new Color(0, 0, 0, 0.00f));
+			if (containsImage) {
+				mainPane.setAlpha(0.0f); // required in glass effect / robot screenshot
+				tLabel.setImageAlpha(info.getOpacity());
+			} else {
+				mainPane.setAlpha(info.getOpacity());
+			}
+		}
+		else
+		{
+			if (wholeTranslucency) {
+				// if foreground is translucent or pixel translucency is unsupported,
+				// then opacity shouldn't be below 0.2, else, it'll be almost invisible.
+				if (info.getOpacity() < 0.2f && !containsImage) {
+					setOpacity(0.2f);
+					info.setOpacity(0.2f);
+				} else {
+					setOpacity(info.getOpacity());
+				}
+			} else {
+				setOpacity(1.0f);
+				info.setOpacity(1.0f);
+			}
+			setBackground(info.getBackground());
+			tLabel.setImageAlpha(1.0f);
+			mainPane.setAlpha(1.0f);
+		}
+		repaint();
+	}
+
+	private void setRoundedCorners(int roundness)
 	{
 		Border thisBorder = info.getBorder();
-		if (isRound && (!info.hasGlassEffect() || thisBorder instanceof EtchedBorder || thisBorder instanceof LineBorder || thisBorder instanceof BevelBorder))
+		if (roundness != 0 && (!info.hasGlassEffect() || thisBorder instanceof EtchedBorder || thisBorder instanceof LineBorder || thisBorder instanceof BevelBorder))
 		{
-			setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 5, 5));
+			int arc = Math.floorDiv(Math.min(getWidth(), getHeight()), 5);
+			setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 0.25f * roundness * arc, 0.25f * roundness * arc));
 		}
 		else
 		{
@@ -525,10 +572,36 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
+		else if (obj.equals(sysClk))
+		{
+			switch (ExUtils.getOS()) {
+				case WINDOWS:
+					String[] sysClkCmd = {"explorer.exe", "shell:Appsfolder\\Microsoft.WindowsAlarms_8wekyb3d8bbwe!App"};
+					ExUtils.runProgram(sysClkCmd, this);
+					break;
+				case LINUX:
+					sysClkCmd = new String[]{"xclock"};
+					ExUtils.runProgram(sysClkCmd, this);
+					break;
+				case MAC:
+					// to be included later
+					break;
+				default:
+					break;
+			}
+		}
+		else if (obj.equals(mAllOpacity))
+		{
+			info.setForegroundTranslucent(!info.isForegroundTranslucent());
+			mAllOpacity.setIcon(info.isForegroundTranslucent() ? checkPng : clearPng);
+			ExUtils.saveDeskStops(info, deskstops);
+			re_init();
+		}
 		else if (obj.equals(miMovable))
 		{
 			info.setFixed(!info.isFixed());
 			miMovable.setIcon(info.isFixed() ? clearPng : checkPng);
+			tLabel.setCursor(info.isFixed() ? Cursor.getDefaultCursor() : Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 			ExUtils.saveDeskStops(info, deskstops);
 		}
 		else if (obj.equals(ontop))
@@ -568,6 +641,22 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		else if (obj.equals(removePanel))
 		{
 			DeskStop.removeInstance(this, info);
+		}
+		else if (obj instanceof JMenuItem)
+		{
+			int mCnt = 0;
+			for (ExUtils.ROUND_CORNERS corner : ExUtils.ROUND_CORNERS.values()) {
+				if (corner.name().equals(actionevent.getActionCommand())) {
+					tMenuItem[mCnt].setIcon(checkPng);
+					setRoundedCorners(corner.getRoundType());
+					info.setRoundCorners(corner.getRoundType());
+					ExUtils.saveDeskStops(info, deskstops);
+					re_init();
+				} else {
+					tMenuItem[mCnt].setIcon(clearPng);
+				}
+				mCnt++;
+			}
 		}
 		info.setPixelAlphaSupport(pixelTranslucency);
 		info.setWindowAlphaSupport(wholeTranslucency);
@@ -682,13 +771,13 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	@Override
 	public void componentResized(ComponentEvent e)
 	{
-		setRoundedCorners(info.hasRoundedCorners());
+		setRoundedCorners(info.getRoundCorners());
 	}
 
 	@Override
 	public void componentShown(ComponentEvent e)
 	{
-		setRoundedCorners(info.hasRoundedCorners());
+		setRoundedCorners(info.getRoundCorners());
 	}
 
 	@Override
@@ -703,13 +792,23 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 
 	public void stateChanged(ChangeEvent ce)
 	{
-		Font derived = info.getFont().deriveFont((float)ai[sizer.getValue()]);
-		if (derived.getSize() != info.getFont().getSize()) {
-			tLabel.setFont(derived);
-			metrics = tLabel.getFontMetrics(derived);
-			resizingMethod(info.isAnalogClock() ? "" : time);
-			info.setFont(derived);
-			ExUtils.saveDeskStops(info, deskstops);
+		Object srcObject = ce.getSource();
+		if (srcObject.equals(sizer)) {
+			Font derived = info.getFont().deriveFont((float)ai[sizer.getValue()]);
+			if (derived.getSize() != info.getFont().getSize()) {
+				tLabel.setFont(derived);
+				metrics = tLabel.getFontMetrics(derived);
+				resizingMethod(info.isAnalogClock() ? "" : time);
+				info.setFont(derived);
+				ExUtils.saveDeskStops(info, deskstops);
+			}
+		} else if (srcObject.equals(opacityLevel)) {
+			float derived = (float)opacityLevel.getValue() / 20;
+			if (derived != info.getOpacity()) {
+				info.setOpacity(derived);
+				opacityMethod(info.isUsingImage());
+				ExUtils.saveDeskStops(info, deskstops);
+			}
 		}
 	}
 

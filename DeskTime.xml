@@ -3,36 +3,27 @@
  <object class="java.util.ArrayList">
   <void method="add">
    <object class="com.sounaks.desktime.InitInfo" id="InitInfo0">
-    <void id="Boolean0" method="get">
+    <void method="put">
      <string>ROUND_CORNERS</string>
+     <int>4</int>
+    </void>
+    <void id="Boolean0" method="get">
+     <string>ON_TOP</string>
     </void>
     <void method="put">
      <string>ANALOG_CLOCK</string>
      <object idref="Boolean0"/>
     </void>
-    <void method="put">
-     <string>IMAGEFILE</string>
-     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\RTAEerGgc-clock.png</string>
-    </void>
-    <void method="put">
-     <string>ANALOG_CLOCK_OPTS</string>
-     <int>3000</int>
-    </void>
-    <void method="put">
-     <string>BACKGROUND</string>
-     <object class="java.awt.Color">
-      <int>0</int>
-      <int>153</int>
-      <int>0</int>
-      <int>255</int>
-     </object>
-    </void>
     <void id="Boolean1" method="get">
      <string>SLOW_TRANS</string>
     </void>
     <void method="put">
-     <string>TOOLTIP</string>
+     <string>FORE_TRANSLUCENT</string>
      <object idref="Boolean1"/>
+    </void>
+    <void method="put">
+     <string>IMAGEFILE</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\BabyBlue.JPG</string>
     </void>
     <void method="put">
      <string>TIMEZONE</string>
@@ -49,40 +40,22 @@
       <int>16</int>
      </object>
     </void>
-    <void method="put">
-     <string>FOREGROUND</string>
-     <object class="java.awt.Color">
-      <int>0</int>
-      <int>51</int>
-      <int>51</int>
-      <int>255</int>
-     </object>
-    </void>
     <void id="Point0" method="get">
      <string>LOCATION</string>
      <void class="java.awt.Point" method="getField">
       <string>x</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>944</int>
+       <int>1018</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>68</int>
+       <int>65</int>
       </void>
      </void>
-    </void>
-    <void method="put">
-     <string>LINE_COLOR</string>
-     <object class="java.awt.Color">
-      <int>102</int>
-      <int>102</int>
-      <int>102</int>
-      <int>255</int>
-     </object>
     </void>
    </object>
   </void>

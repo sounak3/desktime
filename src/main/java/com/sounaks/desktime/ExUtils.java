@@ -41,6 +41,43 @@ public class ExUtils
 	public static final int BEEP_ALARM    = 2;
 	public static final int MESSAGE_ALARM = 4;
 
+	public enum ROUND_CORNERS {		
+		SQUARE(0), MINIMAL(1), STANDARD(4), SQUIRCLE(16), CIRCLE(20);
+
+		private int roundType;
+
+		ROUND_CORNERS (int roundType) {
+			this.roundType = roundType;
+		}
+
+		public int getRoundType() {
+			return roundType;
+		}
+	}
+
+	private static OS os = null;
+
+	public enum OS {
+		WINDOWS, LINUX, MAC, SOLARIS
+	} // Operating systems.
+
+	public static OS getOS() {
+        if (os == null) {
+            String operSys = System.getProperty("os.name").toLowerCase();
+            if (operSys.contains("win")) {
+                os = OS.WINDOWS;
+            } else if (operSys.contains("nix") || operSys.contains("nux")
+                    || operSys.contains("aix")) {
+                os = OS.LINUX;
+            } else if (operSys.contains("mac")) {
+                os = OS.MAC;
+            } else if (operSys.contains("sunos")) {
+                os = OS.SOLARIS;
+            }
+        }
+        return os;
+    }
+
 	public static void	addComponent(Container container, Component	component, int i, int j, int k,	int	l, double d, double	d1, ActionListener alistener) throws AWTException
 	{
 		java.awt.LayoutManager layoutmanager = container.getLayout();
@@ -464,6 +501,10 @@ public class ExUtils
 		}
 		// System.out.println(destLocation.getAbsolutePath());
 		return destLocation;
+	}
+
+	public static String toCamelCase(String input) {
+		return Character.toUpperCase(input.charAt(0)) + input.substring(1).toLowerCase();
 	}
 
 	public String getMetalLookAndFeelName()
