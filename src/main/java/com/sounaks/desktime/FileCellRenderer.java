@@ -10,8 +10,8 @@ import javax.swing.JList;
 
 class FileCellRenderer extends DefaultListCellRenderer
 {
-	final Image block = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/block-icon.png"))).getImage();
-	final Image clock = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/clock-icon.png"))).getImage();
+	final transient Image block = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/block-icon.png"))).getImage();
+	final transient Image clock = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/clock-icon.png"))).getImage();
 	ImageIcon blockIcon, clockIcon;
 
 	FileCellRenderer()
@@ -20,6 +20,7 @@ class FileCellRenderer extends DefaultListCellRenderer
 		clockIcon = new ImageIcon(clock.getScaledInstance(16, 16, Image.SCALE_AREA_AVERAGING));
 	}
 
+	@Override
 	public Component getListCellRendererComponent(JList<?> jlist, Object obj, int i, boolean flag,	boolean	flag1)
 	{
 		JLabel label = (JLabel) super.getListCellRendererComponent(jlist, obj, i, flag,	flag1);

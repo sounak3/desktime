@@ -17,7 +17,7 @@ public class DatePane extends JComponent implements ActionListener
 	private JLabel yearlabel;
 	private JPanel calendarpanel;
 	private Font titlefont                     = new Font("SansSerif", Font.BOLD, 13);
-	private static Vector <Component>compArray = new Vector<Component>();
+	private static Vector <Component>compArray = new Vector<>();
 
 	protected int selectedday = -1;
 	protected int month;
@@ -69,9 +69,9 @@ public class DatePane extends JComponent implements ActionListener
 		JPanel bottom = new JPanel();
 		bottom.setLayout(new GridLayout(1, 7, 5, 5));
 
-		JLabel sun = new JLabel("Sun", SwingConstants.CENTER);
-		sun.setForeground(Color.red);
-		bottom.add(sun);
+		JLabel sunday = new JLabel("Sun", SwingConstants.CENTER);
+		sunday.setForeground(Color.red);
+		bottom.add(sunday);
 		bottom.add(new JLabel("Mon", SwingConstants.CENTER));
 		bottom.add(new JLabel("Tue", SwingConstants.CENTER));
 		bottom.add(new JLabel("Wed", SwingConstants.CENTER));
@@ -96,7 +96,7 @@ public class DatePane extends JComponent implements ActionListener
 		yearlabel.setText(String.valueOf(year)); 
 		calendarpanel.removeAll();
 		GregorianCalendar today               = new GregorianCalendar();
-		GregorianCalendar selectedday         = new GregorianCalendar(year,month,day);
+		GregorianCalendar selectedDayCal      = new GregorianCalendar(year,month,day);
 		GregorianCalendar firstdayofmonth     = new GregorianCalendar(year,month,1);
 		GregorianCalendar lastdayofmonth      = new GregorianCalendar(year,month,firstdayofmonth.getActualMaximum(Calendar.DAY_OF_MONTH));
 		int               weeksinmonth        = lastdayofmonth.get(Calendar.WEEK_OF_MONTH);
@@ -117,7 +117,7 @@ public class DatePane extends JComponent implements ActionListener
 			if (currentday.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) nextbutton.setForeground(Color.blue);
 			if (currentday.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) nextbutton.setForeground(Color.red);
 			if (compare(currentday,today)) nextbutton.setForeground(Color.green.darker());
-			if (compare(currentday,selectedday)) nextbutton.setSelected(true);
+			if (compare(currentday,selectedDayCal)) nextbutton.setSelected(true);
 			nextbutton.addActionListener(this);
 			nextbutton.setMargin(setin);
 			bg.add(nextbutton);
@@ -128,13 +128,13 @@ public class DatePane extends JComponent implements ActionListener
 		if (lastdayofmonth.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) lastdaybutton.setForeground(Color.blue);
 		if (lastdayofmonth.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) lastdaybutton.setForeground(Color.red);
 		if (compare(lastdayofmonth,today)) lastdaybutton.setForeground(Color.green.darker());
-		if (compare(lastdayofmonth,selectedday)) lastdaybutton.setSelected(true);
+		if (compare(lastdayofmonth,selectedDayCal)) lastdaybutton.setSelected(true);
 		lastdaybutton.addActionListener(this);
 		lastdaybutton.setMargin(setin);
 		bg.add(lastdaybutton);
 		calendarpanel.add(lastdaybutton);
 		int lastdayinlastweek = lastdayofmonth.get(Calendar.DAY_OF_WEEK);
-		for (int i = lastdayinlastweek + 1; i <= (weeksinmonth == 4 ? 21 : (weeksinmonth == 5 ? 14 : 7)); i++)
+		for (int i = lastdayinlastweek + 1; i <= getDatesInCurrWeek(weeksinmonth); i++)
 		{
 			JToggleButton blank = new JToggleButton("--");
 			blank.setEnabled(false);
@@ -143,7 +143,28 @@ public class DatePane extends JComponent implements ActionListener
 		}
 		calendarpanel.validate();
 	}
-	
+
+	private int getDatesInCurrWeek(int weekOfMonth)
+	{
+		if (weekOfMonth == 4) {
+			return 21;
+		} else if (weekOfMonth == 5) {
+			return 14;
+		} else {
+			return 7;
+		}
+	}
+
+	private int validatedSelectedDay(int givenDay)
+	{
+		if (givenDay == -1) {
+			return Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+		} else {
+			return givenDay;
+		}
+	}
+
+	@Override
 	public void actionPerformed(ActionEvent actionevent)
 	{
 		String actionstring = actionevent.getActionCommand();
@@ -155,7 +176,7 @@ public class DatePane extends JComponent implements ActionListener
 				month = 11;
 				year  = year - 1;
 			}
-			updateCalendarDisplay(selectedday == -1 ? Calendar.getInstance().get(Calendar.DAY_OF_MONTH) : selectedday, month, year);
+			updateCalendarDisplay(validatedSelectedDay(selectedday), month, year);
 		}
 		else if (actionstring.compareTo("NEXTMTH") == 0)
 		{
@@ -165,24 +186,24 @@ public class DatePane extends JComponent implements ActionListener
 				month = 0;
 				year  = year + 1;
 			}
-			updateCalendarDisplay(selectedday == -1 ? Calendar.getInstance().get(Calendar.DAY_OF_MONTH) : selectedday, month, year);
+			updateCalendarDisplay(validatedSelectedDay(selectedday), month, year);
 		}
 		else if (actionstring.compareTo("PREVYEAR") == 0)
 		{
 			year = year - 1;
-			updateCalendarDisplay(selectedday == -1 ? Calendar.getInstance().get(Calendar.DAY_OF_MONTH) : selectedday, month, year);
+			updateCalendarDisplay(validatedSelectedDay(selectedday), month, year);
 		}
 		else if (actionstring.compareTo("NEXTYEAR") == 0)
 		{
 			year = year + 1;
-			updateCalendarDisplay(selectedday == -1 ? Calendar.getInstance().get(Calendar.DAY_OF_MONTH) : selectedday, month, year);
+			updateCalendarDisplay(validatedSelectedDay(selectedday), month, year);
 		}
 		else
 		{
 			if (getInt(actionstring) > 0)
 			{
 				selectedday   = getInt(actionstring);
-				dateselection = String.valueOf(month+1) + "/" + String.valueOf(selectedday) + "/" + String.valueOf(year);
+				dateselection = String.valueOf(month+1) + "/" + selectedday + "/" + year;
 				//System.out.println(dateselection);
 				fireActionPerformed(actionevent);
 			}
@@ -278,10 +299,10 @@ public class DatePane extends JComponent implements ActionListener
 		}
 	}
 	
-	private void fillCompArray(Component cont[])
+	private void fillCompArray(Component[] cont)
 	{
 		if (cont.length == 0) return;
-		Component tempArray[] = null;
+		Component[] tempArray = null;
 		for (int x = 0; x < cont.length; x++)
 		{
 			if (cont[x] instanceof Container)

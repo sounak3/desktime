@@ -17,15 +17,15 @@ class ListChooser extends JPanel implements ListSelectionListener, KeyListener, 
 	private	JTextField jtf;
 	private	JList<Object> jl;
 	private	JScrollPane	jsp;
-	Object listDataFinal[];
+	private transient Object[] listDataFinal;
 	private int curPosition;
-	private List<ListSelectionListener> listeners1;
+	private transient List<ListSelectionListener> listeners1;
 
-	public ListChooser(Object aobj[], String s)
+	public ListChooser(Object[] aobj, String s)
 	{
 		setLayout(new BorderLayout());
 		listDataFinal =	aobj;
-		jl = new JList<Object>(aobj);
+		jl = new JList<>(aobj);
 		jl.setSelectionMode(0);
 		jl.setValueIsAdjusting(true);
 		jl.setVisibleRowCount(6);
@@ -39,7 +39,7 @@ class ListChooser extends JPanel implements ListSelectionListener, KeyListener, 
 		add(jsp, "Center");
 		setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), s));
 		curPosition = 0;
-		listeners1 = new ArrayList<ListSelectionListener>();
+		listeners1 = new ArrayList<>();
 	}
 
 	public void addListSelectionListener(ListSelectionListener toAdd)
@@ -47,14 +47,19 @@ class ListChooser extends JPanel implements ListSelectionListener, KeyListener, 
         listeners1.add(toAdd);
     }
 
+	@Override
 	public void	keyPressed(KeyEvent	keyevent)
 	{
+		// Not required to be implemented.
 	}
 
+	@Override
 	public void	keyTyped(KeyEvent keyevent)
 	{
+		// Not required to be implemented.
 	}
 
+	@Override
 	public void	keyReleased(KeyEvent keyevent)
 	{
 		int	i =	keyevent.getKeyCode();
@@ -62,11 +67,12 @@ class ListChooser extends JPanel implements ListSelectionListener, KeyListener, 
 			jl.grabFocus();
 		for(int	j =	0; j < listDataFinal.length; j++)
 		{
-			if(!listDataFinal[j].toString().toLowerCase().startsWith(jtf.getText().toLowerCase()))
-				continue;
-			curPosition = jtf.getCaretPosition();
-			jl.setSelectedValue(listDataFinal[j], true);
-			break;
+			if(listDataFinal[j].toString().toLowerCase().startsWith(jtf.getText().toLowerCase()))
+			{
+				curPosition = jtf.getCaretPosition();
+				jl.setSelectedValue(listDataFinal[j], true);
+				break;
+			}
 		}
 	}
 
@@ -108,6 +114,7 @@ class ListChooser extends JPanel implements ListSelectionListener, KeyListener, 
 		jl.setSelectedValue(obj, flag);
 	}
 
+	@Override
 	public void	valueChanged(ListSelectionEvent	listselectionevent)
 	{
 		JList<?> jlist	= (JList<?>)listselectionevent.getSource();
@@ -128,5 +135,6 @@ class ListChooser extends JPanel implements ListSelectionListener, KeyListener, 
 
 	@Override
 	public void focusLost(FocusEvent e) {
+		// Not required to be implemented.
 	}
 }

@@ -8,11 +8,9 @@ import javazoom.jl.decoder.JavaLayerException;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.image.ImageObserver;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.awt.image.BufferedImage;
-import java.awt.geom.Rectangle2D;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -40,6 +38,8 @@ public class ExUtils
 	public static final int AUDIO_ALARM   = 1;
 	public static final int BEEP_ALARM    = 2;
 	public static final int MESSAGE_ALARM = 4;
+
+	public static final String SETTINGS_FILE = "DeskTime.xml";
 
 	public enum ROUND_CORNERS {		
 		SQUARE(0), MINIMAL(1), STANDARD(4), SQUIRCLE(16), CIRCLE(20);
@@ -82,7 +82,7 @@ public class ExUtils
 	{
 		java.awt.LayoutManager layoutmanager = container.getLayout();
 		if (!(layoutmanager instanceof GridBagLayout))
-			throw new AWTException("Invalid	Layout " + layoutmanager);
+			throw new AWTException("Invalid Layout " + layoutmanager);
 		GridBagConstraints gridbagconstraints            = new	GridBagConstraints();
 		                   gridbagconstraints.gridx      = i;
 		                   gridbagconstraints.gridy      = j;
@@ -92,7 +92,7 @@ public class ExUtils
 		                   gridbagconstraints.weighty    = d1;
 		                   gridbagconstraints.fill       = GridBagConstraints.BOTH;
 		                   gridbagconstraints.anchor     = GridBagConstraints.WEST;
-		                   gridbagconstraints.insets     = new	Insets(5, 5, 5,	0);
+		                   gridbagconstraints.insets     = new	Insets(5, 5, 5,	5);
 		((GridBagLayout)layoutmanager).setConstraints(component, gridbagconstraints);
 		container.add(component);
 		if (component instanceof	JButton)
@@ -108,9 +108,9 @@ public class ExUtils
 		boolean flag  = false;
 		boolean flag1 = false;
 		SwingUtilities.convertPointToScreen(point, parent);
-		if ((double)dimension.width - point.getX()  < (double)jpopupmenu.getWidth())
+		if (dimension.width - point.getX()  < jpopupmenu.getWidth())
 			flag  = true;
-		if ((double)dimension.height - point.getY() < (double)jpopupmenu.getHeight())
+		if (dimension.height - point.getY() < jpopupmenu.getHeight())
 			flag1 = true;
 		SwingUtilities.convertPointFromScreen(point, parent);
 		if (flag && !flag1)
@@ -146,91 +146,6 @@ public class ExUtils
 		return false;
 	}
 	
-	public static Image getDesktopImage(Image image, ImageObserver observer, int deskLayout)
-	{
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		Dimension newWH;
-		int inuse;
-		int           imgWidth     = image.getWidth(observer);
-		int           imgHeight    = image.getHeight(observer);
-		double        aspectWidth  = (double)Math.max(screenSize.width, imgWidth) / (double)Math.min(screenSize.width, imgWidth);
-		double        aspectHeight = (double)Math.max(screenSize.height, imgHeight) / (double)Math.min(screenSize.height, imgHeight);
-		Color         desktopColor = SystemColor.desktop;
-		BufferedImage bim          = new BufferedImage(screenSize.width,screenSize.height,BufferedImage.TYPE_INT_ARGB);
-		Graphics2D    g2d4im       = bim.createGraphics();
-		g2d4im.setColor(desktopColor);
-		g2d4im.fill(new Rectangle2D.Double(0,0,screenSize.width, screenSize.height));
-		switch(deskLayout)
-		{
-			case CENTER:
-				if (imgWidth      > screenSize.width && imgHeight > screenSize.height)
-					g2d4im.drawImage(image, 0, 0, 0 + screenSize.width, 0 + screenSize.height, (imgWidth - screenSize.width) / 2, (imgHeight - screenSize.width) / 2, (imgWidth - screenSize.width) / 2 + screenSize.width, (imgHeight - screenSize.height) / 2 + screenSize.height, observer);
-				else if (imgWidth > screenSize.width && imgHeight <= screenSize.height)
-					g2d4im.drawImage(image, 0, (screenSize.height - imgHeight) / 2, 0 + screenSize.width, (screenSize.height - imgHeight) / 2 + imgHeight, (imgWidth - screenSize.width) / 2, 0, (imgWidth - screenSize.width) / 2 + screenSize.width, imgHeight, observer);
-				else if (imgWidth <= screenSize.width && imgHeight > screenSize.height)
-					g2d4im.drawImage(image, (screenSize.width - imgWidth) / 2, 0, (screenSize.width - imgWidth) / 2 + imgWidth, 0 + screenSize.height, 0, (imgHeight - screenSize.height) / 2, imgWidth, (imgHeight - screenSize.height) / 2 + screenSize.height, observer);
-				else if (imgWidth <= screenSize.width && imgHeight <= screenSize.height)
-					g2d4im.drawImage(image, (screenSize.width - imgWidth) / 2, (screenSize.height - imgHeight) / 2, imgWidth, imgHeight, observer);
-				return bim;
-			case TILE:
-				int k = (int)Math.ceil((double)screenSize.width / (double)imgWidth);
-				int l = (int)Math.ceil((double)screenSize.height / (double)imgHeight);
-				for (int i1 = 0; i1 < l; i1++)
-				{
-					for (int j1 = 0; j1 < k; j1++)
-						g2d4im.drawImage(image, j1 * imgWidth, i1 * imgHeight, imgWidth, imgHeight, observer);
-				}
-				return bim;
-			case STRETCH:
-				g2d4im.drawImage(image, 0, 0, screenSize.width, screenSize.height, observer);
-				return bim;
-			case V_TILE:
-				if (screenSize.width > imgWidth)
-					newWH = new Dimension((int)Math.ceil((double)imgWidth * aspectWidth), (int)Math.ceil((double)imgHeight * aspectWidth));
-				else
-					newWH = new Dimension((int)Math.ceil((double)imgWidth / aspectWidth), (int)Math.ceil((double)imgHeight / aspectWidth));
-				if (newWH.height >= screenSize.height)
-				{
-					g2d4im.drawImage(image, 0, 0, newWH.width, newWH.height, observer);
-				}
-				else
-				{
-					inuse = (int)Math.ceil((double)screenSize.height / (double)newWH.height);
-					for (int j = 0; j <= inuse; j++)
-						g2d4im.drawImage(image, 0, j * newWH.height, newWH.width, newWH.height, observer);
-				}
-				return bim;
-			case H_TILE:
-				if (screenSize.height > imgHeight)
-					newWH = new Dimension((int)Math.ceil((double)imgWidth * aspectHeight), (int)Math.ceil((double)imgHeight * aspectHeight));
-				else
-					newWH = new Dimension((int)Math.ceil((double)imgWidth / aspectHeight), (int)Math.ceil((double)imgHeight / aspectHeight));
-				if (newWH.width >= screenSize.width)
-				{
-					g2d4im.drawImage(image, 0, 0, newWH.width, newWH.height, observer);
-				}
-				else
-				{
-					inuse = (int)Math.ceil((double)screenSize.width / (double)newWH.width);
-					for (int i = 0; i <= inuse; i++)
-						g2d4im.drawImage(image, i * newWH.width, 0, newWH.width, newWH.height, observer);
-				}
-				return bim;
-			case FIT:
-				if (imgWidth > screenSize.width && imgHeight > screenSize.height)
-					g2d4im.drawImage(image, 0, 0, screenSize.width, screenSize.height, observer);
-				else if (imgWidth > screenSize.width && imgHeight <= screenSize.height)
-					g2d4im.drawImage(image, 0, (screenSize.height - imgHeight) / 2, screenSize.width, imgHeight, observer);
-				else if (imgWidth <= screenSize.width && imgHeight > screenSize.height)
-					g2d4im.drawImage(image, (screenSize.width - imgWidth) / 2, 0, imgWidth, screenSize.height, observer);
-				else if (imgWidth < screenSize.width && imgHeight < screenSize.height)
-					g2d4im.drawImage(image, (screenSize.width - imgWidth) / 2, (screenSize.height - imgHeight) / 2, imgWidth, imgHeight, observer);
-				return bim;
-			default:
-				return bim;
-		}
-	}
-	
 	/**
 	 * Converts a given Image into a BufferedImage
 	 *
@@ -254,23 +169,6 @@ public class ExUtils
 
 		// Return the buffered image
 		return bimage;
-	}
-
-	public static Image getScreenCapture(Rectangle rect)
-	{
-		BufferedImage bim = new BufferedImage((int)Math.ceil(rect.getWidth()),(int)Math.ceil(rect.getHeight()),BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g2d4im = bim.createGraphics();
-		g2d4im.setColor(SystemColor.desktop);
-		g2d4im.fill(rect);
-		try
-		{
-			Robot robot = new Robot();
-			bim = robot.createScreenCapture(rect);
-		}
-		catch(AWTException awe)
-		{
-		}
-		return bim;
 	}
 	
 	public static boolean checkAWTPermission(String permission)
@@ -306,11 +204,7 @@ public class ExUtils
 		JOptionPane opt         = new JOptionPane(messageStr,JOptionPane.ERROR_MESSAGE);
 		final       JDialog dlg = opt.createDialog(parent, errTitle);
 		int         errShow     = displaySec * 1000; // 60 sec x 1000 ms
-		Timer       timer       = new Timer(errShow, new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				dlg.dispose();
-			}
-		});
+		Timer       timer       = new Timer(errShow, (ActionEvent e) -> dlg.dispose());
 		timer.setRepeats(false);
 		timer.start();
 		dlg.setLocation((scsize.width - dlg.getWidth()) / 2, (scsize.height - dlg.getHeight()) / 2);
@@ -319,7 +213,7 @@ public class ExUtils
 		dlg.setVisible(true);
 	}
 
-	public static void runProgram(String command[], Component parent) {
+	public static void runProgram(String[] command, Component parent) {
 		Runtime   nativePro = Runtime.getRuntime();
 		try
 		{
@@ -330,7 +224,6 @@ public class ExUtils
 			String errStr = "A command was to be run now, but the following error occured\n" + e.getMessage();
 			showErrorMessage(errStr, "Program error", parent, 50);
 		}
-		nativePro.gc();
 	}
 
 	public static void runAlarm(TimeBean tmpb, Component parent, int numSec)
@@ -366,11 +259,7 @@ public class ExUtils
 				almStr = "<html><font size=+3><i>Alarm! \"" + tmpb.getName() + "\"</i></font><p>This alarm was scheduled to run now: <font color=blue>" + tmpb.getNextAlarmTriggerTime() + "</font>.</html>";
 				opt    = new JOptionPane(almStr,JOptionPane.INFORMATION_MESSAGE,JOptionPane.DEFAULT_OPTION, new ImageIcon("duke.gif"));
 				final JDialog dlg    = opt.createDialog(parent,"Alarm...");
-				Timer timer = new Timer(almShow, new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						dlg.dispose();
-					}
-				});
+				Timer timer = new Timer(almShow, (ActionEvent e) -> dlg.dispose());
 				timer.setRepeats(false);
 				timer.start();
 				dlg.setLocation((scsize.width - dlg.getWidth()) / 2, (scsize.height - dlg.getHeight()) / 2);
@@ -378,15 +267,15 @@ public class ExUtils
 				dlg.setVisible(true);
 			}
 			catch(Exception e)
-			{}
+			{
+				e.printStackTrace();
+			}
 		}
-		almStr = null;
-		opt    = null;
 	}
 	
 	public static Date getSystemStartTime()
 	{
-		long nanosToSeconds = Math.abs((long)Math.floor(System.nanoTime() / 1000000000));
+		long nanosToSeconds = Math.abs((long)Math.floor(System.nanoTime() / 1000000000.00d));
 		int  days           = -1 * (int)nanosToSeconds / 86400;
 		int  hours          = -1 * (int)(nanosToSeconds % 86400) / 3600;
 		int  minutes        = -1 * (int)(nanosToSeconds % 86400 % 3600) / 60;
@@ -402,48 +291,48 @@ public class ExUtils
 
 	public static String formatUptime(Duration duration, String pattern)
 	{
-		String  arr[]           = pattern.split("\'");
-		String  upTimeFormatted = "";
+		String []  arr          = pattern.split("\'");
+		StringBuilder formattedUptime = new StringBuilder();
 		boolean outOfQuote      = true;
 		for (String val : arr)
 		{
 			if (outOfQuote)
 			{
 				if (val.contains("DD")) {
-					upTimeFormatted += val.replace("DD", String.format("%02d", duration.toDays()));
+					formattedUptime.append(val.replace("DD", String.format("%02d", duration.toDays())));
 					duration = duration.minusDays(duration.toDays());
 				}
 				else if (val.contains("HH")) {
-					upTimeFormatted += val.replace("HH", String.format("%02d", duration.toHours()));
+					formattedUptime.append(val.replace("HH", String.format("%02d", duration.toHours())));
 				}
 				else if (val.contains("mm"))
 				{
-					upTimeFormatted += val.replace("mm", String.format("%02d", duration.toMinutes() % 60));
+					formattedUptime.append(val.replace("mm", String.format("%02d", duration.toMinutes() % 60)));
 				}
 				else if (val.contains("ss"))
 				{
-					upTimeFormatted += val.replace("ss", String.format("%02d", (duration.getSeconds() % 60) % 60));
+					formattedUptime.append(val.replace("ss", String.format("%02d", (duration.getSeconds() % 60) % 60)));
 				}
 				else
 				{
-					upTimeFormatted += val;
+					formattedUptime.append(val);
 				}
 			}
 			else
 			{
-				upTimeFormatted += val;
+				formattedUptime.append(val);
 			}
 			outOfQuote = !outOfQuote;
 		}
-		return upTimeFormatted;
+		return formattedUptime.toString();
 	}
 
 	public static String formatPomodoroTime(Duration duration, String pattern, String label, boolean leadLabel) throws IllegalArgumentException
 	{
-		String arr[]         = pattern.split("\'");
-		String formattedTime = "";
-		boolean outOfQuote   = true;
-		Calendar cal = new GregorianCalendar();
+		String        [] arr        = pattern.split("\'");
+		StringBuilder formattedTime = new StringBuilder();
+		boolean       outOfQuote    = true;
+		Calendar      cal           = new GregorianCalendar();
 		cal.set(Calendar.HOUR_OF_DAY, 0);
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.SECOND, (int)duration.getSeconds());
@@ -453,26 +342,26 @@ public class ExUtils
 			{
 				if (val.toLowerCase().contains("hh")) {
 					SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-					formattedTime += sdf.format(cal.getTime());
+					formattedTime.append(sdf.format(cal.getTime()));
 				}
 				else
 				{
-					formattedTime += val.replace("mm", String.format("%02d", duration.toMinutes()));
-					formattedTime = formattedTime.replace("ss", String.format("%02d", (duration.getSeconds() % 60) % 60));
+					formattedTime.append(val.replace("mm", String.format("%02d", duration.toMinutes())));
+					formattedTime.replace(0, formattedTime.length(), formattedTime.toString().replace("ss", String.format("%02d", (duration.getSeconds() % 60) % 60)));
 				}
 			}
 			else
 			{
-				formattedTime += val;
+				formattedTime.append(val);
 			}
 			outOfQuote = !outOfQuote;
 		}
 
 		if (leadLabel)
-			formattedTime = "[" + label + "] " + formattedTime;
+			formattedTime.insert(0, "[" + label + "] ");
 		else
-			formattedTime = formattedTime + " [" + label + "]";
-		return formattedTime;
+			formattedTime.append(" [" + label + "]");
+		return formattedTime.toString();
 	}
 
 	public static File getJarExtractedDirectory(File sourceJar)
@@ -527,12 +416,12 @@ public class ExUtils
 		return "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
 	}
 
-	public static ArrayList<InitInfo> loadDeskStops()
+	public static java.util.List<InitInfo> loadDeskStops()
 	{
-		ArrayList<InitInfo> data = new ArrayList<InitInfo>();
+		ArrayList<InitInfo> data = new ArrayList<>();
 		try
 		{
-			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream("DeskTime.xml")));
+			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(SETTINGS_FILE)));
 			Object content = decoder.readObject();
 			decoder.close();
 			if (content instanceof ArrayList) {
@@ -544,13 +433,13 @@ public class ExUtils
 		}
 		catch (Exception exclusive)
 		{// Ignoring missing file...
-			System.out.println("File missing-\"DeskTime.xml\": " + exclusive.toString());
+			System.out.println("File missing-\"" + SETTINGS_FILE + "\": " + exclusive.toString());
 			exclusive.printStackTrace();
 		}
 		return data;
 	}
 	
-	public static void saveDeskStops(InitInfo currInitInfo, ArrayList<InitInfo> currDeskStops)
+	public static void saveDeskStops(InitInfo currInitInfo, java.util.List<InitInfo> currDeskStops)
 	{
 		int id = currInitInfo.getID();
 		int cnt = 0;
@@ -559,7 +448,7 @@ public class ExUtils
 			if (currDeskStops.isEmpty()) {
 				currDeskStops.add(currInitInfo);
 			} else {
-				thisID = ((InitInfo)currDeskStops.get(cnt)).getID();
+				thisID = (currDeskStops.get(cnt)).getID();
 				if (thisID == id) currDeskStops.set(cnt, currInitInfo);
 			}
 			cnt++;
@@ -567,35 +456,35 @@ public class ExUtils
 
 		try
 		{
-			XMLEncoder xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream("DeskTime.xml")));
+			XMLEncoder xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(SETTINGS_FILE)));
 			xencode.writeObject(currDeskStops);
 			xencode.close();
 		}
 		catch (FileNotFoundException fne)
 		{
-			System.out.println("Exception while saving properties file-\"DeskTime.xml\": " + fne.toString());
+			System.out.println("Exception while saving properties file-\"" + SETTINGS_FILE + "\": " + fne.toString());
 			fne.printStackTrace();
 		}
 	}
 
-	public static void saveDeskStops(ArrayList<InitInfo> currDeskStops)
+	public static void saveDeskStops(java.util.List<InitInfo> currDeskStops)
 	{
 		try
 		{
-			XMLEncoder xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream("DeskTime.xml")));
+			XMLEncoder xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(SETTINGS_FILE)));
 			xencode.writeObject(currDeskStops);
 			xencode.close();
 		}
 		catch (FileNotFoundException fne)
 		{
-			System.out.println("Exception while saving properties file-\"DeskTime.xml\": " + fne.toString());
+			System.out.println("Exception while saving properties file-\"" + SETTINGS_FILE + "\": " + fne.toString());
 			fne.printStackTrace();
 		}
 	}
 
 	public static Vector<TimeBean> loadAlarms()
 	{
-		Vector<TimeBean> data = new Vector<TimeBean>();
+		Vector<TimeBean> data = new Vector<>();
 		try
 		{
 			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream("Smrala.xml")));

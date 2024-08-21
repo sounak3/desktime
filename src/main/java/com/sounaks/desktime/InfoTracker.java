@@ -7,8 +7,8 @@ import java.util.Vector;
 class InfoTracker extends WindowAdapter implements ActionListener
 {
 	ChooserBox chooseBox;
-	public InitInfo INFORMATION    = new InitInfo();
-	public Vector <TimeBean>ALARMS = new Vector<TimeBean>();
+	private InitInfo trackedInfo           = new InitInfo();
+	private Vector <TimeBean>trackedAlarms = new Vector<>();
 
 	public InfoTracker(ChooserBox chooserbox)
 	{
@@ -22,8 +22,8 @@ class InfoTracker extends WindowAdapter implements ActionListener
 		{
 			try
 			{
-				ALARMS      = chooseBox.applyAlarms();
-				INFORMATION = chooseBox.applySettings();
+				trackedAlarms = chooseBox.applyAlarms();
+				trackedInfo   = chooseBox.applySettings();
 			}
 			catch(Exception exception)
 			{
@@ -45,20 +45,31 @@ class InfoTracker extends WindowAdapter implements ActionListener
 		}
 		else if(s.equals("CANCEL"))
 		{
-			INFORMATION = chooseBox.information;
-			ALARMS      = chooseBox.data;
+			trackedInfo   = chooseBox.getExistingInfo();
+			trackedAlarms = chooseBox.getExistingAlarms();
 			chooseBox.dispose();
 		}
 	}
 
+	@Override
 	public void	windowClosing(WindowEvent windowevent)
 	{
-		INFORMATION = chooseBox.information;
-		ALARMS      = chooseBox.data;
+		trackedInfo   = chooseBox.getExistingInfo();
+		trackedAlarms = chooseBox.getExistingAlarms();
 	}
 
 	public InfoTracker getParameters()
 	{
 		return this;
+	}
+
+	public InitInfo getSelectedInformation()
+	{
+		return trackedInfo;
+	}
+
+	public Vector<TimeBean> getSelectedAlarms()
+	{
+		return trackedAlarms;
 	}
 }

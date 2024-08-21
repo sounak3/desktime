@@ -56,8 +56,12 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		"India Standard Time (IST)",
 		"Japan Standard Time (JST)",
 		"Coordinated Universal Time (UTC)"};
-	private final int ai[] = {6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 64, 72, 80};
-	private static final GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	private final int ai[]                                     = {6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 64, 72, 80};
+	private static final GraphicsDevice gd                     = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	public  static final String DISPLAY_MODE_CURRENT_TIMEZONE  = "CURTZ";
+	public  static final String DISPLAY_MODE_SELECTED_TIMEZONE = "GMTTZ";
+	public  static final String DISPLAY_MODE_SYSTEM_UPTIME     = "UPTIME";
+	public  static final String DISPLAY_MODE_POMODORO_TIMER    = "POMODORO";
 	private static ArrayList<InitInfo> deskstops;
 	private final ImageIcon plusPng  = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/plus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
 	private final ImageIcon minusPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/minus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
@@ -335,8 +339,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
 		miDigTime.setIcon(info.getDisplayMethod().endsWith("TZ") && !info.isAnalogClock() ? checkPng : clearPng);
 		miAnaTime.setIcon(info.getDisplayMethod().endsWith("TZ") && info.isAnalogClock() ? checkPng : clearPng);
-		miUptime.setIcon(info.getDisplayMethod().equals("UPTIME") ? checkPng : clearPng);
-		miPomo.setIcon(info.getDisplayMethod().equals("POMODORO") ? checkPng : clearPng);
+		miUptime.setIcon(info.getDisplayMethod().equals(DISPLAY_MODE_SYSTEM_UPTIME) ? checkPng : clearPng);
+		miPomo.setIcon(info.getDisplayMethod().equals(DISPLAY_MODE_POMODORO_TIMER) ? checkPng : clearPng);
 		mAllOpacity.setIcon(info.isForegroundTranslucent() ? checkPng : clearPng);
 		opacityLevel.setMinimum(info.isPixelAlphaSupported() && !info.isForegroundTranslucent() ? 0 : 4);
 		opacityLevel.setValue(Math.round(info.getOpacity() * 20));
@@ -349,10 +353,10 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private void timeDisplayConfig()
 	{
 		String dispString = info.getDisplayMethod();
-		if (dispString.equals("GMTTZ") || dispString.equals("CURTZ"))
+		if (dispString.equals(DISPLAY_MODE_SELECTED_TIMEZONE) || dispString.equals(DISPLAY_MODE_CURRENT_TIMEZONE))
 		{
 			sd   = new SimpleDateFormat(info.getZonedTimeFormat());
-			sd.setTimeZone(dispString.equals("GMTTZ") ? TimeZone.getTimeZone(info.getTimeZone()) : TimeZone.getDefault());
+			sd.setTimeZone(dispString.equals(DISPLAY_MODE_SELECTED_TIMEZONE) ? TimeZone.getTimeZone(info.getTimeZone()) : TimeZone.getDefault());
 			time = sd.format(date = new Date());
 			if (info.isAnalogClock())
 			{
@@ -371,7 +375,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			else
 				tLabel.setToolTipText(null);
 		}
-		else if (dispString.equals("POMODORO"))
+		else if (dispString.equals(DISPLAY_MODE_POMODORO_TIMER))
 		{
 			// Only create new pomodoro object if earlier was not present, else refer existing one.
 			tLabel.setClockMode(false);
@@ -394,7 +398,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			else
 				tLabel.setToolTipText(null);
 		}
-		else if (dispString.equals("UPTIME"))
+		else if (dispString.equals(DISPLAY_MODE_SYSTEM_UPTIME))
 		{
 			tLabel.setClockMode(false);
 			time = ExUtils.formatUptime(Duration.ofNanos(System.nanoTime()), info.getUpTimeFormat());
@@ -484,8 +488,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		if (obj.equals(bdr))
 		{
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.BORDER_TAB, info, alarms);
-			info         = trackChanges.INFORMATION;
-			alarms       = trackChanges.ALARMS;
+			info         = trackChanges.getSelectedInformation();
+			alarms       = trackChanges.getSelectedAlarms();
 			ExUtils.saveAlarms(alarms);
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
@@ -493,8 +497,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		else if (obj.equals(fore))
 		{
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.FONT_TAB, info, alarms);
-			info         = trackChanges.INFORMATION;
-			alarms       = trackChanges.ALARMS;
+			info         = trackChanges.getSelectedInformation();
+			alarms       = trackChanges.getSelectedAlarms();
 			ExUtils.saveAlarms(alarms);
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
@@ -502,21 +506,21 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		else if (obj.equals(back))
 		{
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.BACKGROUND_TAB, info, alarms);
-			info         = trackChanges.INFORMATION;
-			alarms       = trackChanges.ALARMS;
+			info         = trackChanges.getSelectedInformation();
+			alarms       = trackChanges.getSelectedAlarms();
 			ExUtils.saveAlarms(alarms);
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
 		else if (obj.equals(miSeltz))
 		{
-			info.setDisplayMethod("GMTTZ");
+			info.setDisplayMethod(DISPLAY_MODE_SELECTED_TIMEZONE);
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
 		else if (obj.equals(miDeftz))
 		{
-			info.setDisplayMethod("CURTZ");
+			info.setDisplayMethod(DISPLAY_MODE_CURRENT_TIMEZONE);
 			info.setTimeZone(TimeZone.getDefault().getID());
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
@@ -524,9 +528,9 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		else if (obj.equals(miDigTime) || obj.equals(miAnaTime))
 		{
 			if(info.getTimeZone().equals(TimeZone.getDefault().getID())) {
-				info.setDisplayMethod("CURTZ");
+				info.setDisplayMethod(DISPLAY_MODE_CURRENT_TIMEZONE);
 			} else {
-				info.setDisplayMethod("GMTTZ");
+				info.setDisplayMethod(DISPLAY_MODE_SELECTED_TIMEZONE);
 			}
 			info.setAnalogClock(obj.equals(miAnaTime));
 			ExUtils.saveDeskStops(info, deskstops);
@@ -535,21 +539,21 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		else if (obj instanceof JMenuItem && actionevent.getActionCommand().startsWith("TZ-"))
 		{
 			String tzId = actionevent.getActionCommand().split("-")[1];
-			info.setDisplayMethod(TimeZone.getTimeZone(tzId).hasSameRules(TimeZone.getDefault()) ? "CURTZ" : "GMTTZ");
+			info.setDisplayMethod(TimeZone.getTimeZone(tzId).hasSameRules(TimeZone.getDefault()) ? DISPLAY_MODE_CURRENT_TIMEZONE : DISPLAY_MODE_SELECTED_TIMEZONE);
 			info.setTimeZone(tzId);
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
 		else if (obj.equals(miUptime))
 		{
-			info.setDisplayMethod("UPTIME");
+			info.setDisplayMethod(DISPLAY_MODE_SYSTEM_UPTIME);
 			info.setAnalogClock(false);
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
 		}
 		else if (obj.equals(miPomo))
 		{
-			info.setDisplayMethod("POMODORO");
+			info.setDisplayMethod(DISPLAY_MODE_POMODORO_TIMER);
 			info.setAnalogClock(false);
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
@@ -557,8 +561,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		else if (obj.equals(timSet) || obj.equals(zonSet))
 		{
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.TIMES_TAB, info, alarms);
-			info         = trackChanges.INFORMATION;
-			alarms       = trackChanges.ALARMS;
+			info         = trackChanges.getSelectedInformation();
+			alarms       = trackChanges.getSelectedAlarms();
 			ExUtils.saveAlarms(alarms);
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
@@ -566,8 +570,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		else if (obj.equals(alm))
 		{
 			trackChanges = ChooserBox.showDialog("Preferences...", ChooserBox.ALARMS_TAB, info, alarms);
-			info         = trackChanges.INFORMATION;
-			alarms       = trackChanges.ALARMS;
+			info         = trackChanges.getSelectedInformation();
+			alarms       = trackChanges.getSelectedAlarms();
 			ExUtils.saveAlarms(alarms);
 			ExUtils.saveDeskStops(info, deskstops);
 			re_init();
@@ -837,7 +841,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 				date = new Date();
 				try
 				{
-					if (method.equals("UPTIME"))
+					if (method.equals(DISPLAY_MODE_SYSTEM_UPTIME))
 					{
 						Duration uptimeNow = Duration.ofNanos(System.nanoTime());
 						time = ExUtils.formatUptime(uptimeNow, info.getUpTimeFormat());
@@ -853,7 +857,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 							runPlayer = SoundPlayer.playAudio(info.getUptimeHourSound(), soundRunSec);
 						}
 					}
-					else if (method.equals("GMTTZ") || method.equals("CURTZ"))
+					else if (method.equals(DISPLAY_MODE_SELECTED_TIMEZONE) || method.equals(DISPLAY_MODE_CURRENT_TIMEZONE))
 					{
 						time = sd.format(date);
 						gcal.setTime(date);
@@ -1150,7 +1154,13 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 
 	public static void main(String args[])
 	{
-		deskstops = ExUtils.loadDeskStops();
+		java.util.List<InitInfo> readList = ExUtils.loadDeskStops();
+		if (readList instanceof ArrayList) {
+			deskstops = (ArrayList<InitInfo>)readList;
+		} else {
+			throw new ArrayStoreException("DeskTime.xml is not in ArrayList format.");
+		}
+		
 		Vector<TimeBean> allTimeBeans = ExUtils.loadAlarms();
 		int count = 0;
 		do {
