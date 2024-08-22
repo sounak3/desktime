@@ -20,7 +20,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	protected transient Refresher refreshThread;
 	private String time, lastPomFormat, lastPomTask;
 	private Date date;
-	private int locX,locY,locW,locH,cursorX,cursorY,cursorW,cursorH;
+	private int locX, locY, locW, locH, cursorX, cursorY, cursorW, cursorH;
 	private TLabel tLabel;
 	private TwilightPanel mainPane;
 	private SimpleDateFormat sd, clk;
@@ -28,10 +28,10 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private InitInfo info;
 	private Vector <TimeBean>alarms;
 	private JPopupMenu pMenu;
-	private JMenu addPanel,mFormat,timeMode,timeZone,mSize,mOpacityLevel, mRoundCorners;
+	private JMenu addPanel, mFormat, timeMode, timeZone, mSize, mOpacityLevel, mRoundCorners;
 	private JSlider sizer, opacityLevel;
-	private JMenuItem miAnaTime,miDigTime,miUptime,miPomo,miSeltz,miDeftz,timSet,zonSet,mAllOpacity;
-	private JMenuItem fore,back,alm,bdr,exit,about,newItem,dupItem,removePanel,miMovable,ontop,sysClk;
+	private JMenuItem miAnaTime, miDigTime, miUptime, miPomo, miSeltz, miDeftz, timSet, zonSet, mAllOpacity;
+	private JMenuItem fore, back, alm, bdr, exit, about, newItem, dupItem, removePanel, miMovable, ontop, sysClk;
 	private JMenuItem[] impZon;
 	private JMenuItem[] tMenuItem;
 	private transient PointerInfo pi;

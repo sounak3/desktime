@@ -100,13 +100,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		getContentPane().setLayout(new BorderLayout());
 		tabPane     = new JTabbedPane();
 		//All configuration for Font Panel as follows:
-		JPanel  jpanel = new JPanel(new GridBagLayout());
-		resetFont  	   = new JButton("Reset Font");
-		Integer[] ainteger = new Integer[20];
-		int[]     ai       = {6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 
-								24, 28, 32, 36, 40, 48, 56, 64, 72, 80};
-		for (int i = 0; i < ai.length; i++)
-			ainteger[i] = Integer.valueOf(ai[i]);
+		JPanel  jpanel      = new JPanel(new GridBagLayout());
+		        resetFont   = new JButton("Reset Font");
+		int    [] fontSizes = DeskStop.getFontSizes();
+		Integer[] ainteger  = new Integer[fontSizes.length];
+		for (int i = 0; i < fontSizes.length; i++)
+			ainteger[i] = Integer.valueOf(fontSizes[i]);
 		
 		String[] as1   = {"Plain", "Bold", "Italic", "Bold Italic"};
 		String[] as    = graphicsenvironment.getAvailableFontFamilyNames();

@@ -12,11 +12,18 @@
      <float>0.5</float>
     </void>
     <void id="Boolean0" method="get">
+     <string>ON_TOP</string>
+    </void>
+    <void method="put">
+     <string>ANALOG_CLOCK</string>
+     <object idref="Boolean0"/>
+    </void>
+    <void id="Boolean1" method="get">
      <string>SLOW_TRANS</string>
     </void>
     <void method="put">
      <string>FORE_TRANSLUCENT</string>
-     <object idref="Boolean0"/>
+     <object idref="Boolean1"/>
     </void>
     <void method="put">
      <string>IMAGEFILE</string>
@@ -28,18 +35,15 @@
     </void>
     <void method="put">
      <string>ANALOG_CLOCK_OPTS</string>
-     <int>900</int>
+     <int>3900</int>
     </void>
     <void method="put">
      <string>TIMEZONE</string>
      <string>Asia/Calcutta</string>
     </void>
-    <void id="Boolean1" method="get">
-     <string>ON_TOP</string>
-    </void>
     <void method="put">
      <string>POMODORO_LEAD_LABEL</string>
-     <object idref="Boolean1"/>
+     <object idref="Boolean0"/>
     </void>
     <void id="Integer0" method="get">
      <string>PANEL_ID</string>
@@ -67,20 +71,16 @@
       <string>x</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>816</int>
+       <int>965</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>130</int>
+       <int>39</int>
       </void>
      </void>
-    </void>
-    <void method="put">
-     <string>IMAGE_STYLE</string>
-     <int>2</int>
     </void>
    </object>
   </void>
