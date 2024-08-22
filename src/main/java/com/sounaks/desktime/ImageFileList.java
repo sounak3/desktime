@@ -1,13 +1,12 @@
 package com.sounaks.desktime;
 
 import java.io.File;
-import java.net.URISyntaxException;
 import javax.swing.JList;
 
 class ImageFileList extends JList<File>
 {
 	private	File dir;
-	public String defaultImagesDir;
+	private String defaultImagesDir;
 
 	public String getDefaultImagesDir()
 	{
@@ -32,7 +31,7 @@ class ImageFileList extends JList<File>
 		setCellRenderer(new	FileCellRenderer());
 		if(dir.exists())
 		{
-			File afile[] = dir.listFiles(new ImageFileFilter());
+			File[] afile = dir.listFiles(new ImageFileFilter());
 			setListData(afile);
 		}
 	}
@@ -42,7 +41,7 @@ class ImageFileList extends JList<File>
 		return dir;
 	}
 
-	public void	setDirectory(File file) throws URISyntaxException
+	public void	setDirectory(File file)
 	{
 		if(file	== null) {
 			dir	= new File(System.getProperty("user.home"));
@@ -58,7 +57,7 @@ class ImageFileList extends JList<File>
 			dir	= file.getParentFile();
 		}
 		if(dir.exists()) {
-			File afile[] = dir.listFiles(new ImageFileFilter());
+			File[] afile = dir.listFiles(new ImageFileFilter());
 			setListData(afile);
 			ensureIndexIsVisible(0);
 		}

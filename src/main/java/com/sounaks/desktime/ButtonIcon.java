@@ -12,8 +12,8 @@ public class ButtonIcon implements Icon
 	public static final int SQUARE      = 105;
 	public static final int RECTANGLE   = 106;
 
-	public int shape;
-	public Color enabledColor;
+	private int shape;
+	private Color enabledColor;
 
 	public Color getEnabledColor()
 	{
@@ -40,13 +40,6 @@ public class ButtonIcon implements Icon
 		g.setColor( component.isEnabled() ? enabledColor : Color.gray);
 		switch (shape)
 		{
-			case DOWN_ARROW:
-				g.drawLine( 0, 0, iconWidth - 1, 0 );
-				g.drawLine( 1, 1, 1 + (iconWidth - 3), 1 );
-				g.drawLine( 2, 2, 2 + (iconWidth - 5), 2 );
-				g.drawLine( 3, 3, 3 + (iconWidth - 7), 3 );
-				g.drawLine( 4, 4, 4 + (iconWidth - 9), 4 );
-				break;
 			case UP_ARROW:
 				g.drawLine(0, iconHeight - 1, iconWidth - 1, iconHeight - 1);
 				g.drawLine(1, iconHeight - 2, 1 + iconWidth - 3, iconHeight - 2);
@@ -79,15 +72,17 @@ public class ButtonIcon implements Icon
 				g.drawLine(iconWidth - 10, 4, iconWidth - 10, iconHeight - 5);
 				break;
 			case SQUARE:
-				g.fillRect(0, 0, iconWidth, getIconHeight());
+				int side = Math.min(iconWidth, iconHeight);
+				g.fillRect(0, 0, side, side);
 				if (component.isEnabled()) g.setColor(enabledColor.darker());
-				g.drawRect(0, 0, iconWidth, getIconHeight());
+				g.drawRect(0, 0, side, side);
 				break;
 			case RECTANGLE:
 				g.fillRect(0, 0, iconWidth, getIconHeight());
 				if (component.isEnabled()) g.setColor(enabledColor.darker());
 				g.drawRect(0, 0, iconWidth, getIconHeight());
 				break;
+			case DOWN_ARROW:
 			default:
 				g.drawLine( 0, 0, iconWidth - 1, 0 );
 				g.drawLine( 1, 1, 1 + (iconWidth - 3), 1 );

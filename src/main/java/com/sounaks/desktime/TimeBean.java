@@ -33,9 +33,6 @@ public class TimeBean implements Serializable
 		gcal.setTime(toPropell);
 		switch (getAlarmRepeatInterval())
 		{
-			case 0:
-			return gcal.getTime();
-			
 			case 1:
 			gcal.add(Calendar.MINUTE, repeatMultiple);
 			return gcal.getTime();
@@ -67,17 +64,20 @@ public class TimeBean implements Serializable
 			gcal.set(Calendar.WEEK_OF_MONTH,w);
 			gcal.set(Calendar.DAY_OF_WEEK_IN_MONTH,wd);
 			return gcal.getTime();
+
+			case 0:
+			default:
+			return gcal.getTime();			
 		}
-		return gcal.getTime();
 	}
 	
 	public Date getNextAlarmTriggerTime()
 	{
 		Date temp, now;
 		if (isSystemStartTimeBasedAlarm())
-			temp = now = new Date(ExUtils.getSystemStartTime().getTime() + Math.round(Math.floor(System.nanoTime() / 1000000)));
+			now = new Date(ExUtils.getSystemStartTime().getTime() + Math.round(Math.floor(System.nanoTime() / 1000000.00d)));
 		else
-		 	temp = now = new Date();
+		 	now = new Date();
 		if (alarmTriggerTime.before(now) && alarmRepeatInterval != 0)
 			temp = oneStepPropell(alarmTriggerTime);
 		else
