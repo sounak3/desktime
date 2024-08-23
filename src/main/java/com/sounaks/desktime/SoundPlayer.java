@@ -13,14 +13,14 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
     private JTextField txtFile;
     private JButton browser, play;
     private JFileChooser fileChooser;
-    private Player player;
+    private transient Player player;
     private boolean playing;
-    private FileInputStream fStream;
+    private transient FileInputStream fStream;
     private Timer playTimer;
     private ImageIcon playIcon, stopIcon, brseIcon;
-    public int playSeconds;
-    public String audioFile;
-    public String defaultSoundsDir;
+    private int playSeconds;
+    private String audioFile;
+    private String defaultSoundsDir;
 
     public String getDefaultSoundsDir() {
         return defaultSoundsDir;
@@ -267,8 +267,7 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
             String threadName = "THREAD_" + fileToPlay.getName().toUpperCase().replaceAll("\\W", ""). replace(".mp3", "");
             Player sPlayer = new Player(fins);
             int playMillis = playSec * 1000;
-            Timer tPlay = new Timer(playMillis, new ActionListener() {
-                public void actionPerformed(ActionEvent ae) {
+            Timer tPlay = new Timer(playMillis, (ActionEvent ae) -> {
                     try {
                         sPlayer.close();
                         fins.close();
@@ -276,8 +275,9 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
                         ioe.printStackTrace();
                     }
                 }
-            });
+            );
             Thread playerThread = new Thread(threadName) {
+                @Override
                 public void run() {
                     try {
                         tPlay.start();
@@ -300,7 +300,7 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
     {
         try {
             playerToStop.close();
-            playerToStop = null;
+            // playerToStop = null;
             return true;
         } catch (Exception ioe) {
             ioe.printStackTrace();

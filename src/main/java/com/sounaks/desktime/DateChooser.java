@@ -9,51 +9,50 @@ import java.text.*;
 
 public class DateChooser extends JComponent implements ActionListener
 {
-	protected JButton BUTTON;
-	protected JFormattedTextField TEXTFIELD;
+	protected JButton arrowButton;
+	protected JFormattedTextField inputField;
 	protected DatePane pane;
 	private JWindow forPane=null;
-	protected JDialog parent;
+	protected JDialog parentDlg;
 	private Component glass;
 	
-	private Point location;
 	protected boolean showing;
-	protected SimpleDateFormat OWN_FORMAT = new SimpleDateFormat("EEEE',' MMM dd',' yyyy ");
-	private   final ButtonIcon upArrow    = new ButtonIcon(ButtonIcon.UP_ARROW, Color.BLACK);
-	private   final ButtonIcon downArrow  = new ButtonIcon(ButtonIcon.DOWN_ARROW, Color.BLACK);
-	private WindowHandler handler;
+	protected SimpleDateFormat ownFormat           = new SimpleDateFormat("EEEE',' MMM dd',' yyyy ");
+	private   final transient ButtonIcon upArrow   = new ButtonIcon(ButtonIcon.UP_ARROW, Color.BLACK);
+	private   final transient ButtonIcon downArrow = new ButtonIcon(ButtonIcon.DOWN_ARROW, Color.BLACK);
+	private transient WindowHandler handler;
 	
 	public DateChooser()
 	{
-		TEXTFIELD = new JFormattedTextField(OWN_FORMAT);
-		TEXTFIELD.setPreferredSize(new Dimension(160, 20));
-		BUTTON= new JButton(downArrow);
-		BUTTON.setActionCommand("POPUP");
-		BUTTON.addActionListener(this);
-		BUTTON.setPreferredSize(new Dimension(20, 20));
+		inputField = new JFormattedTextField(ownFormat);
+		inputField.setPreferredSize(new Dimension(160, 20));
+		arrowButton= new JButton(downArrow);
+		arrowButton.setActionCommand("POPUP");
+		arrowButton.addActionListener(this);
+		arrowButton.setPreferredSize(new Dimension(20, 20));
 		pane = new DatePane();
 		pane.setBorder(BorderFactory.createLineBorder(Color.black));
 		pane.addActionListener(this);
 		GridBagLayout lay = new GridBagLayout();
 		setLayout(lay);
 		GridBagConstraints gbc = new GridBagConstraints(0, 0, 2, 1, 0.90, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0 ,0);
-		lay.setConstraints(TEXTFIELD, gbc);
-		add(TEXTFIELD);
+		lay.setConstraints(inputField, gbc);
+		add(inputField);
 		gbc = new GridBagConstraints(2, 0, 1, 1, 0.10, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0);
-		lay.setConstraints(BUTTON, gbc);
-		add(BUTTON);
+		lay.setConstraints(arrowButton, gbc);
+		add(arrowButton);
 		showing = false;
-		TEXTFIELD.setBorder(null);
-		BUTTON.setBorder(null);
-		BUTTON.setBorderPainted(false);
+		inputField.setBorder(null);
+		arrowButton.setBorder(null);
+		arrowButton.setBorderPainted(false);
 		setBorder(BorderFactory.createEtchedBorder());
-		TEXTFIELD.setFont(BUTTON.getFont());
-		TEXTFIELD.setHorizontalAlignment(JTextField.RIGHT);
+		inputField.setFont(arrowButton.getFont());
+		inputField.setHorizontalAlignment(SwingConstants.RIGHT);
 	}
 
 	public void setBackground(Color color, boolean paintButton)
 	{
-		Component comps[] = getComponents();
+		Component[] comps = getComponents();
 		for (int i = 0; i < comps.length; i++)
 		{
 			if ((comps[i] instanceof JButton) && paintButton)
@@ -66,15 +65,15 @@ public class DateChooser extends JComponent implements ActionListener
 	public Date getDate()
 	{
 		Date   temp = new Date();
-		String tmp  = OWN_FORMAT.format(temp);
+		String tmp  = ownFormat.format(temp);
 		try
 		{
-			tmp=TEXTFIELD.getText();
-			temp=OWN_FORMAT.parse(tmp, new ParsePosition(0));
+			tmp=inputField.getText();
+			temp=ownFormat.parse(tmp, new ParsePosition(0));
 		}
 		catch (NullPointerException ne)
 		{
-			TEXTFIELD.setText(OWN_FORMAT.format(temp));
+			inputField.setText(ownFormat.format(temp));
 		}
 		return temp == null ? new Date() : temp;
 	}
@@ -83,55 +82,58 @@ public class DateChooser extends JComponent implements ActionListener
 	{								//And no parse exception will be thrown.
 		try
 		{
-			TEXTFIELD.setText(OWN_FORMAT.format(date));
-			TEXTFIELD.commitEdit();
+			inputField.setText(ownFormat.format(date));
+			inputField.commitEdit();
 		}
-		catch (ParseException pse){}
+		catch (ParseException pse)
+		{
+			// Not implemented as not required.
+		}
 	}
 	
 	public SimpleDateFormat getFormat()
 	{
-		return OWN_FORMAT;
+		return ownFormat;
 	}
 	
 	protected void showHide(boolean show)
 	{
 		if (show && forPane == null)
 		{
-			BUTTON.setIcon(upArrow);
+			arrowButton.setIcon(upArrow);
 			pane.setSelectedDate(getDate());
-			parent  = (JDialog)SwingUtilities.windowForComponent(this);
-			forPane = new JWindow(parent);
+			parentDlg  = (JDialog)SwingUtilities.windowForComponent(this);
+			forPane = new JWindow(parentDlg);
 			forPane.add(pane);
 			forPane.pack();
-			setCurLocation(this, forPane);
+			setCurLocation(forPane);
 			forPane.setVisible(show);
 			forPane.setFocusCycleRoot(true);
-			glass=parent.getGlassPane();
+			glass=parentDlg.getGlassPane();
 			if (glass != null) glass.setVisible(show);
 			handler = new WindowHandler();
 			glass.addMouseListener(handler);
 			addAncestorListener(handler);
-			parent.addWindowListener(handler);
-			parent.addWindowStateListener(handler);
+			parentDlg.addWindowListener(handler);
+			parentDlg.addWindowStateListener(handler);
 		}
 		else
 		{
 			try
 			{
-				BUTTON.setIcon(downArrow);
+				arrowButton.setIcon(downArrow);
 				showing = false;
 				forPane.setVisible(false);
 				forPane.dispose();
 				forPane = null;
 				glass.removeMouseListener(handler);
 				glass.setVisible(show);
-				parent.setFocusCycleRoot(true);
-				BUTTON.requestFocusInWindow();
-				BUTTON.requestFocus();
+				parentDlg.setFocusCycleRoot(true);
+				arrowButton.requestFocusInWindow();
+				arrowButton.requestFocus();
 				removeAncestorListener(handler);
-				parent.removeWindowListener(handler);
-				parent.removeWindowStateListener(handler);
+				parentDlg.removeWindowListener(handler);
+				parentDlg.removeWindowStateListener(handler);
 				handler = null;
 			}
 			catch (Exception rme)
@@ -141,22 +143,23 @@ public class DateChooser extends JComponent implements ActionListener
 		}
 	}
 	
-	protected void setCurLocation(Component master, Component pop)
+	protected void setCurLocation(Component pop)
 	{
 		Dimension screen   = Toolkit.getDefaultToolkit().getScreenSize();
-		          location = new Point();
-		          location = TEXTFIELD.getLocation(location);
+		Point     location = new Point();
+		          location = inputField.getLocation(location);
 		SwingUtilities.convertPointToScreen(location,this);
-		if (location.y + pop.getHeight() + TEXTFIELD.getHeight() > screen.getHeight())
+		if (location.y + pop.getHeight() + inputField.getHeight() > screen.getHeight())
 			pop.setLocation(location.x, location.y - pop.getHeight());
 		else
-			pop.setLocation(location.x, location.y + TEXTFIELD.getHeight());
+			pop.setLocation(location.x, location.y + inputField.getHeight());
 	}
 	
+	@Override
 	public void setEnabled(boolean enabled)
 	{
-		BUTTON.setEnabled(enabled);
-		TEXTFIELD.setEnabled(enabled);
+		arrowButton.setEnabled(enabled);
+		inputField.setEnabled(enabled);
 	}
 	
 	public void actionPerformed(ActionEvent ae)
@@ -169,56 +172,77 @@ public class DateChooser extends JComponent implements ActionListener
 		if (pane.getInt(ae.getActionCommand()) > 0)
 		{
 			Date date = pane.getSelectedDate();
-			TEXTFIELD.setText(OWN_FORMAT.format(date));
+			inputField.setText(ownFormat.format(date));
 			showHide(false);
 		}
 	}
 	
 	class WindowHandler extends WindowAdapter implements AncestorListener, MouseListener
 	{
+		@Override
 		public void windowIconified(WindowEvent we)
 		{
 			showHide(false);
 		}
-		
+
+		@Override
 		public void windowStateChanged(WindowEvent we)
 		{
 			showHide(false);
 		}
-		
+
+		@Override
 		public void windowDeactivated(WindowEvent we)
 		{
 			showHide(false);
 		}
 		
+		@Override
 		public void ancestorMoved(AncestorEvent ace)
 		{
 			showHide(false);
 		}
 		
+		@Override
 		public void ancestorAdded(AncestorEvent ace)
 		{
-		}		
+			// Not implemented as not required.
+		}
+
+		@Override
 		public void ancestorRemoved(AncestorEvent ace)
 		{
+			// Not implemented as not required.
 		}
 		
+		@Override
 		public void mousePressed(MouseEvent me)
 		{
 			showHide(false);
 		}
 		
+		@Override
 		public void mouseReleased(MouseEvent me)
 		{
+			// Not implemented as not required.
 		}
+
+		@Override
 		public void mouseClicked(MouseEvent me)
 		{
+			// Not implemented as not required.
 		}
+
+		@Override
 		public void mouseEntered(MouseEvent me)
 		{
+			// Not implemented as not required.
 		}
+
+		@Override
 		public void mouseExited(MouseEvent me)
 		{
+			// Not implemented as not required.
 		}
 	}
 }

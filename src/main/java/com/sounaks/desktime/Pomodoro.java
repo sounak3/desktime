@@ -15,6 +15,10 @@ public class Pomodoro {
     private Instant instant;
     private Duration position;
 
+    private static final String WORK_BREAK_CYCLE_ERROR = "numWorkBreakCycles should be > 0.";
+    private static final String DURATION_STR_PLACEHOLDER = "Duration ";
+    private static final String OUT_OF_BOUNDS_PLACEHOLDER = " out of bounds.";
+
     public static final int OF_SECONDS = 1;
     public static final int OF_MINUTES = 2;
 
@@ -22,9 +26,9 @@ public class Pomodoro {
     public static final int SHOW_HOUR_MINUTE_SECOND = 5;
 
     // Constructor
-    public Pomodoro(String workLabel, Duration workTime, String breakLabel, Duration breakTime, String restLabel, Duration restTime, int numWorkBreakCycles, String name) {
+    public Pomodoro(String workLabel, Duration workTime, String breakLabel, Duration breakTime, String restLabel, Duration restTime, String name) {
         if (numWorkBreakCycles <= 0) {
-            throw new IllegalArgumentException("numWorkBreakCycles should be > 0.");
+            throw new IllegalArgumentException(WORK_BREAK_CYCLE_ERROR);
         }
         this.workLabel          = workLabel;
         this.workTime           = workTime;
@@ -32,7 +36,7 @@ public class Pomodoro {
         this.breakTime          = breakTime;
         this.restLabel          = restLabel;
         this.restTime           = restTime;
-        this.numWorkBreakCycles = numWorkBreakCycles;
+        this.numWorkBreakCycles = 1;
         this.canRest            = (restTime != null && !restTime.isNegative() && !restTime.isZero());
         this.durationType       = Pomodoro.OF_SECONDS;
         this.name               = name;
@@ -40,12 +44,17 @@ public class Pomodoro {
         this.position           = Duration.ZERO;
     }
 
-    public Pomodoro(String workLabel, int workTime, String breakLabel, int breakTime, String restLabel, int restTime, int numWorkBreakCycles, int durationType, String name) {
-        if (durationType == Pomodoro.OF_MINUTES && durationType == Pomodoro.OF_SECONDS) {
+    public Pomodoro(String workLabel, int workTime, String breakLabel, int breakTime, String restLabel, int restTime, int durationType) {
+        String typeString = "min.";
+        if (durationType != Pomodoro.OF_MINUTES && durationType != Pomodoro.OF_SECONDS) {
             throw new IllegalArgumentException("int durationType can only be Pomodoro.OF_MINUTES or Pomodoro.OF_SECONDS");
+        } else if (durationType == Pomodoro.OF_SECONDS) {
+            typeString = "sec.";
+        } else {
+            typeString = "min.";
         }
         if (numWorkBreakCycles <= 0) {
-            throw new IllegalArgumentException("numWorkBreakCycles should be > 0.");
+            throw new IllegalArgumentException(WORK_BREAK_CYCLE_ERROR);
         }
         this.workLabel          = workLabel;
         this.workTime           = (durationType == Pomodoro.OF_MINUTES ? Duration.ofMinutes(workTime) : Duration.ofSeconds(workTime));
@@ -53,10 +62,10 @@ public class Pomodoro {
         this.breakTime          = (durationType == Pomodoro.OF_MINUTES ? Duration.ofMinutes(breakTime) : Duration.ofSeconds(breakTime));
         this.restLabel          = restLabel;
         this.restTime           = (durationType == Pomodoro.OF_MINUTES ? Duration.ofMinutes(restTime) : Duration.ofSeconds(restTime));
-        this.numWorkBreakCycles = numWorkBreakCycles;
+        this.numWorkBreakCycles = 1;
         this.canRest            = (restTime > 0);
         this.durationType       = durationType;
-        this.name               = name;
+        this.name               = workTime + " " + typeString + " " + workLabel + ", " + breakTime + " " + typeString + " " + breakLabel + ", " + restTime + " " + typeString + " " + restLabel;
         this.instant            = Instant.now();
         this.position           = Duration.ZERO;
     }
@@ -156,12 +165,12 @@ public class Pomodoro {
             } else if (tmpPos.compareTo(getWorkBreakDuration()) < 0) {
                 return getBreakLabel();
             } else {
-                throw new IllegalStateException("Duration " + tmpPos.toString() + " out of bounds.");
+                throw new IllegalStateException(DURATION_STR_PLACEHOLDER + tmpPos.toString() + OUT_OF_BOUNDS_PLACEHOLDER);
             }
         } else if (position.compareTo(getTotalDuration()) < 0) {
             return getRestLabel();
         } else {
-            throw new IllegalStateException("Duration " + position.toString() + " out of bounds.");
+            throw new IllegalStateException(DURATION_STR_PLACEHOLDER + position.toString() + OUT_OF_BOUNDS_PLACEHOLDER);
         }
     }
 
@@ -200,7 +209,7 @@ public class Pomodoro {
                     return tmpPos.minus(getWorkTime()).plus(Duration.ofSeconds(1));
                 }
             } else {
-                throw new IllegalStateException("Duration " + tmpPos.toString() + " out of bounds.");
+                throw new IllegalStateException(DURATION_STR_PLACEHOLDER + tmpPos.toString() + OUT_OF_BOUNDS_PLACEHOLDER);
             }
         } else if (position.compareTo(getTotalDuration()) < 0) {
             if (reverse) {
@@ -209,7 +218,7 @@ public class Pomodoro {
                 return position.minus(getWorkBreakDuration().multipliedBy(numWorkBreakCycles)).plus(Duration.ofSeconds(1));
             }
         } else {
-            throw new IllegalStateException("Duration " + position.toString() + " out of bounds.");
+            throw new IllegalStateException(DURATION_STR_PLACEHOLDER + position.toString() + OUT_OF_BOUNDS_PLACEHOLDER);
         }
     }
 
@@ -295,7 +304,7 @@ public class Pomodoro {
 
     public void setNumWorkBreakCycles(int numWorkBreakCycles) {
         if (numWorkBreakCycles <= 0) {
-            throw new IllegalArgumentException("numWorkBreakCycles should be > 0.");
+            throw new IllegalArgumentException(WORK_BREAK_CYCLE_ERROR);
         }
         this.numWorkBreakCycles = numWorkBreakCycles;
     }

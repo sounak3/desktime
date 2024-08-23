@@ -8,10 +8,10 @@ import javax.swing.*;
 public class TLabel extends JLabel
 {
 
-	private Graphics2D g2;
-	private Image image, backupImage;
-	private Dimension fitDim, thumbDim;
-	private int imgLayout, inuse, analogClockOptions;
+	private transient Graphics2D g2;
+	private transient Image image, backupImage;
+	private int imgLayout, analogClockOptions;
+	private float imageAlpha;
 	protected boolean hasImage;
 	protected boolean forceTrans;
 	public static final String V_TILE_TEXT  = "Tile Vertically";
@@ -34,14 +34,12 @@ public class TLabel extends JLabel
 	public static final int HOUR_TICK     = 400;
 	public static final int MINUTE_TICK   = 800;
 
-	public final int gap                  = 5;
-	private int labelWidth, labelHeight, imgWidth, imgHeight;
-	private double aspectWidth;
-	private double aspectHeight;
-	private Dimension newWH;
-	private int time_hr, time_mn, time_sc;
+	public static final int GAP           = 5;
+	private static final String WRONG_ARGUMENT_ERR = "Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH";
+	private int labelWidth, labelHeight;
+	private int timeHrs, timeMin, timeSec;
 	private boolean clockMode;
-	private String time_zn, time_ampm;
+	private String timeZn, timeAmPm;
 	private FontMetrics fm;
 	private Font anaClkFnt;
 
@@ -60,7 +58,7 @@ public class TLabel extends JLabel
 		if (position == 4 || position == 2 || position == 1 || position == 8 || position == 16 || position == 32)
 			this.imgLayout = position;
 		else
-			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
+			throw new IllegalArgumentException(WRONG_ARGUMENT_ERR);
 	}
 
 	public TLabel(String s, Image image1, int position, boolean forceTrans)
@@ -69,7 +67,7 @@ public class TLabel extends JLabel
 		if (position == 4 || position == 2 || position == 1 || position == 8 || position == 16 || position == 32)
 			this.imgLayout = position;
 		else
-			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
+			throw new IllegalArgumentException(WRONG_ARGUMENT_ERR);
 		this.forceTrans = forceTrans;
 	}
 
@@ -78,17 +76,26 @@ public class TLabel extends JLabel
 		super(s, 0);
 		hasImage   = false;
 		forceTrans = false;
-		g2         = (Graphics2D)super.getGraphics();
+		g2         = (Graphics2D)getGraphics();
 		anaClkFnt  = getFont().deriveFont(getFont().getSize() >= 12 ? (float)getFont().getSize() - 2 : 10.0f);
 		fm         = getFontMetrics(anaClkFnt);
+		imageAlpha = 1.0f;
 		setOpaque(false);
 		setVerticalAlignment(0);
-		time_hr   = 10;
-		time_mn   = 10;
-		time_sc   = 5;
-		time_ampm = "";
-		time_zn   = "";
+		timeHrs   = 10;
+		timeMin   = 10;
+		timeSec   = 5;
+		timeAmPm = "";
+		timeZn   = "";
 		clockMode = false;
+	}
+
+	public void setImageAlpha(float imageAlpha) {
+		this.imageAlpha = imageAlpha;
+	}
+
+	public float getImageAlpha() {
+		return imageAlpha;
 	}
 
 	@Override
@@ -100,20 +107,20 @@ public class TLabel extends JLabel
 
 	public void setTime(int hour, int min, int sec, String ampm, String timeZone)
 	{
-		time_hr         = hour;
-		time_mn         = min;
-		time_sc         = sec;
-		time_ampm       = ampm;
-		time_zn         = timeZone;
+		timeHrs         = hour;
+		timeMin         = min;
+		timeSec         = sec;
+		timeAmPm       = ampm;
+		timeZn         = timeZone;
 		repaint();
 	}
 
 	public void setTime(String hour, String min, String sec, String ampm, String timeZone)
 	{
-		time_hr = Integer.parseInt(hour);
-		time_mn = Integer.parseInt(min);
-		time_sc = Integer.parseInt(sec);
-		this.setTime(time_hr, time_mn, time_sc, ampm, timeZone);
+		timeHrs = Integer.parseInt(hour);
+		timeMin = Integer.parseInt(min);
+		timeSec = Integer.parseInt(sec);
+		this.setTime(timeHrs, timeMin, timeSec, ampm, timeZone);
 	}
 
 	public void setAnalogClockOptions(int clockOptions)
@@ -139,17 +146,17 @@ public class TLabel extends JLabel
 
 	private void drawRadius(double r1, double r2, int degrees)
 	{
-		int xCenter = (labelWidth - 2 * gap) / 2;
-		int yCenter = (labelHeight - 2 * gap)/ 2;
+		int xCenter = (labelWidth - 2 * GAP) / 2;
+		int yCenter = (labelHeight - 2 * GAP)/ 2;
 		int radius  = Math.min(xCenter, yCenter);
 		int diff    = Math.abs(xCenter - yCenter);
 		double radians = (degrees - 90) * 2 * Math.PI / 360;  // 0 deg = 12:00
 		double xr = Math.cos(radians);
 		double yr = Math.sin(radians);
-		int xr1 = (int)(radius * xr * r1) + gap;  // line endpoints relative to center
-		int yr1 = (int)(radius * yr * r1) + gap;
-		int xr2 = (int)(radius * xr * r2) + gap;
-		int yr2 = (int)(radius * yr * r2) + gap;
+		int xr1 = (int)(radius * xr * r1) + GAP;  // line endpoints relative to center
+		int yr1 = (int)(radius * yr * r1) + GAP;
+		int xr2 = (int)(radius * xr * r2) + GAP;
+		int yr2 = (int)(radius * yr * r2) + GAP;
 		if (xCenter > yCenter) g2.drawLine(radius + xr1 + diff, radius + yr1, radius + xr2 + diff, radius + yr2);
 		else g2.drawLine(radius + xr1, radius + yr1 + diff, radius + xr2, radius + yr2 + diff);
 	}
@@ -196,7 +203,7 @@ public class TLabel extends JLabel
 		if (layout == 4 || layout == 2 || layout == 1 || layout == 8 || layout == 16 || layout == 32)
 			imgLayout = layout;
 		else
-			throw new IllegalArgumentException("Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH");
+			throw new IllegalArgumentException(WRONG_ARGUMENT_ERR);
 		repaint();
 	}
 
@@ -205,6 +212,7 @@ public class TLabel extends JLabel
 		return imgLayout;
 	}
 
+	@Override
 	public void setEnabled(boolean enabled)
 	{
 		super.setEnabled(enabled);
@@ -242,16 +250,17 @@ public class TLabel extends JLabel
 	public static Color getInvertedColor(Color colour)
 	{
 		int color = colour.getRGB();
-		int R = color & 255;
-		int G = (color >> 8) & 255;
-		int B = (color >> 16) & 255;
-		int A = (color >> 24) & 255;
-		R = 255 - R;
-		G = 255 - G;
-		B = 255 - B;
-		return new Color(R + (G << 8) + ( B << 16) + ( A << 24));
+		int red   = color & 255;
+		int green = (color >> 8) & 255;
+		int blue  = (color >> 16) & 255;
+		int alpha = (color >> 24) & 255;
+		    red   = 255 - red;
+		    green = 255 - green;
+		    blue  = 255 - blue;
+		return new Color(red + (green << 8) + ( blue << 16) + ( alpha << 24));
 	}
 
+	@Override
 	protected void paintComponent(Graphics g)
 	{
 		g2 = (Graphics2D)g;
@@ -262,13 +271,13 @@ public class TLabel extends JLabel
 
 		if (hasImage)
 		{
-			imgWidth     = image.getWidth(this);
-			imgHeight    = image.getHeight(this);
-			aspectWidth  = (double)Math.max(labelWidth, imgWidth) / (double)Math.min(labelWidth, imgWidth);
-			aspectHeight = (double)Math.max(labelHeight, imgHeight) / (double)Math.min(labelHeight, imgHeight);
-			fitDim       = getScaledDimension(new Dimension(imgWidth, imgHeight), new Dimension(labelWidth, labelHeight));
-			thumbDim     = getScaledDimension(new Dimension(imgWidth, imgHeight), new Dimension(30, 30));
-			Point pp     = getLocation();
+			int       imgWidth     = image.getWidth(this);
+			int       imgHeight    = image.getHeight(this);
+			double    aspectWidth  = (double)Math.max(labelWidth, imgWidth) / (double)Math.min(labelWidth, imgWidth);
+			double    aspectHeight = (double)Math.max(labelHeight, imgHeight) / (double)Math.min(labelHeight, imgHeight);
+			Dimension fitDim       = getScaledDimension(new Dimension(imgWidth, imgHeight), new Dimension(labelWidth, labelHeight));
+			Dimension thumbDim     = getScaledDimension(new Dimension(imgWidth, imgHeight), new Dimension(30, 30));
+			Point     pp           = getLocation();
 			SwingUtilities.convertPointToScreen(pp,this);
 			if (forceTrans) // For desktop background based image on window position (Transparent effect)
 			{
@@ -276,6 +285,10 @@ public class TLabel extends JLabel
 			}
 			else
 			{
+				int inuse;
+				Dimension newWH;
+				Composite compositeBackup = g2.getComposite();
+				g2.setComposite(AlphaComposite.Src.derive(getImageAlpha()));
 				switch (imgLayout)
 				{
 					case TLabel.STRETCH: // For image Stretch to Fit;
@@ -283,9 +296,9 @@ public class TLabel extends JLabel
 						break;
 					case TLabel.H_TILE: // For image Horizontal tiles;
 						if (labelHeight > imgHeight)
-							newWH = new Dimension((int)Math.ceil((double)imgWidth * aspectHeight), (int)Math.ceil((double)imgHeight * aspectHeight));
+							newWH = new Dimension((int)Math.ceil(imgWidth * aspectHeight), (int)Math.ceil(imgHeight * aspectHeight));
 						else
-							newWH = new Dimension((int)Math.ceil((double)imgWidth / aspectHeight), (int)Math.ceil((double)imgHeight / aspectHeight));
+							newWH = new Dimension((int)Math.ceil(imgWidth / aspectHeight), (int)Math.ceil(imgHeight / aspectHeight));
 						if (newWH.width >= labelWidth)
 						{
 							g2.drawImage(image, 0, 0, newWH.width, newWH.height, this);
@@ -299,9 +312,9 @@ public class TLabel extends JLabel
 						break;
 					case TLabel.V_TILE: // For image Vertical tiles;
 						if (labelWidth > imgWidth)
-							newWH = new Dimension((int)Math.ceil((double)imgWidth * aspectWidth), (int)Math.ceil((double)imgHeight * aspectWidth));
+							newWH = new Dimension((int)Math.ceil(imgWidth * aspectWidth), (int)Math.ceil(imgHeight * aspectWidth));
 						else
-							newWH = new Dimension((int)Math.ceil((double)imgWidth / aspectWidth), (int)Math.ceil((double)imgHeight / aspectWidth));
+							newWH = new Dimension((int)Math.ceil(imgWidth / aspectWidth), (int)Math.ceil(imgHeight / aspectWidth));
 						if (newWH.height >= labelHeight)
 						{
 							g2.drawImage(image, 0, 0, newWH.width, newWH.height, this);
@@ -335,13 +348,17 @@ public class TLabel extends JLabel
 								g2.drawImage(image, j1 * thumbDim.width, i1 * thumbDim.height, thumbDim.width, thumbDim.height, this);
 						}
 						break;
+					default: // default is stretch to fit
+						g2.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+						break;
 				}
+				g2.setComposite(compositeBackup);
 			}
 		}
 
 		if (clockMode) {
-			int     xCenter   = (labelWidth - 2 * gap) / 2;
-			int     yCenter   = (labelHeight - 2 * gap)/ 2;
+			int     xCenter   = (labelWidth - 2 * GAP) / 2;
+			int     yCenter   = (labelHeight - 2 * GAP)/ 2;
 			int     radius    = Math.min(xCenter, yCenter);
 			float   stroke    = (float)radius / 50;
 			boolean ampm      = false;
@@ -436,8 +453,8 @@ public class TLabel extends JLabel
 				break;
 			}
 
-			if (ampm) g2.drawString(time_ampm, xCenter + gap - fm.stringWidth(time_ampm)/2, yCenter + gap + yCenter / 2);
-			if (tzone) g2.drawString(time_zn, xCenter + gap - Math.round(fm.stringWidth(time_zn)/2), gap + Math.round(yCenter * 0.60));
+			if (ampm) g2.drawString(timeAmPm, xCenter + GAP - fm.stringWidth(timeAmPm)/2, yCenter + GAP + yCenter / 2);
+			if (tzone) g2.drawString(timeZn, xCenter + GAP - Math.round(fm.stringWidth(timeZn)/2.00f), GAP + Math.round(yCenter * 0.60f));
 			for (int i = 0; i < 360; i++)
 			{
 				if (i % 90 == 0 && majHrTick) drawRadius(0.85, 0.97, i);
@@ -450,16 +467,16 @@ public class TLabel extends JLabel
 			}
 
 			g2.setColor(TLabel.darker(getForeground(), 0.50));
-			if (clkBdr) g2.drawOval(xCenter - radius + gap, yCenter - radius + gap, 2 * radius, 2 * radius);
+			if (clkBdr) g2.drawOval(xCenter - radius + GAP, yCenter - radius + GAP, 2 * radius, 2 * radius);
 			g2.setStroke(new BasicStroke(stroke * 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			drawRadius(-0.1, 0.8, time_mn * 6 + time_sc / 10);  // Minutes
+			drawRadius(-0.1, 0.8, timeMin * 6 + timeSec / 10);  // Minutes
 			g2.setStroke(new BasicStroke(stroke * 3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			drawRadius(-0.1, 0.5, time_hr * 30 + time_mn / 2);  // Hours
+			drawRadius(-0.1, 0.5, timeHrs * 30 + timeMin / 2);  // Hours
 			g2.setColor(TLabel.getInvertedColor(getForeground()));
 			g2.setStroke(new BasicStroke(stroke * 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			drawRadius(0, 0.7, time_sc * 6);  // Seconds
+			drawRadius(0, 0.7, timeSec * 6);  // Seconds
 			int doubleStroke = Math.round(3 * stroke);
-			g2.fillOval(gap + xCenter - doubleStroke, gap + yCenter - doubleStroke , 2 * doubleStroke, 2 * doubleStroke);
+			g2.fillOval(GAP + xCenter - doubleStroke, GAP + yCenter - doubleStroke , 2 * doubleStroke, 2 * doubleStroke);
 		}
 
 		super.paintComponent(g2);
