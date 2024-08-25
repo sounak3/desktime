@@ -12,18 +12,11 @@
      <float>0.5</float>
     </void>
     <void id="Boolean0" method="get">
-     <string>ON_TOP</string>
-    </void>
-    <void method="put">
-     <string>ANALOG_CLOCK</string>
-     <object idref="Boolean0"/>
-    </void>
-    <void id="Boolean1" method="get">
      <string>SLOW_TRANS</string>
     </void>
     <void method="put">
      <string>FORE_TRANSLUCENT</string>
-     <object idref="Boolean1"/>
+     <object idref="Boolean0"/>
     </void>
     <void method="put">
      <string>IMAGEFILE</string>
@@ -31,11 +24,15 @@
     </void>
     <void method="put">
      <string>UPTIME_FORMAT</string>
-     <string>&apos;Uptime: &apos;DD&apos;-day(s), &apos;HH&apos;-hour(s), &apos;mm&apos;-minute(s), &apos;ss&apos;-second(s)&apos;</string>
+     <string>&apos;System uptime: &apos;HH&apos;-hour(s), &apos;mm&apos;-minute(s), &apos;ss&apos;-second(s)&apos;</string>
     </void>
     <void method="put">
      <string>ANALOG_CLOCK_OPTS</string>
      <int>3000</int>
+    </void>
+    <void method="put">
+     <string>DISPLAY_METHOD</string>
+     <string>UPTIME</string>
     </void>
     <void method="put">
      <string>BACKGROUND</string>
@@ -48,15 +45,18 @@
     </void>
     <void method="put">
      <string>TOOLTIP</string>
-     <object idref="Boolean1"/>
+     <object idref="Boolean0"/>
     </void>
     <void method="put">
      <string>TIMEZONE</string>
      <string>Asia/Calcutta</string>
     </void>
+    <void id="Boolean1" method="get">
+     <string>ON_TOP</string>
+    </void>
     <void method="put">
      <string>POMODORO_LEAD_LABEL</string>
-     <object idref="Boolean0"/>
+     <object idref="Boolean1"/>
     </void>
     <void id="Integer0" method="get">
      <string>PANEL_ID</string>
@@ -72,9 +72,9 @@
     <void method="put">
      <string>FOREGROUND</string>
      <object class="java.awt.Color">
+      <int>51</int>
       <int>255</int>
-      <int>255</int>
-      <int>0</int>
+      <int>51</int>
       <int>255</int>
      </object>
     </void>
@@ -84,29 +84,29 @@
       <string>x</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>916</int>
+       <int>592</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>72</int>
+       <int>117</int>
       </void>
      </void>
     </void>
     <void method="put">
      <string>LINE_COLOR</string>
      <object class="java.awt.Color">
-      <int>102</int>
-      <int>102</int>
-      <int>102</int>
+      <int>0</int>
+      <int>51</int>
+      <int>51</int>
       <int>255</int>
      </object>
     </void>
     <void method="put">
      <string>IMAGE_STYLE</string>
-     <int>32</int>
+     <int>2</int>
     </void>
    </object>
   </void>
