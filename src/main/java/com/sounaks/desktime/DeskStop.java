@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
 import java.awt.image.*;
+import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
@@ -11,6 +12,8 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
+
+import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
 import static java.awt.GraphicsDevice.WindowTranslucency.*;
 
@@ -29,7 +32,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private Vector <TimeBean>alarms;
 	private JPopupMenu pMenu;
 	private JMenu addPanel, mFormat, timeMode, timeZone, mSize, mOpacityLevel, mRoundCorners;
-	private JSlider sizer, opacityLevel;
+	private JSlider sizer, miOpacitySlider;
 	private JMenuItem miAnaTime, miDigTime, miUptime, miPomo, miSeltz, miDeftz, timSet, zonSet, mAllOpacity;
 	private JMenuItem fore, back, alm, bdr, exit, about, newItem, dupItem, removePanel, miMovable, ontop, sysClk;
 	private JMenuItem[] impZon;
@@ -66,6 +69,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	public  static final String WINDOW_SHADOW_PROPERTY         = "Window.shadow";
 	public  static final String PREFERENCES_TITLE              = "Preferences...";
 	private static final String ABOUT_STRING                   = "<html>Created and Developed by : Sounak Choudhury<p>E-mail Address : <a href='mailto:sounak_s@rediffmail.com'>sounak_s@rediffmail.com</a><p>The software, information and documentation<p>is provided \"AS IS\" without warranty of any<p>kind, either express or implied. The Readme.txt<p>file containing EULA must be read before use.<p>Suggestions and credits are Welcomed.</html>";
+	private static final String CMD_TIME_SETTINGS              = "Time Settings";
+	private static final String CMD_ABOUT					   = "About DeskStop...";
 	private static ArrayList<InitInfo> deskstops;
 	private final ImageIcon plusPng  = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/plus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
 	private final ImageIcon minusPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/minus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
@@ -141,14 +146,14 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			mCnt++;
 		}
 		mOpacityLevel = new JMenu("Opacity level");
-		opacityLevel  = new JSlider(SwingConstants.VERTICAL, 4, 20, 10);
-		opacityLevel.setPreferredSize(new Dimension(opacityLevel.getPreferredSize().width + 40, opacityLevel.getPreferredSize().height + 40));
-		opacityLevel.setMajorTickSpacing(4);
-		opacityLevel.setMinorTickSpacing(1);
-		opacityLevel.setPaintTicks(true);
-		opacityLevel.setSnapToTicks(true);
-		opacityLevel.addChangeListener(this);
-		mOpacityLevel.add(opacityLevel);
+		miOpacitySlider  = new JSlider(SwingConstants.VERTICAL, 4, 20, 10);
+		miOpacitySlider.setPreferredSize(new Dimension(miOpacitySlider.getPreferredSize().width + 40, miOpacitySlider.getPreferredSize().height + 40));
+		miOpacitySlider.setMajorTickSpacing(4);
+		miOpacitySlider.setMinorTickSpacing(1);
+		miOpacitySlider.setPaintTicks(true);
+		miOpacitySlider.setSnapToTicks(true);
+		miOpacitySlider.addChangeListener(this);
+		mOpacityLevel.add(miOpacitySlider);
 		mAllOpacity = new JMenuItem("Blend foreground opacity");
 		mAllOpacity.setIcon(info.isForegroundTranslucent() ? checkPng : clearPng);
 		mAllOpacity.addActionListener(this);
@@ -173,10 +178,13 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		miAnaTime.addActionListener(this);
 		miUptime = new JMenuItem("System Up-time");
 		miUptime.addActionListener(this);
+		miUptime.setActionCommand(DISPLAY_MODE_SYSTEM_UPTIME);
 		miPomo   = new JMenuItem("Pomodoro Timer");
 		miPomo.addActionListener(this);
+		miPomo.setActionCommand(DISPLAY_MODE_POMODORO_TIMER);
 		timSet   = new JMenuItem("More settings...");
 		timSet.addActionListener(this);
+		timSet.setActionCommand(CMD_TIME_SETTINGS);
 		timeMode.add(miDigTime);
 		timeMode.add(miAnaTime);
 		timeMode.add(miUptime);
@@ -186,8 +194,10 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		timeZone = new JMenu("Timezone");
 		miSeltz  = new JMenuItem("Last selected");
 		miSeltz.addActionListener(this);
+		miSeltz.setActionCommand(DISPLAY_MODE_SELECTED_TIMEZONE);
 		miDeftz  = new JMenuItem("System");
 		miDeftz.addActionListener(this);
+		miDeftz.setActionCommand(DISPLAY_MODE_CURRENT_TIMEZONE);
 		timeZone.add(miSeltz);
 		timeZone.add(miDeftz);
 		timeZone.addSeparator();
@@ -200,6 +210,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		}
 		zonSet   = new JMenuItem("More Timezones...");
 		zonSet.addActionListener(this);
+		zonSet.setActionCommand(CMD_TIME_SETTINGS);
 		timeZone.addSeparator();
 		timeZone.add(zonSet);
 		sysClk = new JMenuItem("System Clock");
@@ -237,7 +248,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		removePanel = new JMenuItem("Remove this panel", minusPng);
 		removePanel.addActionListener(this);
 		removePanel.setEnabled(info.getID() != 0);
-		about = new JMenuItem("About...");
+		about = new JMenuItem(CMD_ABOUT);
 		about.addActionListener(this);
 		exit  = new JMenuItem("Exit");
 		exit.addActionListener(this);
@@ -328,7 +339,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		else
 		{
 			mainPane.setBackground(info.getBackground());
-			if (info.hasGlassEffect()) info.setGlassEffect(false);
+			info.setGlassEffect(false);
 			opacityMethod(info.isUsingImage());
 			tLabel.setText(time);
 			tLabel.setBackImage(null);
@@ -338,6 +349,16 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		}
 		if(info.getID() != 0) setVisible(true);
 		setRoundedCorners(info.getRoundCorners());
+		updatePopupMenuIcons();
+		updateOpacitySlider(info.getOpacity(), info.isPixelAlphaSupported(), info.isForegroundTranslucent());
+		lastPomTask = info.getPomodoroTask();
+		lastPomFormat = info.getPomodoroFormat();
+		timeDisplayConfig();
+		validate();
+	}
+
+	private void updatePopupMenuIcons()
+	{
 		miMovable.setIcon(info.isFixed() ? clearPng : checkPng);
 		ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
 		if (info.getDisplayMethod().endsWith("TZ"))
@@ -348,12 +369,12 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		miUptime.setIcon(info.getDisplayMethod().equals(DISPLAY_MODE_SYSTEM_UPTIME) ? checkPng : clearPng);
 		miPomo.setIcon(info.getDisplayMethod().equals(DISPLAY_MODE_POMODORO_TIMER) ? checkPng : clearPng);
 		mAllOpacity.setIcon(info.isForegroundTranslucent() ? checkPng : clearPng);
-		opacityLevel.setMinimum(info.isPixelAlphaSupported() && !info.isForegroundTranslucent() ? 0 : 4);
-		opacityLevel.setValue(Math.round(info.getOpacity() * 20));
-		lastPomTask = info.getPomodoroTask();
-		lastPomFormat = info.getPomodoroFormat();
-		timeDisplayConfig();
-		validate();
+	}
+
+	private void updateOpacitySlider(float opacityLevel, boolean pixelTransSupport, boolean foregroundTranslucent)
+	{
+		miOpacitySlider.setMinimum(pixelTransSupport && !foregroundTranslucent ? 0 : 4);
+		miOpacitySlider.setValue(Math.round(opacityLevel * 20));
 	}
 
 	public static final int[] getFontSizes()
@@ -370,22 +391,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			sd.setTimeZone(dispString.equals(DISPLAY_MODE_SELECTED_TIMEZONE) ? TimeZone.getTimeZone(info.getTimeZone()) : TimeZone.getDefault());
 			date = new Date();
 			time = sd.format(date);
-			if (info.isAnalogClock())
-			{
-				tLabel.setText("");
-				tLabel.setClockMode(true);
-				resizingMethod("");
-			}
-			else
-			{
-				tLabel.setText(time);
-				tLabel.setClockMode(false);
-				resizingMethod(time);
-			}
-			if (info.hasTooltip())
-				tLabel.setToolTipText(tipCur.replace("Time of your location", info.getTimeZone()));
-			else
-				tLabel.setToolTipText(null);
+			resizeTimeLabel(time);
+			tLabel.setToolTipText(info.hasTooltip() ? tipCur.replace("Time of your location", info.getTimeZone()) : null);
 		}
 		else if (dispString.equals(DISPLAY_MODE_POMODORO_TIMER))
 		{
@@ -394,31 +401,46 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			if (pom == null || !lastPomTask.equals(info.getPomodoroTask()) || !lastPomFormat.equals(info.getPomodoroFormat()))
 				pom  = new Pomodoro(info.getPomodoroTask());
 			time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(info.isPomodoroCountdown()), info.getPomodoroFormat(), pom.getRunningLabel(), info.isPomodoroLeadingLabel());
-
-			String lstr1 = info.getPomodoroFormat() + " [" + pom.getWorkLabel() + "]";
-			String lstr2 = info.getPomodoroFormat() + " [" + pom.getBreakLabel() + "]";
-			String lstr3 = pom.checkCanRest() ? info.getPomodoroFormat() + " [" + pom.getRestLabel() + "]" : "";
-			if (lstr1.length() >= lstr2.length() && lstr1.length() >= lstr3.length())
-				resizingMethod(lstr1);
-			else if (lstr2.length() >= lstr1.length() && lstr2.length() >= lstr3.length())
-				resizingMethod(lstr2);
-			else
-				resizingMethod(lstr3);
-
-			if (info.hasTooltip())
-				tLabel.setToolTipText(tipPom.replace("pomodoro task", info.getPomodoroTask()));
-			else
-				tLabel.setToolTipText(null);
+			resizePomodoroLabel();
+			tLabel.setToolTipText(info.hasTooltip() ? tipPom.replace("pomodoro task", info.getPomodoroTask()) : null);
 		}
 		else if (dispString.equals(DISPLAY_MODE_SYSTEM_UPTIME))
 		{
 			tLabel.setClockMode(false);
 			time = ExUtils.formatUptime(Duration.ofNanos(System.nanoTime()), info.getUpTimeFormat());
 			resizingMethod(time);
-			if (info.hasTooltip())
-				tLabel.setToolTipText(tipUpt);
-			else
-				tLabel.setToolTipText(null);
+			tLabel.setToolTipText(info.hasTooltip() ? tipUpt : null);
+		}
+	}
+
+	private void resizePomodoroLabel()
+	{
+		String lstr1 = info.getPomodoroFormat() + " [" + pom.getWorkLabel() + "]";
+		String lstr2 = info.getPomodoroFormat() + " [" + pom.getBreakLabel() + "]";
+		String lstr3 = pom.checkCanRest() ? info.getPomodoroFormat() + " [" + pom.getRestLabel() + "]" : "";
+		int maxLength = Math.max(lstr1.length(), Math.max(lstr2.length(), lstr3.length()));
+		if (maxLength == lstr1.length()) {
+			resizingMethod(lstr1);
+		} else if (maxLength == lstr2.length()) {
+			resizingMethod(lstr2);
+		} else {
+			resizingMethod(lstr3);
+		}
+	}
+
+	private void resizeTimeLabel(String text)
+	{
+		if (info.isAnalogClock())
+		{
+			tLabel.setText("");
+			tLabel.setClockMode(true);
+			resizingMethod("");
+		}
+		else
+		{
+			tLabel.setText(text);
+			tLabel.setClockMode(false);
+			resizingMethod(text);
 		}
 	}
 
@@ -490,191 +512,184 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		}
 	}
 
+	private void trackChangesAndSave(InfoTracker trackChanges)
+	{
+		info   = trackChanges.getSelectedInformation();
+		alarms = trackChanges.getSelectedAlarms();
+		ExUtils.saveAlarms(alarms);
+		ExUtils.saveDeskStops(info, deskstops);
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent actionevent)
 	{
 		lastPomTask   = info.getPomodoroTask();   //Since pomodoro change can be triggered with time tab,
 		lastPomFormat = info.getPomodoroFormat(); //which in turn can be navigated from any of the tabs.
-
+		String comm = actionevent.getActionCommand();
 		Object obj = actionevent.getSource();
-		InfoTracker trackChanges;
-		if (obj.equals(bdr))
-		{
-			trackChanges = ChooserBox.showDialog(PREFERENCES_TITLE, ChooserBox.BORDER_TAB, info, alarms);
-			info         = trackChanges.getSelectedInformation();
-			alarms       = trackChanges.getSelectedAlarms();
-			ExUtils.saveAlarms(alarms);
-			ExUtils.saveDeskStops(info, deskstops);
-			reInitialize();
-		}
-		else if (obj.equals(fore))
-		{
-			trackChanges = ChooserBox.showDialog(PREFERENCES_TITLE, ChooserBox.FONT_TAB, info, alarms);
-			info         = trackChanges.getSelectedInformation();
-			alarms       = trackChanges.getSelectedAlarms();
-			ExUtils.saveAlarms(alarms);
-			ExUtils.saveDeskStops(info, deskstops);
-			reInitialize();
-		}
-		else if (obj.equals(back))
-		{
-			trackChanges = ChooserBox.showDialog(PREFERENCES_TITLE, ChooserBox.BACKGROUND_TAB, info, alarms);
-			info         = trackChanges.getSelectedInformation();
-			alarms       = trackChanges.getSelectedAlarms();
-			ExUtils.saveAlarms(alarms);
-			ExUtils.saveDeskStops(info, deskstops);
-			reInitialize();
-		}
-		else if (obj.equals(miSeltz))
-		{
-			info.setDisplayMethod(DISPLAY_MODE_SELECTED_TIMEZONE);
-			ExUtils.saveDeskStops(info, deskstops);
-			reInitialize();
-		}
-		else if (obj.equals(miDeftz))
-		{
-			info.setDisplayMethod(DISPLAY_MODE_CURRENT_TIMEZONE);
-			info.setTimeZone(TimeZone.getDefault().getID());
-			ExUtils.saveDeskStops(info, deskstops);
-			reInitialize();
-		}
-		else if (obj.equals(miDigTime) || obj.equals(miAnaTime))
-		{
-			info.setDisplayMethod(info.getTimeZone().equals(TimeZone.getDefault().getID()) ? DISPLAY_MODE_CURRENT_TIMEZONE : DISPLAY_MODE_SELECTED_TIMEZONE);
-			info.setAnalogClock(obj.equals(miAnaTime));
-			ExUtils.saveDeskStops(info, deskstops);
-			reInitialize();
-		}
-		else if (obj instanceof JMenuItem && actionevent.getActionCommand().startsWith("TZ-"))
-		{
-			String tzId = actionevent.getActionCommand().split("-")[1];
-			info.setDisplayMethod(TimeZone.getTimeZone(tzId).hasSameRules(TimeZone.getDefault()) ? DISPLAY_MODE_CURRENT_TIMEZONE : DISPLAY_MODE_SELECTED_TIMEZONE);
-			info.setTimeZone(tzId);
-			ExUtils.saveDeskStops(info, deskstops);
-			reInitialize();
-		}
-		else if (obj.equals(miUptime))
-		{
-			info.setDisplayMethod(DISPLAY_MODE_SYSTEM_UPTIME);
-			info.setAnalogClock(false);
-			ExUtils.saveDeskStops(info, deskstops);
-			reInitialize();
-		}
-		else if (obj.equals(miPomo))
-		{
-			info.setDisplayMethod(DISPLAY_MODE_POMODORO_TIMER);
-			info.setAnalogClock(false);
-			ExUtils.saveDeskStops(info, deskstops);
-			reInitialize();
-		}
-		else if (obj.equals(timSet) || obj.equals(zonSet))
-		{
-			trackChanges = ChooserBox.showDialog(PREFERENCES_TITLE, ChooserBox.TIMES_TAB, info, alarms);
-			info         = trackChanges.getSelectedInformation();
-			alarms       = trackChanges.getSelectedAlarms();
-			ExUtils.saveAlarms(alarms);
-			ExUtils.saveDeskStops(info, deskstops);
-			reInitialize();
-		}
-		else if (obj.equals(alm))
-		{
-			trackChanges = ChooserBox.showDialog(PREFERENCES_TITLE, ChooserBox.ALARMS_TAB, info, alarms);
-			info         = trackChanges.getSelectedInformation();
-			alarms       = trackChanges.getSelectedAlarms();
-			ExUtils.saveAlarms(alarms);
-			ExUtils.saveDeskStops(info, deskstops);
-			reInitialize();
-		}
-		else if (obj.equals(sysClk))
-		{
-			switch (ExUtils.getOS()) {
-				case WINDOWS:
-					String[] sysClkCmd = {"explorer.exe", "shell:Appsfolder\\Microsoft.WindowsAlarms_8wekyb3d8bbwe!App"};
-					ExUtils.runProgram(sysClkCmd, this);
-					break;
-				case LINUX:
-					sysClkCmd = new String[]{"xclock"};
-					ExUtils.runProgram(sysClkCmd, this);
-					break;
-				case MAC:
-					// to be included later
-					break;
-				default:
-					break;
-			}
-		}
-		else if (obj.equals(mAllOpacity))
-		{
-			info.setForegroundTranslucent(!info.isForegroundTranslucent());
-			mAllOpacity.setIcon(info.isForegroundTranslucent() ? checkPng : clearPng);
-			ExUtils.saveDeskStops(info, deskstops);
-			reInitialize();
-		}
-		else if (obj.equals(miMovable))
-		{
-			info.setFixed(!info.isFixed());
-			miMovable.setIcon(info.isFixed() ? clearPng : checkPng);
-			tLabel.setCursor(info.isFixed() ? Cursor.getDefaultCursor() : Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-			ExUtils.saveDeskStops(info, deskstops);
-		}
-		else if (obj.equals(ontop))
-		{
-			info.setOnTop(!info.getOnTop());
-			ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
-			ExUtils.saveDeskStops(info, deskstops);
-			setAlwaysOnTop(info.getOnTop());
-		}
-		else if (obj.equals(about))
-		{
-			JOptionPane.showMessageDialog(new Frame(), ABOUT_STRING, "About DeskStop...", 1, aboutGif);
-		}
-		else if (obj.equals(exit))
-		{
-			clockThread.terminate();
-			try
-			{
-				clockThread.join();
-			} 
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-				Thread.currentThread().interrupt();
-			}
-			System.exit(0);
-		}
-		else if (obj.equals(newItem))
-		{
-			DeskStop.createInstance(info, false);
-		}
-		else if (obj.equals(dupItem))
-		{
-			DeskStop.createInstance(info, true);
-		}
-		else if (obj.equals(removePanel))
-		{
-			DeskStop.removeInstance(this, info);
-		}
-		else if (obj instanceof JMenuItem)
-		{
-			int mCnt = 0;
-			for (ExUtils.ROUND_CORNERS corner : ExUtils.ROUND_CORNERS.values()) {
-				if (corner.name().equals(actionevent.getActionCommand())) {
-					tMenuItem[mCnt].setIcon(checkPng);
-					setRoundedCorners(corner.getRoundType());
-					info.setRoundCorners(corner.getRoundType());
-					ExUtils.saveDeskStops(info, deskstops);
-					reInitialize();
-				} else {
-					tMenuItem[mCnt].setIcon(clearPng);
+		InfoTracker track;
+		switch (comm) {
+			case "Borders & Clock UI...":
+				track = ChooserBox.showDialog(PREFERENCES_TITLE, ChooserBox.BORDER_TAB, info, alarms);
+				trackChangesAndSave(track);
+				reInitialize();				
+				break;
+			case "Font & Foreground...":
+				track = ChooserBox.showDialog(PREFERENCES_TITLE, ChooserBox.FONT_TAB, info, alarms);
+				trackChangesAndSave(track);
+				reInitialize();
+				break;
+			case "Background & Dials...":
+				track = ChooserBox.showDialog(PREFERENCES_TITLE, ChooserBox.BACKGROUND_TAB, info, alarms);
+				trackChangesAndSave(track);
+				reInitialize();
+				break;
+			case DISPLAY_MODE_SELECTED_TIMEZONE:
+				info.setDisplayMethod(DISPLAY_MODE_SELECTED_TIMEZONE);
+				ExUtils.saveDeskStops(info, deskstops);
+				reInitialize();
+				break;
+			case DISPLAY_MODE_CURRENT_TIMEZONE:
+				info.setDisplayMethod(DISPLAY_MODE_CURRENT_TIMEZONE);
+				info.setTimeZone(TimeZone.getDefault().getID());
+				ExUtils.saveDeskStops(info, deskstops);
+				reInitialize();
+				break;
+			case "Digital clock":
+			case "Analog clock":
+				info.setDisplayMethod(getDisplayMethodBasedOnTZ(info.getTimeZone()));
+				info.setAnalogClock(obj.equals(miAnaTime));
+				ExUtils.saveDeskStops(info, deskstops);
+				reInitialize();
+				break;
+			case DISPLAY_MODE_SYSTEM_UPTIME:
+				info.setDisplayMethod(DISPLAY_MODE_SYSTEM_UPTIME);
+				info.setAnalogClock(false);
+				ExUtils.saveDeskStops(info, deskstops);
+				reInitialize();
+				break;
+			case DISPLAY_MODE_POMODORO_TIMER:
+				info.setDisplayMethod(DISPLAY_MODE_POMODORO_TIMER);
+				info.setAnalogClock(false);
+				ExUtils.saveDeskStops(info, deskstops);
+				reInitialize();
+				break;
+			case CMD_TIME_SETTINGS:
+				track = ChooserBox.showDialog(PREFERENCES_TITLE, ChooserBox.TIMES_TAB, info, alarms);
+				trackChangesAndSave(track);
+				reInitialize();
+				break;
+			case "Set Alarm...":
+				track = ChooserBox.showDialog(PREFERENCES_TITLE, ChooserBox.ALARMS_TAB, info, alarms);
+				trackChangesAndSave(track);
+				reInitialize();
+				break;
+			case "System Clock":
+				runSystemClock();
+			break;
+			case "Blend foreground opacity":
+				info.setForegroundTranslucent(!info.isForegroundTranslucent());
+				mAllOpacity.setIcon(info.isForegroundTranslucent() ? checkPng : clearPng);
+				ExUtils.saveDeskStops(info, deskstops);
+				reInitialize();
+				break;
+			case "Movable":
+				info.setFixed(!info.isFixed());
+				miMovable.setIcon(info.isFixed() ? clearPng : checkPng);
+				tLabel.setCursor(info.isFixed() ? Cursor.getDefaultCursor() : Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+				ExUtils.saveDeskStops(info, deskstops);
+				break;
+			case "Always on top":
+				info.setOnTop(!info.getOnTop());
+				ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
+				ExUtils.saveDeskStops(info, deskstops);
+				setAlwaysOnTop(info.getOnTop());
+				break;
+			case CMD_ABOUT:
+				JOptionPane.showMessageDialog(new Frame(), ABOUT_STRING, CMD_ABOUT, 1, aboutGif);
+				break;
+			case "Exit":
+				clockThread.terminate();
+				try
+				{
+					clockThread.join();
+				} 
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+					Thread.currentThread().interrupt();
 				}
-				mCnt++;
-			}
+				System.exit(0);
+				break;
+			case "New":
+				DeskStop.createInstance(info, false);
+				break;
+			case "Duplicate":
+				DeskStop.createInstance(info, true);
+				break;
+			case "Remove this panel":
+				DeskStop.removeInstance(this, info);
+				break;
+			default: {
+					if (comm.startsWith("TZ-")) {
+						info.setDisplayMethod(getDisplayMethodBasedOnTZ(comm.split("-")[1]));
+						info.setTimeZone(comm.split("-")[1]);
+						ExUtils.saveDeskStops(info, deskstops);
+						reInitialize();
+					} else {
+						checkUpdateRoundedCorners(comm);
+					}
+				}
+				break;
 		}
 		info.setPixelAlphaSupport(pixelTranslucency);
 		info.setWindowAlphaSupport(wholeTranslucency);
 		info.setScreenshotSupport(robotSupport);
 		refreshNow = true;
 		startRefresh();
+	}
+
+	protected void runSystemClock()
+	{
+		switch (ExUtils.getOS()) {
+			case WINDOWS:
+				String[] sysClkCmd = {"explorer.exe", "shell:Appsfolder\\Microsoft.WindowsAlarms_8wekyb3d8bbwe!App"};
+				ExUtils.runProgram(sysClkCmd, this);
+				break;
+			case LINUX:
+				sysClkCmd = new String[]{"xclock"};
+				ExUtils.runProgram(sysClkCmd, this);
+				break;
+			case MAC:
+				// to be included later
+				break;
+			default:
+				break;
+		}
+	}
+
+	private String getDisplayMethodBasedOnTZ(String tzString)
+	{
+		TimeZone inputTZ = TimeZone.getTimeZone(tzString);
+		if (inputTZ.hasSameRules(TimeZone.getDefault())) return DISPLAY_MODE_CURRENT_TIMEZONE;
+		else return DISPLAY_MODE_SELECTED_TIMEZONE;
+	}
+
+	private void checkUpdateRoundedCorners(String cornerType)
+	{
+		int mCnt = 0;
+		for (ExUtils.ROUND_CORNERS corner : ExUtils.ROUND_CORNERS.values()) {
+			if (corner.name().equals(cornerType)) {
+				tMenuItem[mCnt].setIcon(checkPng);
+				setRoundedCorners(corner.getRoundType());
+				info.setRoundCorners(corner.getRoundType());
+				ExUtils.saveDeskStops(info, deskstops);
+				reInitialize();
+			} else {
+				tMenuItem[mCnt].setIcon(clearPng);
+			}
+			mCnt++;
+		}
 	}
 
 	@Override
@@ -826,8 +841,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 				info.setFont(derived);
 				ExUtils.saveDeskStops(info, deskstops);
 			}
-		} else if (srcObject.equals(opacityLevel)) {
-			float derived = (float)opacityLevel.getValue() / 20;
+		} else if (srcObject.equals(miOpacitySlider)) {
+			float derived = (float)miOpacitySlider.getValue() / 20;
 			if (derived != info.getOpacity()) {
 				info.setOpacity(derived);
 				opacityMethod(info.isUsingImage());
@@ -839,6 +854,10 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	class ClockThread extends Thread
 	{
 		private volatile boolean timerun = true;
+		private int      soundRunSec = 60;
+		private Player   runPlayer;
+		private Calendar gcal;
+		private String   curLabel;
 
 		ClockThread()
 		{
@@ -848,12 +867,10 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		@Override
 		public void run()
 		{
-			Calendar gcal        = Calendar.getInstance();
-			Date     startTime   = ExUtils.getSystemStartTime();
-			String   curLabel    = "";
-			Player   runPlayer   = null;
-			int      soundRunSec = 60;
-			String[] clockTime;
+			Date startTime   = ExUtils.getSystemStartTime();
+			gcal        = Calendar.getInstance();
+			curLabel    = "";
+			runPlayer   = null;
 			if(pom != null) 
 				curLabel = pom.getRunningLabel();
 			for (Thread thread = Thread.currentThread(); clockThread == thread && timerun;)
@@ -862,67 +879,30 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 				date = new Date();
 				try
 				{
-					if (method.equals(DISPLAY_MODE_SYSTEM_UPTIME))
-					{
-						Duration uptimeNow = Duration.ofNanos(System.nanoTime());
-						time = ExUtils.formatUptime(uptimeNow, info.getUpTimeFormat());
-						tLabel.setText(time);
-						gcal.setTime(startTime);
-						gcal.add(Calendar.SECOND, (int)uptimeNow.getSeconds());
-						date = gcal.getTime();
-						int curMin = Math.toIntExact(uptimeNow.getSeconds() % 3600 / 60);
-						int curSec = Math.toIntExact(uptimeNow.getSeconds() % 3600 % 60);
-						if (curMin == 0 && curSec == 0)
-						{
-							if (runPlayer != null) SoundPlayer.stopAudio(runPlayer);
-							runPlayer = SoundPlayer.playAudio(info.getUptimeHourSound(), soundRunSec);
-						}
-					}
-					else if (method.equals(DISPLAY_MODE_SELECTED_TIMEZONE) || method.equals(DISPLAY_MODE_CURRENT_TIMEZONE))
-					{
-						time = sd.format(date);
-						gcal.setTime(date);
-						int curMin = gcal.get(Calendar.MINUTE);
-						int curSec = gcal.get(Calendar.SECOND);
-						if (info.isAnalogClock())
-						{
-							clk.setTimeZone(sd.getTimeZone());
-							clockTime = clk.format(date).split(":");
-							tLabel.setText("");
-							tLabel.setTime(clockTime[1], clockTime[2], clockTime[3], clockTime[4], clockTime[0]);
-						}
-						else
+					switch (method) {
+						case DISPLAY_MODE_SYSTEM_UPTIME:
+							Duration uptimeNow = Duration.ofNanos(System.nanoTime());
+							time = ExUtils.formatUptime(uptimeNow, info.getUpTimeFormat());
 							tLabel.setText(time);
-						if (curMin == 0 && curSec == 0)
-						{
-							if (runPlayer != null) SoundPlayer.stopAudio(runPlayer);
-							runPlayer = SoundPlayer.playAudio(info.getHourSound(), soundRunSec);
-						}
-					}
-					else
-					{
-						// Below 2 line is under timeDisplayConfig(), but added here to avoid NullPointerException in case of race condition.
-						if (pom == null || !lastPomTask.equals(info.getPomodoroTask()) || !lastPomFormat.equals(info.getPomodoroFormat()))
-							pom  = new Pomodoro(info.getPomodoroTask());
-						time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(info.isPomodoroCountdown()), info.getPomodoroFormat(), pom.getRunningLabel(), info.isPomodoroLeadingLabel());
-						tLabel.setText(time);
-						if (!curLabel.equals(pom.getRunningLabel())) // compare with stored label as below
-						{
-							if (runPlayer != null) SoundPlayer.stopAudio(runPlayer);
-							if (pom.getRunningLabel().equals(pom.getWorkLabel()))
-							{
-								runPlayer = SoundPlayer.playAudio(info.getPomodoroWorkSound(), soundRunSec);
-							}
-							else if (pom.getRunningLabel().equals(pom.getBreakLabel()))
-							{
-								runPlayer = SoundPlayer.playAudio(info.getPomodoroBreakSound(), soundRunSec);
-							}
-							else if (pom.getRunningLabel().equals(pom.getRestLabel()))
-							{
-								runPlayer = SoundPlayer.playAudio(info.getPomodoroRestSound(), soundRunSec);
-							}
-						}
-						curLabel = pom.getRunningLabel();
+							gcal.setTime(startTime);
+							gcal.add(Calendar.SECOND, (int)uptimeNow.getSeconds());
+							date = gcal.getTime(); // this date is used by checkTimeAndRunAlarm(date) when actual date varies due to uptime selected.
+							checkUptimeAndRunHourSound(uptimeNow);
+							break;
+						case DISPLAY_MODE_POMODORO_TIMER:
+							// Below 2 line is under timeDisplayConfig(), but added here to avoid NullPointerException in case of race condition.
+							if (pom == null || !lastPomTask.equals(info.getPomodoroTask()) || !lastPomFormat.equals(info.getPomodoroFormat()))
+								pom  = new Pomodoro(info.getPomodoroTask());
+							time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(info.isPomodoroCountdown()), info.getPomodoroFormat(), pom.getRunningLabel(), info.isPomodoroLeadingLabel());
+							tLabel.setText(time);
+							checkPomodoroAndRunSound(pom);
+							break;
+						case DISPLAY_MODE_SELECTED_TIMEZONE:
+						case DISPLAY_MODE_CURRENT_TIMEZONE:
+						default:
+							setClockTime(date);
+							checkTimeAndRunHourSound(date);
+							break;
 					}
 					checkTimeAndRunAlarm(date);
 					Thread.sleep(1000L);
@@ -944,6 +924,66 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		public void terminate()
 		{
 			timerun = false;
+		}
+
+		private void setClockTime(Date date)
+		{
+			String[] clockTime;
+			time = sd.format(date);
+			if (info.isAnalogClock())
+			{
+				clk.setTimeZone(sd.getTimeZone());
+				clockTime = clk.format(date).split(":");
+				tLabel.setText("");
+				tLabel.setTime(clockTime[1], clockTime[2], clockTime[3], clockTime[4], clockTime[0]);
+			}
+			else
+				tLabel.setText(time);
+		}
+
+		private void checkUptimeAndRunHourSound(Duration uptimeNow) throws JavaLayerException, FileNotFoundException
+		{
+			int curMin = Math.toIntExact(uptimeNow.getSeconds() % 3600 / 60);
+			int curSec = Math.toIntExact(uptimeNow.getSeconds() % 3600 % 60);
+			if (curMin == 0 && curSec == 0)
+			{
+				if (runPlayer != null) SoundPlayer.stopAudio(runPlayer);
+				runPlayer = SoundPlayer.playAudio(info.getUptimeHourSound(), soundRunSec);
+			}
+		}
+
+		private void checkTimeAndRunHourSound(Date date) throws JavaLayerException, FileNotFoundException
+		{
+			gcal.setTime(date);
+			int curMin = gcal.get(Calendar.MINUTE);
+			int curSec = gcal.get(Calendar.SECOND);
+
+			if (curMin == 0 && curSec == 0)
+			{
+				if (runPlayer != null) SoundPlayer.stopAudio(runPlayer);
+				runPlayer = SoundPlayer.playAudio(info.getHourSound(), soundRunSec);
+			}
+		}
+
+		private void checkPomodoroAndRunSound(Pomodoro thisPomodoro) throws JavaLayerException, FileNotFoundException
+		{
+			if (!curLabel.equals(thisPomodoro.getRunningLabel())) // compare with stored label as below
+			{
+				if (runPlayer != null) SoundPlayer.stopAudio(runPlayer);
+				if (thisPomodoro.getRunningLabel().equals(thisPomodoro.getWorkLabel()))
+				{
+					runPlayer = SoundPlayer.playAudio(info.getPomodoroWorkSound(), soundRunSec);
+				}
+				else if (thisPomodoro.getRunningLabel().equals(thisPomodoro.getBreakLabel()))
+				{
+					runPlayer = SoundPlayer.playAudio(info.getPomodoroBreakSound(), soundRunSec);
+				}
+				else if (thisPomodoro.getRunningLabel().equals(thisPomodoro.getRestLabel()))
+				{
+					runPlayer = SoundPlayer.playAudio(info.getPomodoroRestSound(), soundRunSec);
+				}
+			}
+			curLabel = thisPomodoro.getRunningLabel();
 		}
 
 		private void checkTimeAndRunAlarm(Date current)
@@ -1084,32 +1124,25 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			int w  = (int)Math.round(rectw);
 			int h  = (int)Math.round(recth);
 			int cp = 0;
-			if (tmpArray.length() == (w*h))
+			boolean equalLength = tmpArray.length() == (w*h);
+			int loopH = equalLength ? y + h : h;
+			int loopW = equalLength ? x + w : w;
+			if (!equalLength) tmpArray = new AtomicIntegerArray(w*h);
+
+			for (int j = y; j < loopH; j++)
 			{
-				for (int j = y; j < (y + h); j++)
+				for (int i = x; i < loopW; i++)
 				{
-					for (int i = x; i < (x + w); i++)
-					{
-						int ov = tmpArray.get(cp);
-						int nv = img2compare.getRGB(i, j);
-						tmpArray.set(cp, nv);
-						if (ov != nv) compInt += 1;
-						cp += 1;
-					}
+					int ov = tmpArray.get(cp);
+					int nv = img2compare.getRGB(i, j);
+					tmpArray.set(cp, nv);
+					if (equalLength && ov != nv) compInt += 1;
+					cp += 1;
 				}
 			}
-			else
-			{
-				tmpArray = new AtomicIntegerArray(w*h);
-				for (int j = y; j < h; j++)
-					for (int i = x; i < w; i++)
-					{
-						int nv = img2compare.getRGB(i, j);
-						tmpArray.set(cp, nv);
-						cp += 1;
-					}
-				compInt = 1;  // 0=all matching, >0=mismatch;
-			}
+
+			if (!equalLength) compInt = 1; // 0=all matching, >0=mismatch;
+
 			return tmpArray;
 		}
 	}

@@ -5,11 +5,7 @@
    <object class="com.sounaks.desktime.InitInfo" id="InitInfo0">
     <void method="put">
      <string>ROUND_CORNERS</string>
-     <int>4</int>
-    </void>
-    <void method="put">
-     <string>OPACITY</string>
-     <float>0.5</float>
+     <int>1</int>
     </void>
     <void id="Boolean0" method="get">
      <string>SLOW_TRANS</string>
@@ -49,7 +45,7 @@
     </void>
     <void method="put">
      <string>TIMEZONE</string>
-     <string>Asia/Calcutta</string>
+     <string>CTT</string>
     </void>
     <void id="Boolean1" method="get">
      <string>ON_TOP</string>
@@ -70,6 +66,10 @@
      </object>
     </void>
     <void method="put">
+     <string>USING_IMAGE</string>
+     <object idref="Boolean0"/>
+    </void>
+    <void method="put">
      <string>FOREGROUND</string>
      <object class="java.awt.Color">
       <int>51</int>
@@ -84,24 +84,25 @@
       <string>x</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>592</int>
+       <int>581</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>117</int>
+       <int>90</int>
       </void>
      </void>
     </void>
     <void method="put">
-     <string>LINE_COLOR</string>
-     <object class="java.awt.Color">
+     <string>BORDER</string>
+     <object class="javax.swing.border.BevelBorder">
       <int>0</int>
-      <int>51</int>
-      <int>51</int>
-      <int>255</int>
+      <null/>
+      <null/>
+      <null/>
+      <null/>
      </object>
     </void>
     <void method="put">
