@@ -5,7 +5,7 @@
    <object class="com.sounaks.desktime.InitInfo" id="InitInfo0">
     <void method="put">
      <string>ROUND_CORNERS</string>
-     <int>1</int>
+     <int>4</int>
     </void>
     <void id="Boolean0" method="get">
      <string>SLOW_TRANS</string>
@@ -84,14 +84,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>581</int>
+       <int>523</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>90</int>
+       <int>88</int>
       </void>
      </void>
     </void>
