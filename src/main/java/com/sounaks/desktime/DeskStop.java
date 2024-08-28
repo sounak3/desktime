@@ -351,8 +351,6 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		setRoundedCorners(info.getRoundCorners());
 		updatePopupMenuIcons();
 		updateOpacitySlider(info.getOpacity(), info.isPixelAlphaSupported(), info.isForegroundTranslucent());
-		lastPomTask = info.getPomodoroTask();
-		lastPomFormat = info.getPomodoroFormat();
 		timeDisplayConfig();
 		validate();
 	}
@@ -382,34 +380,40 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		return fontSizes;
 	}
 
-	private void timeDisplayConfig()
+	private synchronized void timeDisplayConfig()
 	{
 		String dispString = info.getDisplayMethod();
-		if (dispString.equals(DISPLAY_MODE_SELECTED_TIMEZONE) || dispString.equals(DISPLAY_MODE_CURRENT_TIMEZONE))
-		{
-			sd   = new SimpleDateFormat(info.getZonedTimeFormat());
-			sd.setTimeZone(dispString.equals(DISPLAY_MODE_SELECTED_TIMEZONE) ? TimeZone.getTimeZone(info.getTimeZone()) : TimeZone.getDefault());
-			date = new Date();
-			time = sd.format(date);
-			resizeTimeLabel(time);
-			tLabel.setToolTipText(info.hasTooltip() ? tipCur.replace("Time of your location", info.getTimeZone()) : null);
-		}
-		else if (dispString.equals(DISPLAY_MODE_POMODORO_TIMER))
-		{
-			// Only create new pomodoro object if earlier was not present, else refer existing one.
-			tLabel.setClockMode(false);
-			if (pom == null || !lastPomTask.equals(info.getPomodoroTask()) || !lastPomFormat.equals(info.getPomodoroFormat()))
-				pom  = new Pomodoro(info.getPomodoroTask());
-			time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(info.isPomodoroCountdown()), info.getPomodoroFormat(), pom.getRunningLabel(), info.isPomodoroLeadingLabel());
-			resizePomodoroLabel();
-			tLabel.setToolTipText(info.hasTooltip() ? tipPom.replace("pomodoro task", info.getPomodoroTask()) : null);
-		}
-		else if (dispString.equals(DISPLAY_MODE_SYSTEM_UPTIME))
-		{
-			tLabel.setClockMode(false);
-			time = ExUtils.formatUptime(Duration.ofNanos(System.nanoTime()), info.getUpTimeFormat());
-			resizingMethod(time);
-			tLabel.setToolTipText(info.hasTooltip() ? tipUpt : null);
+		if (lastPomTask == null) lastPomTask = info.getPomodoroTask();
+		if (lastPomFormat == null) lastPomFormat = info.getPomodoroFormat();
+		switch (dispString) {
+			case DISPLAY_MODE_POMODORO_TIMER:
+				// Only create new pomodoro object if earlier was not present, else refer existing one.
+				tLabel.setClockMode(false);
+				if (pom == null || !lastPomTask.equals(info.getPomodoroTask()) || !lastPomFormat.equals(info.getPomodoroFormat())) {
+					pom  = new Pomodoro(info.getPomodoroTask());
+					// notify waiting clockThread that pom is created
+					notifyAll();
+				}
+				time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(info.isPomodoroCountdown()), info.getPomodoroFormat(), pom.getRunningLabel(), info.isPomodoroLeadingLabel());
+				resizePomodoroLabel();
+				tLabel.setToolTipText(info.hasTooltip() ? tipPom.replace("pomodoro task", info.getPomodoroTask()) : null);
+				break;
+			case DISPLAY_MODE_SYSTEM_UPTIME:
+				tLabel.setClockMode(false);
+				time = ExUtils.formatUptime(Duration.ofNanos(System.nanoTime()), info.getUpTimeFormat());
+				resizingMethod(time);
+				tLabel.setToolTipText(info.hasTooltip() ? tipUpt : null);
+				break;
+			case DISPLAY_MODE_SELECTED_TIMEZONE:
+			case DISPLAY_MODE_CURRENT_TIMEZONE:
+			default:
+				sd   = new SimpleDateFormat(info.getZonedTimeFormat());
+				sd.setTimeZone(dispString.equals(DISPLAY_MODE_SELECTED_TIMEZONE) ? TimeZone.getTimeZone(info.getTimeZone()) : TimeZone.getDefault());
+				date = new Date();
+				time = sd.format(date);
+				resizeTimeLabel(time);
+				tLabel.setToolTipText(info.hasTooltip() ? tipCur.replace("Time of your location", info.getTimeZone()) : null);
+				break;
 		}
 	}
 
@@ -890,9 +894,11 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 							checkUptimeAndRunHourSound(uptimeNow);
 							break;
 						case DISPLAY_MODE_POMODORO_TIMER:
-							// Below 2 line is under timeDisplayConfig(), but added here to avoid NullPointerException in case of race condition.
-							if (pom == null || !lastPomTask.equals(info.getPomodoroTask()) || !lastPomFormat.equals(info.getPomodoroFormat()))
-								pom  = new Pomodoro(info.getPomodoroTask());
+							synchronized(pom) {
+								while (pom == null) {
+									wait(); // wait for first time pom to be created in timeDisplayConfig
+								}
+							}
 							time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(info.isPomodoroCountdown()), info.getPomodoroFormat(), pom.getRunningLabel(), info.isPomodoroLeadingLabel());
 							tLabel.setText(time);
 							checkPomodoroAndRunSound(pom);
