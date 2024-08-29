@@ -9,7 +9,7 @@
     </void>
     <void method="put">
      <string>DISPLAY_METHOD</string>
-     <string>POMODORO</string>
+     <string>GMTTZ</string>
     </void>
     <void id="Integer0" method="get">
      <string>ROUND_CORNERS</string>
