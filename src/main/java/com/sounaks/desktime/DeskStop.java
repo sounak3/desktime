@@ -358,11 +358,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	{
 		miMovable.setIcon(info.isFixed() ? clearPng : checkPng);
 		ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
-		if (info.getDisplayMethod().endsWith("TZ"))
-		{
-			miDigTime.setIcon(!info.isAnalogClock() ? checkPng : clearPng);
-			miAnaTime.setIcon(info.isAnalogClock() ? checkPng : clearPng);
-		}
+		miDigTime.setIcon(info.getDisplayMethod().endsWith("TZ") && !info.isAnalogClock() ? checkPng : clearPng);
+		miAnaTime.setIcon(info.getDisplayMethod().endsWith("TZ") && info.isAnalogClock() ? checkPng : clearPng);
 		miUptime.setIcon(info.getDisplayMethod().equals(DISPLAY_MODE_SYSTEM_UPTIME) ? checkPng : clearPng);
 		miPomo.setIcon(info.getDisplayMethod().equals(DISPLAY_MODE_POMODORO_TIMER) ? checkPng : clearPng);
 		mAllOpacity.setIcon(info.isForegroundTranslucent() ? checkPng : clearPng);

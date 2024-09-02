@@ -3,6 +3,10 @@
  <object class="java.util.ArrayList">
   <void method="add">
    <object class="com.sounaks.desktime.InitInfo" id="InitInfo0">
+    <void method="put">
+     <string>ROUND_CORNERS</string>
+     <int>4</int>
+    </void>
     <void id="Boolean0" method="get">
      <string>SLOW_TRANS</string>
     </void>
@@ -17,6 +21,10 @@
     <void method="put">
      <string>ANALOG_CLOCK_OPTS</string>
      <int>2000</int>
+    </void>
+    <void method="put">
+     <string>DISPLAY_METHOD</string>
+     <string>UPTIME</string>
     </void>
     <void method="put">
      <string>BACKGROUND</string>
@@ -36,7 +44,7 @@
      <string>Asia/Calcutta</string>
     </void>
     <void id="Integer0" method="get">
-     <string>ROUND_CORNERS</string>
+     <string>PANEL_ID</string>
     </void>
     <void method="put">
      <string>FONT</string>
@@ -65,16 +73,26 @@
       <string>x</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>137</int>
+       <int>738</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>150</int>
+       <int>88</int>
       </void>
      </void>
+    </void>
+    <void method="put">
+     <string>BORDER</string>
+     <object class="javax.swing.border.BevelBorder">
+      <int>0</int>
+      <null/>
+      <null/>
+      <null/>
+      <null/>
+     </object>
     </void>
     <void method="put">
      <string>IMAGE_STYLE</string>
