@@ -35,6 +35,7 @@ public class TLabel extends JLabel
 	public static final int MINUTE_TICK   = 800;
 
 	public static final int GAP           = 5;
+	public static final Color SHADOW      = new Color(Color.DARK_GRAY.getRed(), Color.DARK_GRAY.getGreen(), Color.DARK_GRAY.getBlue(), 128);
 	private static final String WRONG_ARGUMENT_ERR = "Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH";
 	private int labelWidth, labelHeight;
 	private int timeHrs, timeMin, timeSec;
@@ -159,6 +160,18 @@ public class TLabel extends JLabel
 		int yr2 = (int)(radius * yr * r2) + GAP;
 		if (xCenter > yCenter) g2.drawLine(radius + xr1 + diff, radius + yr1, radius + xr2 + diff, radius + yr2);
 		else g2.drawLine(radius + xr1, radius + yr1 + diff, radius + xr2, radius + yr2 + diff);
+	}
+
+	private void drawBevelRadius(double r1, double r2, int degrees)
+	{
+		Color oldColor = g2.getColor();
+        g2.setColor( getForeground().brighter() );
+		drawRadius(r1, r2, degrees - 1);
+        g2.setColor( getForeground().darker() );
+		drawRadius(r1, r2, degrees + 1);
+		g2.setColor( getForeground() );
+		drawRadius(r1, r2 + 0.01, degrees);
+		g2.setColor(oldColor);
 	}
 
 	public boolean containsImage()
@@ -370,6 +383,7 @@ public class TLabel extends JLabel
 			boolean majHrTick = false;
 			boolean hrTick    = false;
 			boolean minTick   = false;
+			double  shdOffset = stroke * 2.0f;
 			
 			g2.setFont(anaClkFnt);
 			switch (analogClockOptions) {
@@ -467,15 +481,25 @@ public class TLabel extends JLabel
 			g2.setStroke(new BasicStroke(stroke * 1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			if (clkBdr) g2.drawOval(xCenter - radius + GAP, yCenter - radius + GAP, 2 * radius, 2 * radius);
 			
-			// Draw hour, minute and second hands
-			g2.setStroke(new BasicStroke(stroke * 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			drawRadius(-0.1, 0.8, timeMin * 6 + timeSec / 10);  // Minutes
-			g2.setStroke(new BasicStroke(stroke * 3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			// Draw hour, minute and second hands shadow
+			g2.setColor(SHADOW);
+			g2.setStroke(new ShadowStroke(stroke * 2.0f, shdOffset));
+			drawRadius(-0.1, 0.7, timeMin * 6 + timeSec / 10);  // Minutes
+			g2.setStroke(new ShadowStroke(stroke * 3.0f, shdOffset));
 			drawRadius(-0.1, 0.5, timeHrs * 30 + timeMin / 2);  // Hours
+			g2.setStroke(new ShadowStroke(stroke * 1.0f, shdOffset));
+			drawRadius(0, 0.6, timeSec * 6);  // Seconds
+
+			// Draw hour, minute and second hands
+			g2.setColor(TLabel.darker(getForeground(), 0.50));
+			g2.setStroke(new BasicStroke(stroke * 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			drawBevelRadius(-0.1, 0.7, timeMin * 6 + timeSec / 10);  // Minutes
+			g2.setStroke(new BasicStroke(stroke * 3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			drawBevelRadius(-0.1, 0.5, timeHrs * 30 + timeMin / 2);  // Hours
 			g2.setColor(TLabel.getInvertedColor(getForeground()));
 			g2.setStroke(new BasicStroke(stroke * 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			drawRadius(0, 0.7, timeSec * 6);  // Seconds
-			
+			drawRadius(0, 0.6, timeSec * 6);  // Seconds
+
 			// Draw center circle
 			int doubleStroke = Math.round(3 * stroke);
 			g2.fillOval(GAP + xCenter - doubleStroke, GAP + yCenter - doubleStroke , 2 * doubleStroke, 2 * doubleStroke);
