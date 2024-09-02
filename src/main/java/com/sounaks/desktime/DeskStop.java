@@ -60,7 +60,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		"India Standard Time (IST)",
 		"Japan Standard Time (JST)",
 		"Coordinated Universal Time (UTC)"};
-	private static final int[] fontSizes                       = {6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 64, 72, 80};
+	private static final int[] fontSizes                       = {6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 64, 72, 80, 96, 112, 128, 144, 160, 192, 224, 256, 288, 320};
 	private static final GraphicsDevice gd                     = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 	public  static final String DISPLAY_MODE_CURRENT_TIMEZONE  = "CURTZ";
 	public  static final String DISPLAY_MODE_SELECTED_TIMEZONE = "GMTTZ";
@@ -222,14 +222,13 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			ht.put(i, new JLabel(String.valueOf(fontSizes[i])));
 		sizer = new JSlider(SwingConstants.VERTICAL, 0, fontSizes.length - 1, 5);
 		sizer.setLabelTable(ht);
-		sizer.setMajorTickSpacing(4);
 		sizer.setMinorTickSpacing(1);
 		sizer.setPaintLabels(true);
 		sizer.setPaintTicks(true);
 		sizer.setSnapToTicks(true);
 		sizer.addChangeListener(this);
 		mSize = new JMenu("Resize");
-		sizer.setPreferredSize(new Dimension(sizer.getPreferredSize().width + 20, sizer.getPreferredSize().height + 40));
+		sizer.setPreferredSize(new Dimension(sizer.getPreferredSize().width + 20, sizer.getPreferredSize().height + 2 * fontSizes.length));
 		mSize.add(sizer);
 		miMovable  = new JMenuItem("Movable");
 		miMovable.setIcon(info.isFixed() ? clearPng : checkPng);

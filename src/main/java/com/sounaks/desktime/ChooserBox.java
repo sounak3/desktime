@@ -128,6 +128,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		fontPreview.setBackground(Color.white);
 		JScrollPane jscrollpane = new JScrollPane();
 		jscrollpane.getViewport().setView(fontPreview);
+		jscrollpane.getViewport().setPreferredSize(new Dimension(200, 100));
 		jscrollpane.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 		jpanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Font Preferences"));
 		//All configurations for Border Panel as follows:
