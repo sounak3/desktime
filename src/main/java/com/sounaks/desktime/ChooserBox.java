@@ -74,6 +74,13 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private static final String CMD_FINISH_EDIT    = "FinishEdit";
 	private static final String IN_JOINER          = " in \"";
 
+	private static final String BEVELED_RAISED_BORDER  = "Beveled Raised Border";
+	private static final String BEVELED_LOWERED_BORDER = "Beveled Lowered Border";
+	private static final String ETCHED_RAISED_BORDER   = "Etched Raised Border";
+	private static final String ETCHED_LOWERED_BORDER  = "Etched Lowered Border";
+	private static final String LINE_BORDER            = "Line Border";
+	private static final String NO_BORDER              = "Don't Use Any Border";
+
 	final String[] digiFormats = {
 		"yyyy.MM.dd G 'at' HH:mm:ss z",
 		"zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy",
@@ -121,6 +128,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		fontPreview.setBackground(Color.white);
 		JScrollPane jscrollpane = new JScrollPane();
 		jscrollpane.getViewport().setView(fontPreview);
+		jscrollpane.getViewport().setPreferredSize(new Dimension(200, 100));
 		jscrollpane.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 		jpanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Font Preferences"));
 		//All configurations for Border Panel as follows:
@@ -137,12 +145,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		applyLayout.putConstraint(SpringLayout.VERTICAL_CENTER, bdrPreview, 0, SpringLayout.VERTICAL_CENTER, borderPanel);
 		borderPanel.setBorder(BorderFactory.createLoweredBevelBorder());
 		ButtonGroup buttongroup = new ButtonGroup();
-		bRaised  = new JRadioButton("Beveled Raised Border");
-		bLowered = new JRadioButton("Beveled Lowered Border");
-		eRaised  = new JRadioButton("Etched Raised Border");
-		eLowered = new JRadioButton("Etched Lowered Border");
-		lBorder  = new JRadioButton("Line Border");
-		nBorder  = new JCheckBox("Don't Use Any Border");
+		bRaised  = new JRadioButton(BEVELED_RAISED_BORDER);
+		bLowered = new JRadioButton(BEVELED_LOWERED_BORDER);
+		eRaised  = new JRadioButton(ETCHED_RAISED_BORDER);
+		eLowered = new JRadioButton(ETCHED_LOWERED_BORDER);
+		lBorder  = new JRadioButton(LINE_BORDER);
+		nBorder  = new JCheckBox(NO_BORDER);
 		buttongroup.add(bRaised);
 		buttongroup.add(bLowered);
 		buttongroup.add(eRaised);
@@ -469,119 +477,119 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		cancel.setActionCommand("CANCEL");
 		try
 		{
-			ExUtils.addComponent(jpanel,  cFontList, 		0, 0, 1, 2, 0.33D, 0.4D, this);
-			ExUtils.addComponent(jpanel,  cFontStyleList, 	1, 0, 1, 2, 0.33D, 0.4D, this);
-			ExUtils.addComponent(jpanel,  cFontSizeList, 	2, 0, 1, 2, 0.33D, 0.4D, this);
-			ExUtils.addComponent(jpanel,  selFontCol, 		0, 2, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel,  resFontCol, 		1, 2, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel,  resetFont, 		2, 2, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel,  jscrollpane, 		0, 3, 3, 1, 1.0D, 0.6D, this);
-			ExUtils.addComponent(jpanel1, nBorder, 			0, 0, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, analogCb1,		2, 0, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, comboDialBdr,		3, 0, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, bRaised, 			0, 2, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, borderPanel, 		2, 2, 4, 4, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, bLowered, 		0, 3, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, eRaised, 			0, 4, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, eLowered, 		0, 5, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, jseparator1, 		0, 6, 5, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, lBorder, 			0, 7, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, component, 		0, 8, 1, 1, 0.25D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, selLineCol, 		1, 8, 1, 1, 0.25D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, resLineCol, 		2, 8, 1, 1, 0.25D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, thickPanel, 		3, 8, 1, 1, 0.25D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, jseparator2, 		0, 9, 5, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, enTooltip, 		0, 10, 2, 1, 0.33D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, cbMovable, 		2, 10, 1, 1, 0.33D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, roundBdrPane, 	3, 10, 2, 1, 0.33D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, nativeLook, 		0, 11, 5, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, topPanePr,	 	0, 2, 4, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, analogPanel,		4, 2, 1, 3, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, selTimeZone, 		0, 3, 2, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, analogCb2,		2, 3, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jLDateFormat, 	1, 4, 1, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, cardComboPanel, 	2, 4, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, timePaneRadSpace, 0, 5, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, tzLabel, 			1, 5, 1, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, comboTz, 			2, 5, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, tzCb,		 		4, 5, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jseparator3, 		1, 6, 4, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, sysUpTime, 		0, 7, 2, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, cbShowDays, 		2, 7, 1, 1, 0.5D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jLDayTxt, 		3, 7, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, dSymbol,	 		4, 7, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jLUptimeTxt, 		1, 8, 1, 1, 0.33D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, uSymbol, 			2, 8, 1, 1, 0.33D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jLHourTxt, 		3, 8, 1, 1, 0.01D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, hSymbol, 			4, 8, 1, 1, 0.33D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jLMinTxt, 		1, 9, 1, 1, 0.33D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, mSymbol, 			2, 9, 1, 1, 0.33D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jLSecTxt, 		3, 9, 1, 1, 0.01D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, sSymbol, 			4, 9, 1, 1, 0.33D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jseparator4, 		1, 10, 4, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, pomodoroTime, 	0, 11, 2, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, comboPomodoro, 	2, 11, 3, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, jLPomFormat, 		1, 12, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, comboPomFmt,		2, 12, 1, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, cbPomCountdown,	3, 12, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel2, cbPomLabel,		4, 12, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, useImg, 			0, 0, 4, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, component2, 		0, 1, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, jscrollpane1, 	1, 1, 1, 3, 0.0D, 0.8D, this);
-			ExUtils.addComponent(jpanel3, toolPane2, 		2, 1, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, component3,		0, 2, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, component4,		1, 2, 1, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, picPanel, 		2, 2, 2, 2, 0.0D, 0.8D, this);
-			ExUtils.addComponent(jpanel3, useCol, 			0, 5, 4, 1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, selBackCol, 		1, 6, 2, 1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel3, colMidPanel, 		3, 6, 1, 1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel,  cFontList, 		new int[]{0, 0, 1, 2}, 0.33D, 0.4D, this);
+			ExUtils.addComponent(jpanel,  cFontStyleList, 	new int[]{1, 0, 1, 2}, 0.33D, 0.4D, this);
+			ExUtils.addComponent(jpanel,  cFontSizeList, 	new int[]{2, 0, 1, 2}, 0.33D, 0.4D, this);
+			ExUtils.addComponent(jpanel,  selFontCol, 		new int[]{0, 2, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel,  resFontCol, 		new int[]{1, 2, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel,  resetFont, 		new int[]{2, 2, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel,  jscrollpane, 		new int[]{0, 3, 3, 1}, 1.0D, 0.6D, this);
+			ExUtils.addComponent(jpanel1, nBorder, 			new int[]{0, 0, 2, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, analogCb1,		new int[]{2, 0, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, comboDialBdr,		new int[]{3, 0, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, bRaised, 			new int[]{0, 2, 2, 1}, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, borderPanel, 		new int[]{2, 2, 4, 4}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, bLowered, 		new int[]{0, 3, 2, 1}, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, eRaised, 			new int[]{0, 4, 2, 1}, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, eLowered, 		new int[]{0, 5, 2, 1}, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, jseparator1, 		new int[]{0, 6, 5, 1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, lBorder, 			new int[]{0, 7, 2, 1}, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, component, 		new int[]{0, 8, 1, 1}, 0.25D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, selLineCol, 		new int[]{1, 8, 1, 1}, 0.25D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, resLineCol, 		new int[]{2, 8, 1, 1}, 0.25D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, thickPanel, 		new int[]{3, 8, 1, 1}, 0.25D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, jseparator2, 		new int[]{0, 9, 5, 1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, enTooltip, 		new int[]{0, 10, 2, 1}, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, cbMovable, 		new int[]{2, 10, 1, 1}, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, roundBdrPane, 	new int[]{3, 10, 2, 1}, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, nativeLook, 		new int[]{0, 11, 5, 1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, topPanePr,	 	new int[]{0, 2, 4, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, analogPanel,		new int[]{4, 2, 1, 3}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, selTimeZone, 		new int[]{0, 3, 2, 1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, analogCb2,		new int[]{2, 3, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLDateFormat, 	new int[]{1, 4, 1, 1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, cardComboPanel, 	new int[]{2, 4, 2, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, timePaneRadSpace, new int[]{0, 5, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, tzLabel, 			new int[]{1, 5, 1, 1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, comboTz, 			new int[]{2, 5, 2, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, tzCb,		 		new int[]{4, 5, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jseparator3, 		new int[]{1, 6, 4, 1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, sysUpTime, 		new int[]{0, 7, 2, 1}, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, cbShowDays, 		new int[]{2, 7, 1, 1}, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLDayTxt, 		new int[]{3, 7, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, dSymbol,	 		new int[]{4, 7, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLUptimeTxt, 		new int[]{1, 8, 1, 1}, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, uSymbol, 			new int[]{2, 8, 1, 1}, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLHourTxt, 		new int[]{3, 8, 1, 1}, 0.01D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, hSymbol, 			new int[]{4, 8, 1, 1}, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLMinTxt, 		new int[]{1, 9, 1, 1}, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, mSymbol, 			new int[]{2, 9, 1, 1}, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLSecTxt, 		new int[]{3, 9, 1, 1}, 0.01D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, sSymbol, 			new int[]{4, 9, 1, 1}, 0.33D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jseparator4, 		new int[]{1, 10, 4, 1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, pomodoroTime, 	new int[]{0, 11, 2, 1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, comboPomodoro, 	new int[]{2, 11, 3, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, jLPomFormat, 		new int[]{1, 12, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, comboPomFmt,		new int[]{2, 12, 1, 1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, cbPomCountdown,	new int[]{3, 12, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, cbPomLabel,		new int[]{4, 12, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, useImg, 			new int[]{0, 0, 4, 1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, component2, 		new int[]{0, 1, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, jscrollpane1, 	new int[]{1, 1, 1, 3}, 0.0D, 0.8D, this);
+			ExUtils.addComponent(jpanel3, toolPane2, 		new int[]{2, 1, 2, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, component3,		new int[]{0, 2, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, component4,		new int[]{1, 2, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, picPanel, 		new int[]{2, 2, 2, 2}, 0.0D, 0.8D, this);
+			ExUtils.addComponent(jpanel3, useCol, 			new int[]{0, 5, 4, 1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, selBackCol, 		new int[]{1, 6, 2, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel3, colMidPanel, 		new int[]{3, 6, 1, 1}, 0.0D, 0.0D, this);
 			if (!initinfo.isPixelAlphaSupported() && initinfo.isScreenshotSupported())
 			{
-				ExUtils.addComponent(jpanel3, sliderPanel, 		4, 0, 1, 10, 0.0D, 0.0D, this);
-				ExUtils.addComponent(jpanel3, useTrans, 		0, 8, 4, 1, 1.0D, 0.0D, this);
-				ExUtils.addComponent(jpanel3, slowUpd,			1, 9, 7, 1, 1.0D, 0.0D, this);
+				ExUtils.addComponent(jpanel3, sliderPanel, 		new int[]{4, 0, 1, 10}, 0.0D, 0.0D, this);
+				ExUtils.addComponent(jpanel3, useTrans, 		new int[]{0, 8, 4, 1}, 1.0D, 0.0D, this);
+				ExUtils.addComponent(jpanel3, slowUpd,			new int[]{1, 9, 7, 1}, 1.0D, 0.0D, this);
 			}
 			else
 			{
-				ExUtils.addComponent(jpanel3, sliderPanel, 		4, 0, 1, 8, 0.0D, 0.0D, this);
-				ExUtils.addComponent(jpanel3, jSeparator5, 		0, 4, 4, 1, 1.0D, 0.0D, this);
+				ExUtils.addComponent(jpanel3, sliderPanel, 		new int[]{4, 0, 1, 8}, 0.0D, 0.0D, this);
+				ExUtils.addComponent(jpanel3, jSeparator5, 		new int[]{0, 4, 4, 1}, 1.0D, 0.0D, this);
 			}
-			ExUtils.addComponent(topList, jsp,				0, 0, 1,	5, 1.0D, 1.0D, this);
-			ExUtils.addComponent(topList, add,				1, 0, 1,	1, 0.0D, 0.25D, this);
-			ExUtils.addComponent(topList, edit,				1, 1, 1,	1, 0.0D, 0.25D, this);
-			ExUtils.addComponent(topList, remove,			1, 2, 1,	1, 0.0D, 0.25D, this);
-			ExUtils.addComponent(topList, test,				1, 3, 1,	1, 0.0D, 0.25D, this);
-			ExUtils.addComponent(almSet,  nameLabel,		0, 0, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  alarmName,		1, 0, 6,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  optStartOn,		0, 1, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  chooseDate,		1, 1, 5,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  timeSpinner1,		6, 1, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  optStartAfter,	0, 2, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  countSpinner2,	1, 2, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  jLAlmDays,		2, 2, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  timeSpinner2,		3, 2, 2,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  jLAlmHrs,			5, 2, 2,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  rept,				0, 3, 2,	1, 0.4D, 0.0D, this);
-			ExUtils.addComponent(almSet,  countSpinner1,	2, 3, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  period,			3, 3, 2,	1, 0.2D, 0.0D, this);
-			ExUtils.addComponent(almSet,  jLAlmSame,		5, 3, 1,	1, 0.2D, 0.0D, this);
-			ExUtils.addComponent(almSet,  dateOrWeek,		6, 3, 1,	1, 0.2D, 0.0D, this);
-			ExUtils.addComponent(almSet,  jLAlmAct,			0, 4, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  runSnd,			1, 4, 4,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  runMsg,			5, 4, 2,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(almSet,  sndToRun,			1, 5, 6,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(sndSet,  jlHour,			0, 0, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(sndSet,  sndHour,			1, 0, 1,	1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(sndSet,  jlUpt,			0, 1, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(sndSet,  sndUptime,		1, 1, 1,	1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(sndSet,  jlPomWork,		0, 2, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(sndSet,  sndWork,			1, 2, 1,	1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(sndSet,  jlPomBrk,			0, 3, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(sndSet,  sndBrk,			1, 3, 1,	1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(sndSet,  jlPomRest,		0, 4, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(sndSet,  sndRest,			1, 4, 1,	1, 1.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel5, topList,			0, 0, 1,	1, 0.0D, 0.0D, this);
-			ExUtils.addComponent(jpanel5, bottomCards,		0, 1, 1,	1, 0.0D, 0.0D, this);
+			ExUtils.addComponent(topList, jsp,				new int[]{0, 0, 1,	5}, 1.0D, 1.0D, this);
+			ExUtils.addComponent(topList, add,				new int[]{1, 0, 1,	1}, 0.0D, 0.25D, this);
+			ExUtils.addComponent(topList, edit,				new int[]{1, 1, 1,	1}, 0.0D, 0.25D, this);
+			ExUtils.addComponent(topList, remove,			new int[]{1, 2, 1,	1}, 0.0D, 0.25D, this);
+			ExUtils.addComponent(topList, test,				new int[]{1, 3, 1,	1}, 0.0D, 0.25D, this);
+			ExUtils.addComponent(almSet,  nameLabel,		new int[]{0, 0, 1,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  alarmName,		new int[]{1, 0, 6,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  optStartOn,		new int[]{0, 1, 1,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  chooseDate,		new int[]{1, 1, 5,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  timeSpinner1,		new int[]{6, 1, 1,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  optStartAfter,	new int[]{0, 2, 1,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  countSpinner2,	new int[]{1, 2, 1,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  jLAlmDays,		new int[]{2, 2, 1,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  timeSpinner2,		new int[]{3, 2, 2,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  jLAlmHrs,			new int[]{5, 2, 2,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  rept,				new int[]{0, 3, 2,	1}, 0.4D, 0.0D, this);
+			ExUtils.addComponent(almSet,  countSpinner1,	new int[]{2, 3, 1,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  period,			new int[]{3, 3, 2,	1}, 0.2D, 0.0D, this);
+			ExUtils.addComponent(almSet,  jLAlmSame,		new int[]{5, 3, 1,	1}, 0.2D, 0.0D, this);
+			ExUtils.addComponent(almSet,  dateOrWeek,		new int[]{6, 3, 1,	1}, 0.2D, 0.0D, this);
+			ExUtils.addComponent(almSet,  jLAlmAct,			new int[]{0, 4, 1,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  runSnd,			new int[]{1, 4, 4,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  runMsg,			new int[]{5, 4, 2,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(almSet,  sndToRun,			new int[]{1, 5, 6,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  jlHour,			new int[]{0, 0, 1,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  sndHour,			new int[]{1, 0, 1,	1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  jlUpt,			new int[]{0, 1, 1,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  sndUptime,		new int[]{1, 1, 1,	1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  jlPomWork,		new int[]{0, 2, 1,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  sndWork,			new int[]{1, 2, 1,	1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  jlPomBrk,			new int[]{0, 3, 1,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  sndBrk,			new int[]{1, 3, 1,	1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  jlPomRest,		new int[]{0, 4, 1,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(sndSet,  sndRest,			new int[]{1, 4, 1,	1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel5, topList,			new int[]{0, 0, 1,	1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel5, bottomCards,		new int[]{0, 1, 1,	1}, 0.0D, 0.0D, this);
 		}
 		catch (AWTException awtexception)
 		{
@@ -666,37 +674,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		color = initinfo.getBackground();
 		((ButtonIcon)selBackCol.getIcon()).setEnabledColor(color);
 		foregroundTrans.setSelected(initinfo.isForegroundTranslucent());
-		transLevel.setMinimum(initinfo.isPixelAlphaSupported() && !foregroundTrans.isSelected() ? 0 : 4);
-		transLevel.setValue(Math.round(initinfo.getOpacity() * 20));
+		updateOpacitySlider(initinfo.getOpacity(), initinfo.isPixelAlphaSupported(), foregroundTrans.isSelected());
 		jlTransSlide.setText("Opacity [ " + Math.round(initinfo.getOpacity() * 100) + " % ]");
-		Border border = initinfo.getBorder();
-		bdrPreview.setBorder(border);
-		if (border instanceof BevelBorder)
-		{
-			if (((BevelBorder)border).getBevelType() == 0)
-				bRaised.setSelected(true);
-			else
-				bLowered.setSelected(true);
-		}
-		else if (border instanceof EtchedBorder)
-		{
-			if (((EtchedBorder)border).getEtchType() == 0)
-				eRaised.setSelected(true);
-			else
-				eLowered.setSelected(true);
-		}
-		else if (border instanceof LineBorder)
-		{
-			lBorder.setSelected(true);
-			Color color1 = ((LineBorder)border).getLineColor();
-			((ButtonIcon)selLineCol.getIcon()).setEnabledColor(color1);
-			intThick = ((LineBorder)border).getThickness();
-			thickSpinner.setValue(intThick);
-		}
-		else
-		{
-			nBorder.setSelected(true);
-		}
+		bdrPreview.setBorder(initinfo.getBorder());
+		initFrameBorderValues(initinfo.getBorder());
 		cbMovable.setSelected(!initinfo.isFixed());
 		enTooltip.setSelected(initinfo.hasTooltip());
 		nativeLook.setSelected(initinfo.hasNativeLook());
@@ -724,16 +705,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		String dispM = initinfo.getDisplayMethod();
 		String privT = "";
 		pom          = new Pomodoro(initinfo.getPomodoroTask());
-		if (dispM.equals(DeskStop.DISPLAY_MODE_CURRENT_TIMEZONE))
-		{
-			tzCb.setSelected(true);
-			comboTz.setSelectedItem(TimeZone.getDefault().getID());
-		}
-		else
-		{
-			tzCb.setSelected(false);
-			comboTz.setSelectedItem(TimeZone.getTimeZone(initinfo.getTimeZone()).getID());
-		}
+		comboTz.setSelectedItem(dispM.equals(DeskStop.DISPLAY_MODE_CURRENT_TIMEZONE) ? TimeZone.getDefault().getID() : TimeZone.getTimeZone(initinfo.getTimeZone()).getID());
+		tzCb.setSelected(dispM.equals(DeskStop.DISPLAY_MODE_CURRENT_TIMEZONE));
 		comboDateFmt.setSelectedItem(initinfo.getZonedTimeFormat());
 		if (dispM.equals(DeskStop.DISPLAY_MODE_SELECTED_TIMEZONE) || dispM.equals(DeskStop.DISPLAY_MODE_CURRENT_TIMEZONE)) {
 			selTimeZone.setSelected(true);
@@ -743,8 +716,6 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			Calendar toUpdate = Calendar.getInstance(tempTz);
 			privT = sd.format(toUpdate.getTime());
 			updateAnalogClockTimezone(tempTz);
-			jLAnaPreview.setAnalogClockOptions(Math.floorDiv(initinfo.getAnalogClockOption(), 1000) * 1000);
-			bdrPreview.setAnalogClockOptions(initinfo.getAnalogClockOption() % 1000);
 		}
 		else if (dispM.equals(DeskStop.DISPLAY_MODE_SYSTEM_UPTIME)) {
 			sysUpTime.setSelected(true);
@@ -755,10 +726,29 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			pomodoroTime.setSelected(true);
 			privT = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(initinfo.isPomodoroCountdown()), initinfo.getPomodoroFormat(), pom.getRunningLabel(), initinfo.isPomodoroLeadingLabel());
 		}
+		jLAnaPreview.setAnalogClockOptions(Math.floorDiv(initinfo.getAnalogClockOption(), 1000) * 1000);
+		bdrPreview.setAnalogClockOptions(initinfo.getAnalogClockOption() % 1000);
 		jLDigiPreview.setText(privT);
-		String s1    = initinfo.getUpTimeFormat();
-		String[] arr = s1.split("\'");
-		if (initinfo.isDayShowing())
+		initUptimeFormatValues(initinfo.getUpTimeFormat(), initinfo.isDayShowing());
+		comboPomodoro.setSelectedItem(initinfo.getPomodoroTask());
+		cbPomLabel.setSelected(initinfo.isPomodoroLeadingLabel());
+		cbPomCountdown.setSelected(initinfo.isPomodoroCountdown());
+		comboPomFmt.setSelectedItem(initinfo.getPomodoroFormat());
+		alarmsData = alarmInit;
+		alarmList.setListData(alarmsData);
+		sndHour.setAudioFileName(initinfo.getHourSound());
+		sndUptime.setAudioFileName(initinfo.getUptimeHourSound());
+		sndWork.setAudioFileName(initinfo.getPomodoroWorkSound());
+		sndBrk.setAudioFileName(initinfo.getPomodoroBreakSound());
+		sndRest.setAudioFileName(initinfo.getPomodoroRestSound());
+		sndToRun.setDefaultSoundsDir(initinfo.getDefaultsDir() + "/sounds");
+		setOneEnabled();
+	}
+
+	private void initUptimeFormatValues(String formatValues, boolean containsDaysFormat)
+	{
+		String[] arr = formatValues.split("\'");
+		if (containsDaysFormat)
 		{
 			uSymbol.setSelectedItem(arr[1]);
 			dSymbol.setSelectedItem(arr[3]);
@@ -773,19 +763,36 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			mSymbol.setSelectedItem(arr[5]);
 			sSymbol.setSelectedItem(arr.length == 8 ? arr[7] : " ");
 		}
-		comboPomodoro.setSelectedItem(initinfo.getPomodoroTask());
-		cbPomLabel.setSelected(initinfo.isPomodoroLeadingLabel());
-		cbPomCountdown.setSelected(initinfo.isPomodoroCountdown());
-		comboPomFmt.setSelectedItem(initinfo.getPomodoroFormat());
-		alarmsData = alarmInit;
-		alarmList.setListData(alarmsData);
-		sndHour.setAudioFileName(initinfo.getHourSound());
-		sndUptime.setAudioFileName(initinfo.getUptimeHourSound());
-		sndWork.setAudioFileName(initinfo.getPomodoroWorkSound());
-		sndBrk.setAudioFileName(initinfo.getPomodoroBreakSound());
-		sndRest.setAudioFileName(initinfo.getPomodoroRestSound());
-		sndToRun.setDefaultSoundsDir(initinfo.getDefaultsDir() + "/sounds");
-		setOneEnabled();
+	}
+
+	private void initFrameBorderValues(Border border)
+	{
+		if (border instanceof BevelBorder)
+		{
+			if (((BevelBorder)border).getBevelType() == 0)
+				bRaised.setSelected(true);
+			else
+				bLowered.setSelected(true);
+		}
+		else if (border instanceof EtchedBorder)
+		{
+			if (((EtchedBorder)border).getEtchType() == 0)
+				eRaised.setSelected(true);
+			else
+				eLowered.setSelected(true);
+		}
+		else if (border instanceof LineBorder)
+		{
+			lBorder.setSelected(true);
+			Color color1 = ((LineBorder)border).getLineColor();
+			((ButtonIcon)selLineCol.getIcon()).setEnabledColor(color1);
+			intThick = ((LineBorder)border).getThickness();
+			thickSpinner.setValue(intThick);
+		}
+		else
+		{
+			nBorder.setSelected(true);
+		}
 	}
 
 	private void updateAnalogClockTimezone(TimeZone updZone)
@@ -837,7 +844,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		resBackCol.setEnabled(useCol.isSelected());
 		if (useImg.isSelected())
 		{
-			if (information.getImageFile().isFile())
+			if (information.getImageFile().isFile() && imgFileList.getSelectedValue() != null)
 			{
 				picLabel.setBackImage((new ImageIcon(imgFileList.getSelectedValue().toString())).getImage());
 				picLabel.setText(PREVIEW);
@@ -1150,8 +1157,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		information.setForegroundTranslucent(foregroundTrans.isSelected());
 		information.setOpacity((float)transLevel.getValue() / 20);
 		information.setBorder(bdrPreview.getBorder());
-		if (lBorder.isSelected())
-			information.setLineColor(((ButtonIcon)selLineCol.getIcon()).getEnabledColor());
+		information.setLineColor(((ButtonIcon)selLineCol.getIcon()).getEnabledColor());
 		information.setTooltip(enTooltip.isSelected());
 		information.setFixed(!cbMovable.isSelected());
 		information.setRoundCorners(roundBdr.getItemAt(roundBdr.getSelectedIndex()).getRoundType());
@@ -1172,10 +1178,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			{
 				throw new IllegalArgumentException("The following error occured in date/time format:\n" + exception.toString() + "\n" + exception.getMessage() + IN_JOINER + comboDateFmt.getSelectedItem().toString() + "\"");
 			}
-			if (tzCb.isSelected())
-				information.setDisplayMethod(DeskStop.DISPLAY_MODE_CURRENT_TIMEZONE);
-			else
-				information.setDisplayMethod(DeskStop.DISPLAY_MODE_SELECTED_TIMEZONE);
+			information.setDisplayMethod(tzCb.isSelected() ? DeskStop.DISPLAY_MODE_CURRENT_TIMEZONE : DeskStop.DISPLAY_MODE_SELECTED_TIMEZONE);
 			information.setAnalogClock(analogCb0.isSelected() || analogCb1.isSelected() || analogCb2.isSelected());
 			information.setAnalogClockOption(comboClockFmt.getItemAt(comboClockFmt.getSelectedIndex()).getId() + comboDialBdr.getItemAt(comboDialBdr.getSelectedIndex()).getId());
 			information.setTimeZone(comboTz.getItemAt(comboTz.getSelectedIndex()));
@@ -1199,27 +1202,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		}
 		else if (sysUpTime.isSelected())
 		{
-			Hashtable<String, String> sysUTimePattern = new Hashtable<>();
-			sysUTimePattern.put("Up-time symbol", uSymbol.getSelectedItem().toString());
-			sysUTimePattern.put("Day symbol",     dSymbol.getSelectedItem().toString());
-			sysUTimePattern.put("Hour symbol",    hSymbol.getSelectedItem().toString());
-			sysUTimePattern.put("Minute symbol",  mSymbol.getSelectedItem().toString());
-			sysUTimePattern.put("Second symbol",  sSymbol.getSelectedItem().toString());
-
-			Enumeration<String> e = sysUTimePattern.keys();
-
-			while (e.hasMoreElements())
-			{
-				String key = e.nextElement();
-				try
-				{
-					simpledateformat.applyPattern("'" + sysUTimePattern.get(key) + "'");
-				}
-				catch (Exception exception2)
-				{
-					throw new IllegalArgumentException("The following error occured in \"" + key + "\" field of Up-time format:\n" + exception2.toString() + "\n" + exception2.getMessage() + IN_JOINER + sysUTimePattern.get(key) + "\"");
-				}
-			}
+			validateUptimeBeforeSave();
 			information.setDisplayMethod(DeskStop.DISPLAY_MODE_SYSTEM_UPTIME);
 			if (cbShowDays.isSelected())
 				information.setUpTimeFormat("'" + uSymbol.getSelectedItem().toString() + "'DD'" + dSymbol.getSelectedItem().toString() + "'HH'" + hSymbol.getSelectedItem().toString() + "'mm'" + mSymbol.getSelectedItem().toString() + "'ss'" + sSymbol.getSelectedItem().toString() + "'");
@@ -1229,7 +1212,31 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		return information;
 	}
 	
-	
+	private void validateUptimeBeforeSave() throws IllegalArgumentException
+	{
+		Hashtable<String, String> sysUTimePattern = new Hashtable<>();
+		sysUTimePattern.put("Up-time symbol", uSymbol.getSelectedItem().toString());
+		sysUTimePattern.put("Day symbol",     dSymbol.getSelectedItem().toString());
+		sysUTimePattern.put("Hour symbol",    hSymbol.getSelectedItem().toString());
+		sysUTimePattern.put("Minute symbol",  mSymbol.getSelectedItem().toString());
+		sysUTimePattern.put("Second symbol",  sSymbol.getSelectedItem().toString());
+		Enumeration<String> e = sysUTimePattern.keys();
+
+		SimpleDateFormat simpledateformat = new SimpleDateFormat();
+		while (e.hasMoreElements())
+		{
+			String key = e.nextElement();
+			try
+			{
+				simpledateformat.applyPattern("'" + sysUTimePattern.get(key) + "'");
+			}
+			catch (Exception exception2)
+			{
+				throw new IllegalArgumentException("The following error occured in \"" + key + "\" field of Up-time format:\n" + exception2.toString() + "\n" + exception2.getMessage() + IN_JOINER + sysUTimePattern.get(key) + "\"");
+			}
+		}
+	}
+
 	/** 
 	 * Save all the alarms in the form of vector list of TimeBean
 	 * @return Vector<TimeBean>
@@ -1241,33 +1248,31 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		return alarmsData;
 	}
 	
-	private void setTransparentBackground()
+	private void updateOpacitySlider(float opacityLevel, boolean pixelTransSupport, boolean foregroundTranslucent)
 	{
-		if (useTrans.isSelected())
-		{
-			useTrans.setSelected(true);
-		}
-		else
-		{
-			if (useTrans.isSelected())
-				JOptionPane.showMessageDialog(this,"Error while setting transparency property. Cannot set.","System restriction",JOptionPane.ERROR_MESSAGE);
-			useTrans.setSelected(false);
-			slowUpd.setSelected(false);
-		}
+		transLevel.setMinimum(pixelTransSupport && !foregroundTranslucent ? 0 : 4);
+		transLevel.setValue(Math.round(opacityLevel * 20));
 	}
 	
 	
 	/** 
 	 * Saves the current TimeBean alarm in add or edit mode, to the data vector.
 	 * This also updates the resultant data vector to the alarmList JList.
-	 * @throws NullPointerException
 	 */
-	private void saveCurrentAlarm() throws NullPointerException
+	private void saveCurrentAlarm()
 	{
 		if (alarmName.getText().equals("") || alarmName.getText() == null)
-			throw new NullPointerException("Blank name");
+		{
+			JOptionPane.showMessageDialog(this,"Please enter a brief non-blank alarm name","Empty alarm name",JOptionPane.INFORMATION_MESSAGE);
+			alarmName.grabFocus();
+			return;
+		}
 		if ((sndToRun.getAudioFileName().isEmpty() && runSnd.isSelected()))
-			throw new NullPointerException("No Audio File");
+		{
+			JOptionPane.showMessageDialog(this,"No audio file selected to play alarm.","No Alarm Sound",JOptionPane.INFORMATION_MESSAGE);
+			sndToRun.grabFocus();
+			return;
+		}
 		TimeBean tb = new TimeBean();
 		tb.setName(alarmName.getText());
 		tb.setSystemStartTimeBasedAlarm(startAfterTimeIsSelected()); // must be set before setRuntime();
@@ -1333,272 +1338,279 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		}
 	}
 
+	private void chooseImageDirectory()
+	{
+		JFileChooser jfilechooser = new JFileChooser(imgFileList.getDirectory());
+		jfilechooser.setFileSelectionMode(1);
+		jfilechooser.setMultiSelectionEnabled(false);
+		int i = jfilechooser.showOpenDialog(this);
+		if (i == 0) {
+			try {
+				imgFileList.setDirectory(jfilechooser.getSelectedFile());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void resetTimePreferences()
+	{
+		if (selTimeZone.isSelected())
+		{
+			tzCb.setSelected(true);
+			comboTz.setSelectedItem(TimeZone.getDefault().getID());
+			comboDateFmt.setSelectedItem("zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy");
+		}
+		else if (sysUpTime.isSelected())
+		{
+			cbShowDays.setSelected(false);
+			uSymbol.setSelectedItem("Up-Time: ");
+			dSymbol.setSelectedItem("-day(s)");
+			hSymbol.setSelectedItem("-hour(s), ");
+			mSymbol.setSelectedItem("-minute(s), ");
+			sSymbol.setSelectedItem("-second(s)");
+		}
+		else if (pomodoroTime.isSelected())
+		{
+			comboPomodoro.setSelectedItem("25 min. work, 5 min. break, 30 min. rest");
+			comboPomFmt.setSelectedItem("mm:ss");
+			cbPomLabel.setSelected(false);
+			cbPomCountdown.setSelected(false);
+		}
+	}
+
+	private Color chooseColor(String dialogTitle, Color defaultColor)
+	{
+		Color newColor = JColorChooser.showDialog(new Frame(), dialogTitle, defaultColor);
+		if (newColor == null) newColor = defaultColor;
+		return newColor;
+	}
+
+	private void updateAnalogCheckBoxes(Object srcCheckBox)
+	{
+		if (srcCheckBox.equals(analogCb2)) {
+			analogCb1.setSelected(analogCb2.isSelected());
+			analogCb0.setSelected(analogCb2.isSelected());
+		} else if (srcCheckBox.equals(analogCb1)) {
+			analogCb2.setSelected(analogCb1.isSelected());
+			analogCb0.setSelected(analogCb2.isSelected());
+		} else if (srcCheckBox.equals(analogCb0)) {
+			analogCb1.setSelected(analogCb0.isSelected());
+			analogCb2.setSelected(analogCb0.isSelected());
+		}
+	}
+
+	private void updateBorderPreview(String borderTypeCmd)
+	{
+		switch (borderTypeCmd) {
+			case BEVELED_RAISED_BORDER:
+				bdrPreview.setBorder(BorderFactory.createRaisedBevelBorder());
+				break;
+			case BEVELED_LOWERED_BORDER:
+				bdrPreview.setBorder(BorderFactory.createLoweredBevelBorder());
+				break;
+			case ETCHED_RAISED_BORDER:
+				bdrPreview.setBorder(BorderFactory.createEtchedBorder(0));
+				break;
+			case ETCHED_LOWERED_BORDER:
+				bdrPreview.setBorder(BorderFactory.createEtchedBorder(1));
+				break;
+			case LINE_BORDER:
+				thickSpinner.setValue(intThick);
+				bdrPreview.setBorder(BorderFactory.createLineBorder(((ButtonIcon)selLineCol.getIcon()).getEnabledColor(), intThick, roundBdr.getSelectedIndex() != 0));
+				break;
+			case NO_BORDER:
+				bdrPreview.setBorder(null);
+				break;
+			default:
+				break;
+		}
+	}
+
+	private void updateBackImagePreview(String tileType)
+	{
+		switch (tileType) {
+			case TLabel.V_TILE_TEXT:
+				picLabel.setImageLayout(TLabel.V_TILE); break;
+			case TLabel.TILE_TEXT:
+				picLabel.setImageLayout(TLabel.TILE); break;
+			case TLabel.H_TILE_TEXT:
+				picLabel.setImageLayout(TLabel.H_TILE); break;
+			case TLabel.CENTER_TEXT:
+				picLabel.setImageLayout(TLabel.CENTER); break;
+			case TLabel.FIT_TEXT:
+				picLabel.setImageLayout(TLabel.FIT); break;
+			case TLabel.STRETCH_TEXT:
+				picLabel.setImageLayout(TLabel.STRETCH); break;
+			default:
+				picLabel.setImageLayout(TLabel.FIT); break;
+		}
+	}
+
+	private void showFormatHelp()
+	{
+		if (!exceptionActive)
+			new FormatHelp(this);
+		else
+			validateTimeFormat();
+	}
+
+	private void selectMinOneAlarmExecOption()
+	{
+		if (!runSnd.isSelected() && !runMsg.isSelected())
+			runMsg.setSelected(true);
+		sndToRun.setEnabled(runSnd.isSelected());
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent actionevent)
 	{
 		String     comm = actionevent.getActionCommand();
 		CardLayout cl   = (CardLayout)(bottomCards.getLayout());
-		if (comm.equals("Reset Font"))
-		{
-			fontPreview.setFont((new JLabel()).getFont());
-			setSelectedFont((new JLabel()).getFont());
-		}
-		else if (comm.equals("Choose Font Color"))
-		{
-			Color color  = ((ButtonIcon)selFontCol.getIcon()).getEnabledColor();
-			Color color3 = JColorChooser.showDialog(new Frame(), "Choose Font Color...", color);
-			if (color3 == null)
-				color3 = color;
-			((ButtonIcon)selFontCol.getIcon()).setEnabledColor(color3);
-			fontPreview.setForeground(color3);
-			picLabel.setForeground(color3);
-		}
-		else if (comm.equals("Reset Color"))
-		{
-			((ButtonIcon)selFontCol.getIcon()).setEnabledColor(Color.BLACK);
-			fontPreview.setForeground(Color.BLACK);
-			picLabel.setForeground(Color.BLACK);
-		}
-		else if (comm.equals("Beveled Raised Border") && bRaised.isSelected())
-		{
-			bdrPreview.setBorder(BorderFactory.createRaisedBevelBorder());
-		}
-		else if (comm.equals("Beveled Lowered Border") && bLowered.isSelected())
-		{
-			bdrPreview.setBorder(BorderFactory.createLoweredBevelBorder());
-		}
-		else if (comm.equals("Etched Raised Border") && eRaised.isSelected())
-		{
-			bdrPreview.setBorder(BorderFactory.createEtchedBorder(0));
-		}
-		else if (comm.equals("Etched Lowered Border") && eLowered.isSelected())
-		{
-			bdrPreview.setBorder(BorderFactory.createEtchedBorder(1));
-		}
-		else if (comm.equals("Line Border") && lBorder.isSelected())
-		{
-			thickSpinner.setValue(intThick);
-			bdrPreview.setBorder(BorderFactory.createLineBorder(((ButtonIcon)selLineCol.getIcon()).getEnabledColor(), intThick, roundBdr.getSelectedIndex() != 0));
-		}
-		else if (comm.equals("Don't Use Any Border") && nBorder.isSelected())
-		{
-			bdrPreview.setBorder(null);
-		}
-		else if (comm.equals("Line Border Color") && lBorder.isSelected())
-		{
-			Color color1 = ((ButtonIcon)selLineCol.getIcon()).getEnabledColor();
-			Color color4 = JColorChooser.showDialog(new Frame(), "Choose Line Color...", color1);
-			if (color4 == null)
-				color4 = color1;
-			((ButtonIcon)selLineCol.getIcon()).setEnabledColor(color4);
-			bdrPreview.setBorder(BorderFactory.createLineBorder(color4, intThick, roundBdr.getSelectedIndex() != 0));
-		}
-		else if (comm.equals("Default Line Color") && lBorder.isSelected())
-		{
-			((ButtonIcon)selLineCol.getIcon()).setEnabledColor(resLineCol.getBackground());
-			bdrPreview.setBorder(BorderFactory.createLineBorder(resLineCol.getBackground(), intThick, roundBdr.getSelectedIndex() != 0));
-		}
-		else if (comm.equals(CMD_ANALOG_CLOCK))
-		{
-			if (actionevent.getSource().equals(analogCb2)) {
-				analogCb1.setSelected(analogCb2.isSelected());
-				analogCb0.setSelected(analogCb2.isSelected());
-			} else if (actionevent.getSource().equals(analogCb1)) {
-				analogCb2.setSelected(analogCb1.isSelected());
-				analogCb0.setSelected(analogCb2.isSelected());
-			} else if (actionevent.getSource().equals(analogCb0)) {
-				analogCb1.setSelected(analogCb0.isSelected());
-				analogCb2.setSelected(analogCb0.isSelected());
-			}
-			jLAnaPreview.setPreferredSize(analogPanel.getSize());
-			updateAnalogClockTimezone(TimeZone.getTimeZone(comboTz.getItemAt(comboTz.getSelectedIndex())));
-		}
-		else if (comm.equals("LocalTz"))
-		{
-			if (tzCb.isSelected())	comboTz.setSelectedItem(TimeZone.getDefault().getID());
-			else comboTz.setSelectedItem(information.getTimeZone());
-		}
-		else if (comm.equals("ShowDays"))
-		{
-			if (cbShowDays.isSelected())
-			{
-				String s1    = information.getUpTimeFormat();
-				String[] arr = s1.split("\'");
-				if (information.isDayShowing())
+		switch (comm) {
+			case "Reset Font":
+				fontPreview.setFont((new JLabel()).getFont());
+				setSelectedFont((new JLabel()).getFont());
+				break;
+			case "Choose Font Color":
+				Color color3 = chooseColor("Choose Font Color...", ((ButtonIcon)selFontCol.getIcon()).getEnabledColor());
+				((ButtonIcon)selFontCol.getIcon()).setEnabledColor(color3);
+				fontPreview.setForeground(color3);
+				picLabel.setForeground(color3);
+				break;
+			case "Reset Color":
+				((ButtonIcon)selFontCol.getIcon()).setEnabledColor(Color.BLACK);
+				fontPreview.setForeground(Color.BLACK);
+				picLabel.setForeground(Color.BLACK);
+				break;
+			case BEVELED_RAISED_BORDER:
+			case BEVELED_LOWERED_BORDER:
+			case ETCHED_RAISED_BORDER:
+			case ETCHED_LOWERED_BORDER:
+			case LINE_BORDER:
+			case NO_BORDER:
+				updateBorderPreview(comm);
+				break;
+			case "Line Border Color":
+				Color color4 = chooseColor("Choose Line Color...", ((ButtonIcon)selLineCol.getIcon()).getEnabledColor());
+				((ButtonIcon)selLineCol.getIcon()).setEnabledColor(color4);
+				bdrPreview.setBorder(BorderFactory.createLineBorder(color4, intThick, roundBdr.getSelectedIndex() != 0));
+				break;
+			case "Default Line Color":
+				((ButtonIcon)selLineCol.getIcon()).setEnabledColor(resLineCol.getBackground());
+				bdrPreview.setBorder(BorderFactory.createLineBorder(resLineCol.getBackground(), intThick, roundBdr.getSelectedIndex() != 0));
+				break;
+			case CMD_ANALOG_CLOCK:
+				updateAnalogCheckBoxes(actionevent.getSource());
+				jLAnaPreview.setPreferredSize(analogPanel.getSize());
+				updateAnalogClockTimezone(TimeZone.getTimeZone(comboTz.getItemAt(comboTz.getSelectedIndex())));
+				break;
+			case "LocalTz":
+				comboTz.setSelectedItem(tzCb.isSelected() ? TimeZone.getDefault().getID() : information.getTimeZone());
+				break;
+			case "ShowDays":
+				if (cbShowDays.isSelected() && information.isDayShowing())
+				{
+					String s1    = information.getUpTimeFormat();
+					String[] arr = s1.split("\'");
 					dSymbol.setSelectedItem(arr[3]);
-				else
-					dSymbol.setSelectedIndex(0);
-			}
-			validateTimeFormat();
-		}
-		else if (comm.equals(CMD_POM_LEAD_LABEL))
-		{
-			validateTimeFormat();
-		}
-		else if (comm.equals("Reset to default values"))
-		{
-			if (selTimeZone.isSelected())
-			{
-				tzCb.setSelected(true);
-				comboTz.setSelectedItem(TimeZone.getDefault().getID());
-				comboDateFmt.setSelectedItem("zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy");
-			}
-			else if (sysUpTime.isSelected())
-			{
-				cbShowDays.setSelected(false);
-				uSymbol.setSelectedItem("Up-Time: ");
-				dSymbol.setSelectedItem("-day(s)");
-				hSymbol.setSelectedItem("-hour(s), ");
-				mSymbol.setSelectedItem("-minute(s), ");
-				sSymbol.setSelectedItem("-second(s)");
-			}
-			else if (pomodoroTime.isSelected())
-			{
-				comboPomodoro.setSelectedItem("25 min. work, 5 min. break, 30 min. rest");
-				comboPomFmt.setSelectedItem("mm:ss");
-				cbPomLabel.setSelected(false);
-				cbPomCountdown.setSelected(false);
-			}
-		}
-		else if (comm.equals("Help on date time format characters"))
-		{
-			if (!exceptionActive)
-				new FormatHelp(this);
-			else
-				validateTimeFormat();
-		}
-		else if (comm.equals("Choose Image Directory"))
-		{
-			JFileChooser jfilechooser = new JFileChooser(imgFileList.getDirectory());
-			jfilechooser.setFileSelectionMode(1);
-			jfilechooser.setMultiSelectionEnabled(false);
-			int i = jfilechooser.showOpenDialog(this);
-			if (i == 0) {
-				try {
-					imgFileList.setDirectory(jfilechooser.getSelectedFile());
-				} catch (Exception e) {
-					e.printStackTrace();
 				}
-			}
-		}
-		else if (comm.equals("Reset to default images"))
-		{
-			updateImagesList(new File("."));
-		}
-		else if (comm.equals("Choose Background Color"))
-		{
-			Color color2 = ((ButtonIcon)selBackCol.getIcon()).getEnabledColor();
-			Color color5 = JColorChooser.showDialog(new Frame(), "Choose Background...", color2);
-			if (color5 == null)
-				color5 = color2;
-			((ButtonIcon)selBackCol.getIcon()).setEnabledColor(color5);
-			picBackPanel.setBackground(color5);
-		}
-		else if (comm.equals("Default Color"))
-		{
-			((ButtonIcon)selBackCol.getIcon()).setEnabledColor(resBackCol.getBackground());
-		}
-		else if (comm.equals("Blend foreground opacity"))
-		{
-			transLevel.setMinimum(information.isPixelAlphaSupported() && !foregroundTrans.isSelected() ? 0 : 4);
-			transLevel.setValue(Math.round(information.getOpacity() * 20));
-		}
-		else if (comm.equals("Transparent background"))
-		{
-			setTransparentBackground();
-		}
-		else if (comm.equals("Add"))
-		{
-			cl.show(bottomCards, CMD_ADD_EDIT);
-			alarmViewOnlyMode(false);
-			opmode = ChooserBox.ALARM_ADD;
-			alarmName.setText("");
-			selectStartAfterTimeOption(false); //must be called before timeIn();
-			setSelectedAlarmTime(new Date());
-			setSelectedRepeatInterval(0, 1);
-			selectAlarmExecOutputOption(4); // for msg;
-		}
-		else if (comm.equals("Edit"))
-		{
-			selIndex=alarmList.getSelectedIndex();
-			if (selIndex != -1)
-			{
+				validateTimeFormat();
+				break;
+			case "Reset to default values":
+				resetTimePreferences();
+				break;
+			case "Help on date time format characters":
+				showFormatHelp();
+				break;
+			case "Choose Image Directory":
+				chooseImageDirectory();
+				break;
+			case "Reset to default images":
+				updateImagesList(new File("."));
+				break;
+			case "Choose Background Color":
+				Color color5 = chooseColor("Choose Background...", ((ButtonIcon)selBackCol.getIcon()).getEnabledColor());
+				((ButtonIcon)selBackCol.getIcon()).setEnabledColor(color5);
+				picBackPanel.setBackground(color5);
+				break;
+			case "Default Color":
+				((ButtonIcon)selBackCol.getIcon()).setEnabledColor(resBackCol.getBackground());
+				break;
+			case "Blend foreground opacity":
+				updateOpacitySlider(information.getOpacity(), information.isPixelAlphaSupported(), foregroundTrans.isSelected());
+				break;
+			case "Transparent background":
+				slowUpd.setSelected(useTrans.isSelected());
+				break;
+			case "Add":
+				cl.show(bottomCards, CMD_ADD_EDIT);
+				alarmViewOnlyMode(false);
+				opmode = ChooserBox.ALARM_ADD;
+				alarmName.setText("");
+				selectStartAfterTimeOption(false); //must be called before timeIn();
+				setSelectedAlarmTime(new Date());
+				setSelectedRepeatInterval(0, 1);
+				selectAlarmExecOutputOption(4); // for msg;
+				break;
+			case "Edit":
+				selIndex = alarmList.getSelectedIndex();
+				if (selIndex == -1)
+				{
+					JOptionPane.showMessageDialog(this,"Please select an alarm to edit.","Nothing to edit",JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+
 				cl.show(bottomCards, CMD_ADD_EDIT);
 				alarmViewOnlyMode(false);
 				opmode      = ChooserBox.ALARM_EDIT;
 				TimeBean tb = alarmsData.elementAt(selIndex);
 				alarmName.setText(tb.getName());
-				boolean isAfterOpt = tb.isSystemStartTimeBasedAlarm();
-				selectStartAfterTimeOption(isAfterOpt); //must be called before timeIn();
+				selectStartAfterTimeOption(tb.isSystemStartTimeBasedAlarm()); //must be called before timeIn();
 				setSelectedAlarmTime(tb.getAlarmTriggerTime());
 				setSelectedRepeatInterval(tb.getAlarmRepeatInterval(), tb.getRepeatMultiple());
 				selectAlarmExecOutputOption(tb.getAlarmExecutionOutputType());
 				sndToRun.setAudioFileName(tb.getAlarmSound());
-			}
-			else
-			{
-				JOptionPane.showMessageDialog(this,"Please select an alarm to edit.","Nothing to edit",JOptionPane.INFORMATION_MESSAGE);
-			}
-		}
-		else if (comm.equals("Commit"))
-		{
-			try
-			{
+				break;
+			case "Commit":
 				saveCurrentAlarm();
-			}
-			catch (Exception exception)
-			{
-				if (exception.getMessage().equals("Blank name"))
+				break;
+			case "Discard":
+				cl.show(bottomCards, CMD_FINISH_EDIT);
+				alarmViewOnlyMode(true);
+				opmode = ChooserBox.ALARM_DISCARD;
+				break;
+			case "Remove":
+				selIndex = alarmList.getSelectedIndex();
+				if (selIndex != -1)
 				{
-					JOptionPane.showMessageDialog(this,"Please enter a brief non-blank alarm name","Empty alarm name",JOptionPane.INFORMATION_MESSAGE);
-					alarmName.grabFocus();
+					alarmsData.removeElementAt(selIndex);
+					alarmList.setListData(alarmsData);
+					alarmList.setSelectedIndex(selIndex);
 				}
-				else if (exception.getMessage().equals("No Audio File"))
+				break;
+			case "Test":
+				selIndex = alarmList.getSelectedIndex();
+				if (selIndex != -1)
 				{
-					JOptionPane.showMessageDialog(this,"No audio file selected to play alarm.","No Alarm Sound",JOptionPane.INFORMATION_MESSAGE);
-					sndToRun.grabFocus();
+					ExUtils.runAlarm(alarmsData.elementAt(selIndex), this, 50);
 				}
-			}
-		}
-		else if (comm.equals("Discard"))
-		{
-			cl.show(bottomCards, CMD_FINISH_EDIT);
-			alarmViewOnlyMode(true);
-			opmode = ChooserBox.ALARM_DISCARD;
-		}
-		else if (comm.equals("Remove"))
-		{
-			selIndex = alarmList.getSelectedIndex();
-			if (selIndex != -1)
-			{
-				alarmsData.removeElementAt(selIndex);
-				alarmList.setListData(alarmsData);
-				alarmList.setSelectedIndex(selIndex);
-			}
-		}
-		else if (comm.equals("Test"))
-		{
-			selIndex = alarmList.getSelectedIndex();
-			if (selIndex != -1)
-			{
-				TimeBean tb = alarmsData.elementAt(selIndex);
-				ExUtils.runAlarm(tb, this, 50);
-			}
-		}
-		else if (comm.equals("and repeat every"))
-		{
-			if (rept.isSelected()) period.setSelectedIndex(1);
-			else period.setSelectedIndex(0);
-		}
-		else if (comm.equals("Play selected sound") || comm.equals("Show message"))
-		{
-			if (!runSnd.isSelected() && !runMsg.isSelected())
-				runMsg.setSelected(true);
-			sndToRun.setEnabled(runSnd.isSelected());
-		}
-		else if (comm.equals("POMODORO_RADIO_BUTTON") || comm.equals("TIME_RADIO_BUTTON") || comm.equals("UPTIME_RADIO_BUTTON"))
-		{
-			validateTimeFormat();
+				break;
+			case "and repeat every":
+				period.setSelectedIndex(rept.isSelected() ? 1 : 0);
+				break;
+			case "Play selected sound":
+			case "Show message":
+			selectMinOneAlarmExecOption();
+				break;
+			case "POMODORO_RADIO_BUTTON":
+			case "TIME_RADIO_BUTTON":
+			case "UPTIME_RADIO_BUTTON":
+			case CMD_POM_LEAD_LABEL:
+				validateTimeFormat();
+				break;
+			default:
+				break;
 		}
 		alarmStartOnOrStartAfter();
 		setOneEnabled();
@@ -1613,22 +1625,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			if (source.equals(comboTLayout))
 			{
 				String comm = ie.getItem().toString();
-				switch (comm) {
-					case TLabel.V_TILE_TEXT:
-						picLabel.setImageLayout(TLabel.V_TILE); break;
-					case TLabel.TILE_TEXT:
-						picLabel.setImageLayout(TLabel.TILE); break;
-					case TLabel.H_TILE_TEXT:
-						picLabel.setImageLayout(TLabel.H_TILE); break;
-					case TLabel.CENTER_TEXT:
-						picLabel.setImageLayout(TLabel.CENTER); break;
-					case TLabel.FIT_TEXT:
-						picLabel.setImageLayout(TLabel.FIT); break;
-					case TLabel.STRETCH_TEXT:
-						picLabel.setImageLayout(TLabel.STRETCH); break;
-					default:
-						picLabel.setImageLayout(TLabel.FIT); break;
-				}
+				updateBackImagePreview(comm);
 			}
 			else if (source.equals(comboTz))
 			{

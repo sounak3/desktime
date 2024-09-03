@@ -79,10 +79,8 @@ public class Pomodoro {
             throw new IllegalArgumentException("Definition string must have 2 or 3 parts separated by commas.");
         }
         
-        if (parts.length == 2)
-            this.canRest = false;
-        else
-            this.canRest = true;
+        this.canRest            = parts.length != 2;
+        this.numWorkBreakCycles = 1;
         
         // Define regex pattern to match an integer followed by 'min', 'minute', 'minutes', 'sec', 'second', or 'seconds'
         Pattern pattern = Pattern.compile("\\s*(\\d+)\\s*(min(?:ute|.)?s?|sec(?:ond|.)?s?)\\s*(\\S+)\\s*");
@@ -96,41 +94,47 @@ public class Pomodoro {
             }
             
             // Extract the integer, unit, and worktype
-            int value = Integer.parseInt(matcher.group(1));
-            String unit = matcher.group(2);
-            String worktype = matcher.group(3);
+            int      value    = Integer.parseInt(matcher.group(1));
+            String   unit     = matcher.group(2);
+            String   worktype = matcher.group(3);
             
             // Store the extracted variables
-            if (unit.toLowerCase().startsWith("min")) {
-                this.durationType = Pomodoro.OF_MINUTES;
-            } else if (unit.toLowerCase().startsWith("sec")) {
-                this.durationType = Pomodoro.OF_SECONDS;
-            } else {
-                throw new IllegalArgumentException("Each part must start with an integer followed by 'min', 'minute', 'minutes', 'sec', 'second', or 'seconds', and end with a word.");
+            switch (unit.toLowerCase().substring(0, 3)) {
+                case "min":
+                    this.durationType = Pomodoro.OF_MINUTES;
+                    break;
+                case "sec":
+                    this.durationType = Pomodoro.OF_SECONDS;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Each part must start with an integer followed by 'min', 'minute', 'minutes', 'sec', 'second', or 'seconds', and end with a word.");
             }
 
-            if (i == 0) {
-                this.workLabel = worktype;
-                this.workTime = this.durationType == Pomodoro.OF_MINUTES ? Duration.ofMinutes(value) : Duration.ofSeconds(value);
-            } else if (i == 1) {
-                this.breakLabel = worktype;
-                this.breakTime = this.durationType == Pomodoro.OF_MINUTES ? Duration.ofMinutes(value) : Duration.ofSeconds(value);
-            } else if (i == 2) {
-                this.restLabel = worktype;
-                this.restTime = this.durationType == Pomodoro.OF_MINUTES ? Duration.ofMinutes(value) : Duration.ofSeconds(value);
-            } else {
-                throw new IllegalArgumentException("4th part found! Input string must have 2 or 3 parts separated by commas.");
+            Duration durValue = this.durationType == Pomodoro.OF_MINUTES ? Duration.ofMinutes(value) : Duration.ofSeconds(value);
+            switch (i) {
+                case 0:
+                    this.workLabel = worktype;
+                    this.workTime = durValue;
+                    break;
+                case 1:
+                    this.breakLabel = worktype;
+                    this.breakTime = durValue;
+                    break;
+                case 2:
+                    this.restLabel = worktype;
+                    this.restTime = durValue;
+                    break;
+                default:
+                    throw new IllegalArgumentException("4th part found! Input string must have 2 or 3 parts separated by commas.");
             }
         }
         // The below if condition is for hard coding world famous pomodoro cycle
         if (canRest && workTime.toMinutes() == 25 && breakTime.toMinutes() == 5 && restTime.toMinutes() == 30) {
             this.numWorkBreakCycles = 4;
-        } else {
-            this.numWorkBreakCycles = 1;
         }
-        this.name               = definition;
-        this.instant            = Instant.now();
-        this.position           = Duration.ZERO;
+        this.name     = definition;
+        this.instant  = Instant.now();
+        this.position = Duration.ZERO;
     }
 
     public Pomodoro() {
@@ -174,51 +178,59 @@ public class Pomodoro {
         }
     }
 
-    public Duration getRunningLabelDuration(boolean reverse) {
+    private Duration getReverseRunningLabelDuration() {
         int x = getTotalDuration().compareTo(getRunningDuration());
-        if (x < 0) {
-            position = getRunningDuration().minus(getTotalDuration().multipliedBy(getRunCount()));
-        } else {
-            position = getRunningDuration();
-        }
+        position = x < 0 ? getRunningDuration().minus(getTotalDuration().multipliedBy(getRunCount())) : getRunningDuration();
 
         if (position.compareTo(getWorkTime()) < 0) {
-            if (reverse) {
-                return getWorkTime().minus(position).plus(Duration.ofSeconds(1));
-            } else {
-                return position.plus(Duration.ofSeconds(1));
-            }
+            return getWorkTime().minus(position).plus(Duration.ofSeconds(1));
         } else if (position.compareTo(getWorkBreakDuration()) < 0) {
-            if (reverse) {
                 return getWorkBreakDuration().minus(position).plus(Duration.ofSeconds(1));
-            } else {
-                return position.minus(getWorkTime()).plus(Duration.ofSeconds(1));
-            }
         } else if (position.compareTo(getTotalDuration().minus(getRestTime())) < 0) {
             Duration tmpPos = Duration.ofSeconds(position.getSeconds() % getWorkBreakDuration().getSeconds());
             if (tmpPos.compareTo(getWorkTime()) < 0) {
-                if (reverse) {
                     return getWorkTime().minus(tmpPos);
-                } else {
-                    return tmpPos.plus(Duration.ofSeconds(1));
-                }
             } else if (tmpPos.compareTo(getWorkBreakDuration()) < 0) {
-                if (reverse) {
                     return getWorkBreakDuration().minus(tmpPos);
-                } else {
-                    return tmpPos.minus(getWorkTime()).plus(Duration.ofSeconds(1));
-                }
             } else {
                 throw new IllegalStateException(DURATION_STR_PLACEHOLDER + tmpPos.toString() + OUT_OF_BOUNDS_PLACEHOLDER);
             }
         } else if (position.compareTo(getTotalDuration()) < 0) {
-            if (reverse) {
                 return getTotalDuration().minus(position).plus(Duration.ofSeconds(1));
-            } else {
-                return position.minus(getWorkBreakDuration().multipliedBy(numWorkBreakCycles)).plus(Duration.ofSeconds(1));
-            }
         } else {
             throw new IllegalStateException(DURATION_STR_PLACEHOLDER + position.toString() + OUT_OF_BOUNDS_PLACEHOLDER);
+        }
+    }
+
+    private Duration getForwardRunningLabelDuration() {
+        int x = getTotalDuration().compareTo(getRunningDuration());
+        position = x < 0 ? getRunningDuration().minus(getTotalDuration().multipliedBy(getRunCount())) : getRunningDuration();
+
+        if (position.compareTo(getWorkTime()) < 0) {
+            return position.plus(Duration.ofSeconds(1));
+        } else if (position.compareTo(getWorkBreakDuration()) < 0) {
+                return position.minus(getWorkTime()).plus(Duration.ofSeconds(1));
+        } else if (position.compareTo(getTotalDuration().minus(getRestTime())) < 0) {
+            Duration tmpPos = Duration.ofSeconds(position.getSeconds() % getWorkBreakDuration().getSeconds());
+            if (tmpPos.compareTo(getWorkTime()) < 0) {
+                    return tmpPos.plus(Duration.ofSeconds(1));
+            } else if (tmpPos.compareTo(getWorkBreakDuration()) < 0) {
+                    return tmpPos.minus(getWorkTime()).plus(Duration.ofSeconds(1));
+            } else {
+                throw new IllegalStateException(DURATION_STR_PLACEHOLDER + tmpPos.toString() + OUT_OF_BOUNDS_PLACEHOLDER);
+            }
+        } else if (position.compareTo(getTotalDuration()) < 0) {
+                return position.minus(getWorkBreakDuration().multipliedBy(numWorkBreakCycles)).plus(Duration.ofSeconds(1));
+        } else {
+            throw new IllegalStateException(DURATION_STR_PLACEHOLDER + position.toString() + OUT_OF_BOUNDS_PLACEHOLDER);
+        }
+    }
+
+    public Duration getRunningLabelDuration(boolean reverse) {
+        if (reverse) {
+            return getReverseRunningLabelDuration();
+        } else {
+            return getForwardRunningLabelDuration();
         }
     }
 

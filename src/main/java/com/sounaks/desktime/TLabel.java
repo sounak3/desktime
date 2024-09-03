@@ -35,6 +35,7 @@ public class TLabel extends JLabel
 	public static final int MINUTE_TICK   = 800;
 
 	public static final int GAP           = 5;
+	public static final Color SHADOW      = new Color(Color.DARK_GRAY.getRed(), Color.DARK_GRAY.getGreen(), Color.DARK_GRAY.getBlue(), 128);
 	private static final String WRONG_ARGUMENT_ERR = "Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH";
 	private int labelWidth, labelHeight;
 	private int timeHrs, timeMin, timeSec;
@@ -76,6 +77,7 @@ public class TLabel extends JLabel
 		super(s, 0);
 		hasImage   = false;
 		forceTrans = false;
+		clockMode  = false;
 		g2         = (Graphics2D)getGraphics();
 		anaClkFnt  = getFont().deriveFont(getFont().getSize() >= 12 ? (float)getFont().getSize() - 2 : 10.0f);
 		fm         = getFontMetrics(anaClkFnt);
@@ -87,7 +89,6 @@ public class TLabel extends JLabel
 		timeSec   = 5;
 		timeAmPm = "";
 		timeZn   = "";
-		clockMode = false;
 	}
 
 	public void setImageAlpha(float imageAlpha) {
@@ -101,7 +102,7 @@ public class TLabel extends JLabel
 	@Override
 	public void setFont(Font font) {
 		super.setFont(font);
-		anaClkFnt  = font.deriveFont(font.getSize() >= 12 ? (float)font.getSize() - 2 : 10.0f);
+		anaClkFnt  = font.deriveFont(font.getSize() - 10 >= 8 ? (float)font.getSize() - 10 : 8.0f);
 		fm         = getFontMetrics(anaClkFnt);
 	}
 
@@ -159,6 +160,18 @@ public class TLabel extends JLabel
 		int yr2 = (int)(radius * yr * r2) + GAP;
 		if (xCenter > yCenter) g2.drawLine(radius + xr1 + diff, radius + yr1, radius + xr2 + diff, radius + yr2);
 		else g2.drawLine(radius + xr1, radius + yr1 + diff, radius + xr2, radius + yr2 + diff);
+	}
+
+	private void drawBevelRadius(double r1, double r2, int degrees)
+	{
+		Color oldColor = g2.getColor();
+        g2.setColor( getForeground().brighter() );
+		drawRadius(r1, r2, degrees - 1);
+        g2.setColor( getForeground().darker() );
+		drawRadius(r1, r2, degrees + 1);
+		g2.setColor( getForeground() );
+		drawRadius(r1, r2 + 0.01, degrees);
+		g2.setColor(oldColor);
 	}
 
 	public boolean containsImage()
@@ -260,6 +273,84 @@ public class TLabel extends JLabel
 		return new Color(red + (green << 8) + ( blue << 16) + ( alpha << 24));
 	}
 
+	private void drawBackImage(Image image, int destWidth, int destHeight, int imageLayout)
+	{
+		int       imgWidth     = image.getWidth(this);
+		int       imgHeight    = image.getHeight(this);
+		double    aspectWidth  = (double)Math.max(destWidth, imgWidth) / (double)Math.min(destWidth, imgWidth);
+		double    aspectHeight = (double)Math.max(destHeight, imgHeight) / (double)Math.min(destHeight, imgHeight);
+		Dimension fitDim       = getScaledDimension(new Dimension(imgWidth, imgHeight), new Dimension(destWidth, destHeight));
+		int inuse;
+		Dimension newWH;
+		Composite compositeBackup = g2.getComposite();
+		g2.setComposite(AlphaComposite.Src.derive(getImageAlpha()));
+		switch (imageLayout)
+		{
+			case TLabel.STRETCH: // For image Stretch to Fit;
+				g2.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+				break;
+			case TLabel.H_TILE: // For image Horizontal tiles;
+				if (destHeight > imgHeight)
+					newWH = new Dimension((int)Math.ceil(imgWidth * aspectHeight), (int)Math.ceil(imgHeight * aspectHeight));
+				else
+					newWH = new Dimension((int)Math.ceil(imgWidth / aspectHeight), (int)Math.ceil(imgHeight / aspectHeight));
+				inuse = (int)Math.ceil((double)destWidth / (double)newWH.width);
+				for (int i = 0; i <= inuse; i++)
+					g2.drawImage(image, i * newWH.width, 0, newWH.width, newWH.height, this);
+				break;
+			case TLabel.V_TILE: // For image Vertical tiles;
+				if (destWidth > imgWidth)
+					newWH = new Dimension((int)Math.ceil(imgWidth * aspectWidth), (int)Math.ceil(imgHeight * aspectWidth));
+				else
+					newWH = new Dimension((int)Math.ceil(imgWidth / aspectWidth), (int)Math.ceil(imgHeight / aspectWidth));
+				inuse = (int)Math.ceil((double)destHeight / (double)newWH.height);
+				for (int j = 0; j <= inuse; j++)
+					g2.drawImage(image, 0, j * newWH.height, newWH.width, newWH.height, this);
+				break;
+			case TLabel.CENTER: // For image Center
+				g2.drawImage(image, (destWidth - imgWidth) / 2, (destHeight - imgHeight) / 2, imgWidth, imgHeight, this);
+				break;
+			case TLabel.FIT: // For image Resize to Fit
+				g2.drawImage(image, (destWidth - fitDim.width) / 2, (destHeight - fitDim.height) / 2, fitDim.width, fitDim.height, this);
+				break;
+			case TLabel.TILE: // For image Tile
+				drawImageTiles(image, 30, 30, destWidth, destHeight);
+				break;
+			default: // default is stretch to fit
+				g2.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+				break;
+		}
+		g2.setComposite(compositeBackup);
+	}
+
+	private void drawImageTiles(Image image, int tileWidth, int tileHeight, int destWidth, int destHeight)
+	{
+		int       imageWidth  = image.getWidth(this);
+		int       imageHeight = image.getHeight(this);
+		Dimension thumbDim    = getScaledDimension(new Dimension(imageWidth, imageHeight), new Dimension(tileWidth, tileHeight));
+		int       numTilesW   = (int)Math.ceil((double)destWidth / (double)thumbDim.width);
+		int       numTilesH   = (int)Math.ceil((double)destHeight / (double)thumbDim.height);
+		for (int i1 = 0; i1 < numTilesH; i1++)
+		{
+			for (int j1 = 0; j1 < numTilesW; j1++)
+				g2.drawImage(image, j1 * thumbDim.width, i1 * thumbDim.height, thumbDim.width, thumbDim.height, this);
+		}
+	}
+
+	private void drawDialTicks(boolean majorHours, boolean allHours, boolean minutes)
+	{
+		for (int i = 0; i < 360; i++)
+		{
+			if (i % 90 == 0 && majorHours) drawRadius(0.85, 0.97, i);
+			else if (i % 30 == 0 && allHours) drawRadius(0.9, 0.97, i);
+			else if (minutes)
+			{
+				if (i % 30 == 0) drawRadius(0.9, 0.97, i);
+				else if (i % 6 == 0) drawRadius(0.95, 0.97, i);
+			}
+		}
+	}
+
 	@Override
 	protected void paintComponent(Graphics g)
 	{
@@ -267,92 +358,17 @@ public class TLabel extends JLabel
 		labelWidth   = getWidth();
 		labelHeight  = getHeight();
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+		g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
 		if (hasImage)
 		{
-			int       imgWidth     = image.getWidth(this);
-			int       imgHeight    = image.getHeight(this);
-			double    aspectWidth  = (double)Math.max(labelWidth, imgWidth) / (double)Math.min(labelWidth, imgWidth);
-			double    aspectHeight = (double)Math.max(labelHeight, imgHeight) / (double)Math.min(labelHeight, imgHeight);
-			Dimension fitDim       = getScaledDimension(new Dimension(imgWidth, imgHeight), new Dimension(labelWidth, labelHeight));
-			Dimension thumbDim     = getScaledDimension(new Dimension(imgWidth, imgHeight), new Dimension(30, 30));
-			Point     pp           = getLocation();
-			SwingUtilities.convertPointToScreen(pp,this);
 			if (forceTrans) // For desktop background based image on window position (Transparent effect)
 			{
 				g2.drawImage(image, 0, 0, this);
 			}
 			else
 			{
-				int inuse;
-				Dimension newWH;
-				Composite compositeBackup = g2.getComposite();
-				g2.setComposite(AlphaComposite.Src.derive(getImageAlpha()));
-				switch (imgLayout)
-				{
-					case TLabel.STRETCH: // For image Stretch to Fit;
-						g2.drawImage(image, 0, 0, getWidth(), getHeight(), this);
-						break;
-					case TLabel.H_TILE: // For image Horizontal tiles;
-						if (labelHeight > imgHeight)
-							newWH = new Dimension((int)Math.ceil(imgWidth * aspectHeight), (int)Math.ceil(imgHeight * aspectHeight));
-						else
-							newWH = new Dimension((int)Math.ceil(imgWidth / aspectHeight), (int)Math.ceil(imgHeight / aspectHeight));
-						if (newWH.width >= labelWidth)
-						{
-							g2.drawImage(image, 0, 0, newWH.width, newWH.height, this);
-						}
-						else
-						{
-							inuse = (int)Math.ceil((double)labelWidth / (double)newWH.width);
-							for (int i = 0; i <= inuse; i++)
-								g2.drawImage(image, i * newWH.width, 0, newWH.width, newWH.height, this);
-						}
-						break;
-					case TLabel.V_TILE: // For image Vertical tiles;
-						if (labelWidth > imgWidth)
-							newWH = new Dimension((int)Math.ceil(imgWidth * aspectWidth), (int)Math.ceil(imgHeight * aspectWidth));
-						else
-							newWH = new Dimension((int)Math.ceil(imgWidth / aspectWidth), (int)Math.ceil(imgHeight / aspectWidth));
-						if (newWH.height >= labelHeight)
-						{
-							g2.drawImage(image, 0, 0, newWH.width, newWH.height, this);
-						}
-						else
-						{
-							inuse = (int)Math.ceil((double)labelHeight / (double)newWH.height);
-							for (int j = 0; j <= inuse; j++)
-								g2.drawImage(image, 0, j * newWH.height, newWH.width, newWH.height, this);
-						}
-						break;
-					case TLabel.CENTER: // For image Center
-						if (imgWidth > labelWidth && imgHeight > labelHeight)
-							g2.drawImage(image, 0, 0, 0 + labelWidth, 0 + labelHeight, (imgWidth - labelWidth) / 2, (imgHeight - labelHeight) / 2, (imgWidth - labelWidth) / 2 + labelWidth, (imgHeight - labelHeight) / 2 + labelHeight, this);
-						else if (imgWidth > labelWidth && imgHeight <= labelHeight)
-							g2.drawImage(image, 0, (labelHeight - imgHeight) / 2, 0 + labelWidth, (labelHeight - imgHeight) / 2 + imgHeight, (imgWidth - labelWidth) / 2, 0, (imgWidth - labelWidth) / 2 + labelWidth, imgHeight, this);
-						else if (imgWidth <= labelWidth && imgHeight > labelHeight)
-							g2.drawImage(image, (labelWidth - imgWidth) / 2, 0, (labelWidth - imgWidth) / 2 + imgWidth, 0 + labelHeight, 0, (imgHeight - labelHeight) / 2, imgWidth, (imgHeight - labelHeight) / 2 + labelHeight, this);
-						else if (imgWidth < labelWidth && imgHeight < labelHeight)
-							g2.drawImage(image, (labelWidth - imgWidth) / 2, (labelHeight - imgHeight) / 2, imgWidth, imgHeight, this);
-						break;
-					case TLabel.FIT: // For image Resize to Fit
-						g2.drawImage(image, (labelWidth - fitDim.width) / 2, (labelHeight - fitDim.height) / 2, fitDim.width, fitDim.height, this);
-						break;
-					case TLabel.TILE: // For image Tile
-						int k = (int)Math.ceil((double)labelWidth / (double)thumbDim.width);
-						int l = (int)Math.ceil((double)labelHeight / (double)thumbDim.height);
-						for (int i1 = 0; i1 < l; i1++)
-						{
-							for (int j1 = 0; j1 < k; j1++)
-								g2.drawImage(image, j1 * thumbDim.width, i1 * thumbDim.height, thumbDim.width, thumbDim.height, this);
-						}
-						break;
-					default: // default is stretch to fit
-						g2.drawImage(image, 0, 0, getWidth(), getHeight(), this);
-						break;
-				}
-				g2.setComposite(compositeBackup);
+				drawBackImage(image, labelWidth, labelHeight, imgLayout);
 			}
 		}
 
@@ -367,9 +383,7 @@ public class TLabel extends JLabel
 			boolean majHrTick = false;
 			boolean hrTick    = false;
 			boolean minTick   = false;
-
-			g2.setColor(isEnabled() ? getForeground() : Color.LIGHT_GRAY);
-			g2.setStroke(new BasicStroke(stroke * 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			double  shdOffset = stroke * 2.0f;
 			
 			g2.setFont(anaClkFnt);
 			switch (analogClockOptions) {
@@ -453,32 +467,45 @@ public class TLabel extends JLabel
 				break;
 			}
 
+			// Draw AM/PM and time zone markers
+			g2.setColor(isEnabled() ? getForeground() : Color.LIGHT_GRAY);
 			if (ampm) g2.drawString(timeAmPm, xCenter + GAP - fm.stringWidth(timeAmPm)/2, yCenter + GAP + yCenter / 2);
 			if (tzone) g2.drawString(timeZn, xCenter + GAP - Math.round(fm.stringWidth(timeZn)/2.00f), GAP + Math.round(yCenter * 0.60f));
-			for (int i = 0; i < 360; i++)
-			{
-				if (i % 90 == 0 && majHrTick) drawRadius(0.85, 0.97, i);
-				if (i % 30 == 0 && hrTick) drawRadius(0.9, 0.97, i);
-				if (minTick)
-				{
-					if (i % 30 == 0) drawRadius(0.9, 0.97, i);
-					if (i % 6 == 0) drawRadius(0.95, 0.97, i);
-				}
-			}
-
+			
+			// Draw Hour and minute markers
+			g2.setStroke(new BasicStroke(stroke * 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			drawDialTicks(majHrTick, hrTick, minTick);
+			
+			// Draw dial border
 			g2.setColor(TLabel.darker(getForeground(), 0.50));
+			g2.setStroke(new BasicStroke(stroke * 1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			if (clkBdr) g2.drawOval(xCenter - radius + GAP, yCenter - radius + GAP, 2 * radius, 2 * radius);
-			g2.setStroke(new BasicStroke(stroke * 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			drawRadius(-0.1, 0.8, timeMin * 6 + timeSec / 10);  // Minutes
-			g2.setStroke(new BasicStroke(stroke * 3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			
+			// Draw hour, minute and second hands shadow
+			g2.setColor(SHADOW);
+			g2.setStroke(new ShadowStroke(stroke * 2.0f, shdOffset));
+			drawRadius(-0.1, 0.7, timeMin * 6 + timeSec / 10);  // Minutes
+			g2.setStroke(new ShadowStroke(stroke * 3.0f, shdOffset));
 			drawRadius(-0.1, 0.5, timeHrs * 30 + timeMin / 2);  // Hours
+			g2.setStroke(new ShadowStroke(stroke * 1.0f, shdOffset));
+			drawRadius(0, 0.6, timeSec * 6);  // Seconds
+
+			// Draw hour, minute and second hands
+			g2.setColor(TLabel.darker(getForeground(), 0.50));
+			g2.setStroke(new BasicStroke(stroke * 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			drawBevelRadius(-0.1, 0.7, timeMin * 6 + timeSec / 10);  // Minutes
+			g2.setStroke(new BasicStroke(stroke * 3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			drawBevelRadius(-0.1, 0.5, timeHrs * 30 + timeMin / 2);  // Hours
 			g2.setColor(TLabel.getInvertedColor(getForeground()));
 			g2.setStroke(new BasicStroke(stroke * 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			drawRadius(0, 0.7, timeSec * 6);  // Seconds
+			drawRadius(0, 0.6, timeSec * 6);  // Seconds
+
+			// Draw center circle
 			int doubleStroke = Math.round(3 * stroke);
 			g2.fillOval(GAP + xCenter - doubleStroke, GAP + yCenter - doubleStroke , 2 * doubleStroke, 2 * doubleStroke);
 		}
 
+		g2.setFont(getFont());
 		super.paintComponent(g2);
 	}
 }

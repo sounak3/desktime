@@ -5,11 +5,7 @@
    <object class="com.sounaks.desktime.InitInfo" id="InitInfo0">
     <void method="put">
      <string>ROUND_CORNERS</string>
-     <int>1</int>
-    </void>
-    <void method="put">
-     <string>OPACITY</string>
-     <float>0.5</float>
+     <int>4</int>
     </void>
     <void id="Boolean0" method="get">
      <string>ON_TOP</string>
@@ -27,23 +23,28 @@
     </void>
     <void method="put">
      <string>IMAGEFILE</string>
-     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\violet-capsule.png</string>
-    </void>
-    <void method="put">
-     <string>UPTIME_FORMAT</string>
-     <string>&apos;Uptime: &apos;DD&apos;-day(s), &apos;HH&apos;-hour(s), &apos;mm&apos;-minute(s), &apos;ss&apos;-second(s)&apos;</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\bnw-shadow-dial.png</string>
     </void>
     <void method="put">
      <string>ANALOG_CLOCK_OPTS</string>
-     <int>3900</int>
+     <int>3000</int>
+    </void>
+    <void method="put">
+     <string>BACKGROUND</string>
+     <object class="java.awt.Color">
+      <int>0</int>
+      <int>102</int>
+      <int>255</int>
+      <int>255</int>
+     </object>
+    </void>
+    <void method="put">
+     <string>TOOLTIP</string>
+     <object idref="Boolean1"/>
     </void>
     <void method="put">
      <string>TIMEZONE</string>
      <string>Asia/Calcutta</string>
-    </void>
-    <void method="put">
-     <string>POMODORO_LEAD_LABEL</string>
-     <object idref="Boolean0"/>
     </void>
     <void id="Integer0" method="get">
      <string>PANEL_ID</string>
@@ -51,17 +52,17 @@
     <void method="put">
      <string>FONT</string>
      <object class="java.awt.Font">
-      <string>DialogInput.bold</string>
+      <string>Arial Bold</string>
       <object idref="Integer0"/>
-      <int>16</int>
+      <int>24</int>
      </object>
     </void>
     <void method="put">
      <string>FOREGROUND</string>
      <object class="java.awt.Color">
-      <int>255</int>
-      <int>255</int>
-      <int>0</int>
+      <int>51</int>
+      <int>51</int>
+      <int>51</int>
       <int>255</int>
      </object>
     </void>
@@ -71,14 +72,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>965</int>
+       <int>912</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>39</int>
+       <int>88</int>
       </void>
      </void>
     </void>

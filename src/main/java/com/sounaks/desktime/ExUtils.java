@@ -78,16 +78,16 @@ public class ExUtils
         return os;
     }
 
-	public static void	addComponent(Container container, Component	component, int i, int j, int k,	int	l, double d, double	d1, ActionListener alistener) throws AWTException
+	public static void	addComponent(Container container, Component	component, int[] gridXYWH, double d, double	d1, ActionListener alistener) throws AWTException
 	{
 		java.awt.LayoutManager layoutmanager = container.getLayout();
 		if (!(layoutmanager instanceof GridBagLayout))
 			throw new AWTException("Invalid Layout " + layoutmanager);
 		GridBagConstraints gridbagconstraints            = new	GridBagConstraints();
-		                   gridbagconstraints.gridx      = i;
-		                   gridbagconstraints.gridy      = j;
-		                   gridbagconstraints.gridwidth  = k;
-		                   gridbagconstraints.gridheight = l;
+		                   gridbagconstraints.gridx      = gridXYWH[0];
+		                   gridbagconstraints.gridy      = gridXYWH[1];
+		                   gridbagconstraints.gridwidth  = gridXYWH[2];
+		                   gridbagconstraints.gridheight = gridXYWH[3];
 		                   gridbagconstraints.weightx    = d;
 		                   gridbagconstraints.weighty    = d1;
 		                   gridbagconstraints.fill       = GridBagConstraints.BOTH;

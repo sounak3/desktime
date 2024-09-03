@@ -114,109 +114,103 @@ public class SoundPlayer extends JComponent implements ActionListener, Runnable
         add(play);
     }
 
+    private File validateTextAndReturnFile(boolean selectionMode)
+    {
+        File file;
+        if (txtFile.isEditable()) {
+            String selFileName = txtFile.getText();
+            File updatedAudio = new File(selFileName);
+            if (updatedAudio.exists()) {
+                if (updatedAudio.isDirectory() || !selFileName.toLowerCase().endsWith(".mp3")) {
+                    file = updatedAudio;
+                } else {
+                    setAudioFileName(selFileName);
+                    file = new File(audioFile);
+                }
+            } else {
+                file = selectionMode ? new File(defaultSoundsDir) : updatedAudio;
+            }
+        } else {
+            file = new File(audioFile);
+        }
+        return file;
+    }
+
+    private Timer getPlayTimerInstance()
+    {
+        if (playTimer == null)
+            playTimer = new Timer(playSeconds, this);
+        return playTimer;
+    }
+
+    private Player getPlayerInstance(File file) throws JavaLayerException, FileNotFoundException
+    {
+        fStream = new FileInputStream(file);
+        if (player == null)
+            player = new Player(fStream);
+        return player;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e)
     {
+        File file = null;
         String cmd = e.getActionCommand();
-        if (cmd.equals("SEARCH"))
-        {
-            if (txtFile.isEditable()) {
-                File updatedAudio = new File(txtFile.getText());
-                if (updatedAudio.exists()) {
-                    if (updatedAudio.isDirectory()) {
-                        fileChooser.setCurrentDirectory(updatedAudio);
-                    } else {
-                        if (txtFile.getText().toLowerCase().endsWith(".mp3")) {
-                            setAudioFileName(txtFile.getText());
-                            fileChooser.setCurrentDirectory(new File(audioFile));
-                        } else {
-                            fileChooser.setCurrentDirectory(updatedAudio);
-                        }
-                    }
-                } else {
-                    fileChooser.setCurrentDirectory(new File(defaultSoundsDir));
-                }
-            } else {
-                fileChooser.setCurrentDirectory(new File(audioFile));
-            }
-            fileChooser.showOpenDialog(SoundPlayer.this);
-            File file = fileChooser.getSelectedFile();
-            if (file != null)
-            {
-                this.audioFile = file.getAbsolutePath();
-                txtFile.setText(file.getName());
-                stopPlayer();
-            }
-        }
-        else if (cmd.equals("PLAY_AUDIO_FILE"))
-        {
-            File file;
-            if (txtFile.isEditable()) {
-                File updatedAudio = new File(txtFile.getText());
-                if (updatedAudio.exists()) {
-                    if (updatedAudio.isDirectory()) {
-                        file = updatedAudio;
-                    } else {
-                        if (txtFile.getText().toLowerCase().endsWith(".mp3")) {
-                            setAudioFileName(txtFile.getText());
-                            file = new File(audioFile);
-                        } else {
-                            file = updatedAudio;
-                        }
-                    }
-                } else {
-                    file = updatedAudio;
-                }
-            } else {
-                file = new File(audioFile);
-            }
-            
-            try
-            {
-                if (file.exists())
+        switch (cmd) {
+            case "SEARCH":
+                fileChooser.setCurrentDirectory(validateTextAndReturnFile(true));
+                int selection = fileChooser.showOpenDialog(SoundPlayer.this);
+                if (selection == JFileChooser.APPROVE_OPTION) file = fileChooser.getSelectedFile();
+                
+                if (file != null)
                 {
-                    if (!playing)
-                    {
-                        fStream = new FileInputStream(file);
-                        if (playTimer == null)
-                            playTimer = new Timer(playSeconds, this);
-                        playTimer.setActionCommand("STOP_AUDIO_FILE");
-                        playTimer.setRepeats(false);
-                        if (player == null)
-                            player = new Player(fStream);
-                        playTimer.start();
-                        Thread runThread = new Thread(this, "PLAY_THREAD");
-                        runThread.start();
-                    }
-                    else
-                    {
-                        stopPlayer();
-                    }
+                    this.audioFile = file.getAbsolutePath();
+                    txtFile.setText(file.getName());
+                    stopPlayer();
                 }
-                else
+                break;
+            case "PLAY_AUDIO_FILE":
+                file = validateTextAndReturnFile(false);
+                String msg;
+                if (!file.exists())
                 {
-                    String msg = "";
-                    if (audioFile.isEmpty()) msg = "No file to play! Please select audio file.";
-                    else msg = "The selected file does not exist.";
+                    msg = audioFile.isEmpty() ? "No file to play! Please select audio file." : "The selected file does not exist.";
                     JOptionPane.showMessageDialog(SoundPlayer.this,
                             msg,
                             "Error",
                             JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
-            }
-            catch (Exception me)
-            {
+    
+                try
+                {
+                    if (playing)
+                    {
+                        stopPlayer();
+                        return;
+                    }
+                    playTimer = getPlayTimerInstance();
+                    playTimer.setActionCommand("STOP_AUDIO_FILE");
+                    playTimer.setRepeats(false);
+                    player = getPlayerInstance(file);
+                    playTimer.start();
+                    Thread runThread = new Thread(this, "PLAY_THREAD");
+                    runThread.start();
+                 }
+                catch (Exception me)
+                {
+                    stopPlayer();
+                    me.printStackTrace();
+                    JOptionPane.showMessageDialog(SoundPlayer.this,
+                                "Cannot play selected audio file. Unsupported format!",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE);
+                }
+                break;
+            case "STOP_AUDIO_FILE":
+            default:
                 stopPlayer();
-                me.printStackTrace();
-                JOptionPane.showMessageDialog(SoundPlayer.this,
-                            "Cannot play selected audio file. Unsupported format!",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-            }
-        }
-        else if (cmd.equals("STOP_AUDIO_FILE"))
-        {
-            stopPlayer();
+                break;
         }
     }
 
