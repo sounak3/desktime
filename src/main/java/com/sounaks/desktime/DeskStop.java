@@ -31,12 +31,13 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private InitInfo info;
 	private Vector <TimeBean>alarms;
 	private JPopupMenu pMenu;
-	private JMenu addPanel, mFormat, timeMode, timeZone, mSize, mOpacityLevel, mRoundCorners;
+	private JMenu addPanel, mFormat, timeMode, timeZone, mSize, mOpacityLevel, mRoundCorners, mDialMarks;
 	private JSlider sizer, miOpacitySlider;
 	private JMenuItem miAnaTime, miDigTime, miUptime, miPomo, miSeltz, miDeftz, timSet, zonSet, mAllOpacity;
 	private JMenuItem fore, back, alm, bdr, exit, about, newItem, dupItem, removePanel, miMovable, ontop, sysClk;
+	private JCheckBoxMenuItem miAmPmMark, miTzMark;
 	private JMenuItem[] impZon;
-	private JMenuItem[] tMenuItem;
+	private JRadioButtonMenuItem[] tMenuItem;
 	private transient PointerInfo pi;
 	private Point pointerLoc;
 	private Dimension scsize;
@@ -71,6 +72,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private static final String ABOUT_STRING                   = "<html>Created and Developed by : Sounak Choudhury<p>E-mail Address : <a href='mailto:sounak_s@rediffmail.com'>sounak_s@rediffmail.com</a><p>The software, information and documentation<p>is provided \"AS IS\" without warranty of any<p>kind, either express or implied. The Readme.txt<p>file containing EULA must be read before use.<p>Suggestions and credits are Welcomed.</html>";
 	private static final String CMD_TIME_SETTINGS              = "Time Settings";
 	private static final String CMD_ABOUT					   = "About DeskStop...";
+	private static final String CMD_ANALOG_DIAL_MARKER		   = "AnalogDialMarker";
 	private static ArrayList<InitInfo> deskstops;
 	private final ImageIcon plusPng  = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/plus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
 	private final ImageIcon minusPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/minus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
@@ -132,14 +134,15 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		UIManager.put("PopupMenu.background", Color.WHITE);
 		UIManager.put("MenuItem.background", Color.WHITE);
 		UIManager.put("CheckBoxMenuItem.background", Color.WHITE);
+		UIManager.put("RadioButtonMenuItem.background", Color.WHITE);
 		pMenu = new JPopupMenu("DeskTime Menu");
 		mFormat = new JMenu("Format");
 		mRoundCorners = new JMenu("Rounded corners");
-		tMenuItem = new JMenuItem[ExUtils.ROUND_CORNERS.values().length];
+		tMenuItem = new JRadioButtonMenuItem[ExUtils.ROUND_CORNERS.values().length];
 		int mCnt = 0;
 		for (ExUtils.ROUND_CORNERS corner : ExUtils.ROUND_CORNERS.values()) {
-			ImageIcon selectedIco = info.getRoundCorners() == corner.getRoundType() ? checkPng : clearPng;
-			tMenuItem[mCnt] = new JMenuItem(ExUtils.toCamelCase(corner.name()), selectedIco);
+			tMenuItem[mCnt] = new JRadioButtonMenuItem(ExUtils.toCamelCase(corner.name()));
+			tMenuItem[mCnt].setSelected(info.getRoundCorners() == corner.getRoundType());
 			tMenuItem[mCnt].setActionCommand(corner.name());
 			tMenuItem[mCnt].addActionListener(this);
 			mRoundCorners.add(tMenuItem[mCnt]);
@@ -165,13 +168,12 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		bdr   = new JMenuItem("Borders & Clock UI...");
 		bdr.addActionListener(this);
 		mFormat.add(mRoundCorners);
-		mFormat.add(mOpacityLevel);
 		mFormat.add(mAllOpacity);
 		mFormat.addSeparator();
 		mFormat.add(fore);
 		mFormat.add(back);
 		mFormat.add(bdr);
-		timeMode = new JMenu("Time Mode");
+		timeMode = new JMenu(CMD_TIME_SETTINGS);
 		miDigTime   = new JMenuItem("Digital clock");
 		miDigTime.addActionListener(this);
 		miAnaTime   = new JMenuItem("Analog clock");
@@ -185,12 +187,6 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		timSet   = new JMenuItem("More settings...");
 		timSet.addActionListener(this);
 		timSet.setActionCommand(CMD_TIME_SETTINGS);
-		timeMode.add(miDigTime);
-		timeMode.add(miAnaTime);
-		timeMode.add(miUptime);
-		timeMode.add(miPomo);
-		timeMode.addSeparator();
-		timeMode.add(timSet);
 		timeZone = new JMenu("Timezone");
 		miSeltz  = new JMenuItem("Last selected");
 		miSeltz.addActionListener(this);
@@ -213,10 +209,29 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		zonSet.setActionCommand(CMD_TIME_SETTINGS);
 		timeZone.addSeparator();
 		timeZone.add(zonSet);
+		mDialMarks = new JMenu("Dial markers");
+		miAmPmMark = new JCheckBoxMenuItem("AM-PM markers");
+		miAmPmMark.setActionCommand(CMD_ANALOG_DIAL_MARKER);
+		miAmPmMark.addActionListener(this);
+		miTzMark   = new JCheckBoxMenuItem("Time zone marker");
+		miTzMark.setActionCommand(CMD_ANALOG_DIAL_MARKER);
+		miTzMark.addActionListener(this);
+		mDialMarks.add(miAmPmMark);
+		mDialMarks.add(miTzMark);
 		sysClk = new JMenuItem("System Clock");
 		alm    = new JMenuItem("Set Alarm...");
 		alm.addActionListener(this);
 		sysClk.addActionListener(this);
+		timeMode.add(timeZone);
+		timeMode.add(mDialMarks);
+		timeMode.addSeparator();
+		timeMode.add(miDigTime);
+		timeMode.add(miAnaTime);
+		timeMode.add(miUptime);
+		timeMode.add(miPomo);
+		timeMode.addSeparator();
+		timeMode.add(alm);
+		timeMode.add(timSet);
 		Hashtable<Integer, JLabel> ht = new Hashtable<>();
 		for (int i = 0; i < fontSizes.length; i++)
 			ht.put(i, new JLabel(String.valueOf(fontSizes[i])));
@@ -228,7 +243,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		sizer.setSnapToTicks(true);
 		sizer.addChangeListener(this);
 		mSize = new JMenu("Resize");
-		sizer.setPreferredSize(new Dimension(sizer.getPreferredSize().width + 20, sizer.getPreferredSize().height + 2 * fontSizes.length));
+		int sliderheight = getFontMetrics(getFont()).getHeight() * fontSizes.length;
+		sizer.setPreferredSize(new Dimension(sizer.getPreferredSize().width + 20, sliderheight));
 		mSize.add(sizer);
 		miMovable  = new JMenuItem("Movable");
 		miMovable.setIcon(info.isFixed() ? clearPng : checkPng);
@@ -252,9 +268,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		exit  = new JMenuItem("Exit");
 		exit.addActionListener(this);
 		pMenu.add(timeMode);
-		pMenu.add(timeZone);
 		pMenu.add(mFormat);
-		pMenu.add(alm);
 		switch (ExUtils.getOS()) {
 			case WINDOWS:
 			case LINUX:
@@ -268,6 +282,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		}
 		pMenu.addSeparator();
 		pMenu.add(mSize);
+		pMenu.add(mOpacityLevel);
 		pMenu.add(miMovable);
 		pMenu.add(ontop);
 		pMenu.addSeparator();
@@ -293,6 +308,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		miSeltz.setText("Last selected (" + info.getTimeZone() + ")");
 		miDeftz.setText("System (" + TimeZone.getDefault().getID() + ")");
 		timeZone.setEnabled(info.getDisplayMethod().endsWith("TZ"));
+		mDialMarks.setEnabled(info.isAnalogClock());
 		Rectangle screen = new Rectangle(scsize);
 		Point savedLocation = info.getLocation();
 		setLocation(screen.contains(savedLocation) ? savedLocation : new Point(10, 10));
@@ -350,8 +366,32 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		setRoundedCorners(info.getRoundCorners());
 		updatePopupMenuIcons();
 		updateOpacitySlider(info.getOpacity(), info.isPixelAlphaSupported(), info.isForegroundTranslucent());
+		int anaClkOpts = Math.floorDiv(info.getAnalogClockOption(), 1000) * 1000;
+		updateDialMarksMenu(anaClkOpts);
 		timeDisplayConfig();
 		validate();
+	}
+
+	private void updateDialMarksMenu(int analogDialMarks) {
+		switch (analogDialMarks) {
+			case TLabel.SHOW_AM_PM:
+				miAmPmMark.setSelected(true);
+				miTzMark.setSelected(false);
+				break;
+			case TLabel.SHOW_TIMEZONE:
+				miAmPmMark.setSelected(false);
+				miTzMark.setSelected(true);
+				break;
+			case (TLabel.SHOW_TIMEZONE + TLabel.SHOW_AM_PM):
+				miAmPmMark.setSelected(true);
+				miTzMark.setSelected(true);
+				break;
+			case TLabel.SHOW_NONE:
+			default:
+				miAmPmMark.setSelected(false);
+				miTzMark.setSelected(false);
+				break;
+		}
 	}
 
 	private void updatePopupMenuIcons()
@@ -630,6 +670,9 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			case "Remove this panel":
 				DeskStop.removeInstance(this, info);
 				break;
+			case CMD_ANALOG_DIAL_MARKER:
+				setAnalogClockDialMarks();
+				break;
 			default: {
 					if (comm.startsWith("TZ-")) {
 						info.setDisplayMethod(getDisplayMethodBasedOnTZ(comm.split("-")[1]));
@@ -647,6 +690,15 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		info.setScreenshotSupport(robotSupport);
 		refreshNow = true;
 		startRefresh();
+	}
+
+	private void setAnalogClockDialMarks() {
+		int anaClkOpts = 0;
+		if (miAmPmMark.isSelected()) anaClkOpts += TLabel.SHOW_AM_PM;
+		if (miTzMark.isSelected())   anaClkOpts += TLabel.SHOW_TIMEZONE;
+		info.setAnalogClockOption(anaClkOpts);
+		ExUtils.saveDeskStops(info, deskstops);
+		reInitialize();
 	}
 
 	protected void runSystemClock()
@@ -680,13 +732,13 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		int mCnt = 0;
 		for (ExUtils.ROUND_CORNERS corner : ExUtils.ROUND_CORNERS.values()) {
 			if (corner.name().equals(cornerType)) {
-				tMenuItem[mCnt].setIcon(checkPng);
+				tMenuItem[mCnt].setSelected(true);
 				setRoundedCorners(corner.getRoundType());
 				info.setRoundCorners(corner.getRoundType());
 				ExUtils.saveDeskStops(info, deskstops);
 				reInitialize();
 			} else {
-				tMenuItem[mCnt].setIcon(clearPng);
+				tMenuItem[mCnt].setSelected(false);
 			}
 			mCnt++;
 		}

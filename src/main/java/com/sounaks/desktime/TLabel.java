@@ -77,6 +77,7 @@ public class TLabel extends JLabel
 		super(s, 0);
 		hasImage   = false;
 		forceTrans = false;
+		clockMode  = false;
 		g2         = (Graphics2D)getGraphics();
 		anaClkFnt  = getFont().deriveFont(getFont().getSize() >= 12 ? (float)getFont().getSize() - 2 : 10.0f);
 		fm         = getFontMetrics(anaClkFnt);
@@ -88,7 +89,6 @@ public class TLabel extends JLabel
 		timeSec   = 5;
 		timeAmPm = "";
 		timeZn   = "";
-		clockMode = false;
 	}
 
 	public void setImageAlpha(float imageAlpha) {
@@ -102,7 +102,7 @@ public class TLabel extends JLabel
 	@Override
 	public void setFont(Font font) {
 		super.setFont(font);
-		anaClkFnt  = font.deriveFont(font.getSize() >= 12 ? (float)font.getSize() - 2 : 10.0f);
+		anaClkFnt  = font.deriveFont(font.getSize() - 10 >= 8 ? (float)font.getSize() - 10 : 8.0f);
 		fm         = getFontMetrics(anaClkFnt);
 	}
 
@@ -505,6 +505,7 @@ public class TLabel extends JLabel
 			g2.fillOval(GAP + xCenter - doubleStroke, GAP + yCenter - doubleStroke , 2 * doubleStroke, 2 * doubleStroke);
 		}
 
+		g2.setFont(getFont());
 		super.paintComponent(g2);
 	}
 }
