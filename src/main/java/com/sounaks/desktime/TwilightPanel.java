@@ -35,7 +35,9 @@ public class TwilightPanel extends JPanel {
     protected void paintComponent(Graphics g) {
 
         Graphics2D g2d = (Graphics2D) g.create();
-        g2d.setComposite(AlphaComposite.Src.derive(getAlpha()));
+        AlphaComposite apc = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, getAlpha());
+        g2d.setComposite(apc);
+        // g2d.setComposite(AlphaComposite.Src.derive(getAlpha()));
         g2d.setColor(getBackground());
         g2d.fillRect(0, 0, getWidth(), getHeight());
         super.paintComponent(g2d);

@@ -48,6 +48,7 @@ public class InitInfo extends Hashtable<String, Object>
 	private static final String KEY_POMO_BREAK_SOUND        = "POMO_BREAK_SOUND";
 	private static final String KEY_POMO_REST_SOUND         = "POMO_REST_SOUND";
 	private static final String KEY_PANEL_ID                = "PANEL_ID";
+	private static final String KEY_DIAL_OBJECTS_SIZE               = "HAND_SIZE";
 
 	public InitInfo()
 	{
@@ -64,7 +65,7 @@ public class InitInfo extends Hashtable<String, Object>
 			defaultsDir = new File(".");
 		}
 		put(KEY_FONT, new Font("Courier New", Font.BOLD, 16));
-		put(KEY_BACKGROUND, Color.white);
+		put(KEY_BACKGROUND, Color.black);
 		put(KEY_OPACITY, 1.0F);
 		put(KEY_FORE_TRANSLUCENT, true);
 		put(KEY_FOREGROUND, Color.black);
@@ -98,6 +99,7 @@ public class InitInfo extends Hashtable<String, Object>
 		put(KEY_POMO_BREAK_SOUND, defaultsDir.getAbsolutePath() + "/sounds/" + "bright-phone-ringing-3-152490.mp3");
 		put(KEY_POMO_REST_SOUND, defaultsDir.getAbsolutePath() + "/sounds/" + "chiptune-alarm-clock-112869.mp3");
 		put(KEY_PANEL_ID, 0);
+		put(KEY_DIAL_OBJECTS_SIZE, 0.5f);
 	}
 
 	@Override
@@ -122,6 +124,16 @@ public class InitInfo extends Hashtable<String, Object>
 	@Override
 	public synchronized int hashCode() {
 		return Objects.hash(this);
+	}
+
+	public float getDialObjectsSize()
+	{
+		return (float)get(KEY_DIAL_OBJECTS_SIZE);
+	}
+
+	public void setDialObjectsSize(float dialObjectsSize)
+	{
+		put(KEY_DIAL_OBJECTS_SIZE, dialObjectsSize);
 	}
 
 	public boolean isAnalogClock()

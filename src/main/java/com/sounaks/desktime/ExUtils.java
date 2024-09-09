@@ -53,6 +53,15 @@ public class ExUtils
 		public int getRoundType() {
 			return roundType;
 		}
+
+		public static String nameOfValue(int value) {
+			for (ROUND_CORNERS corner : ROUND_CORNERS.values()) {
+				if (corner.getRoundType() == value) {
+					return corner.name();
+				}
+			}
+			return ROUND_CORNERS.SQUARE.name();
+		}
 	}
 
 	private static OS os = null;

@@ -7,6 +7,28 @@ import javax.swing.*;
 
 public class TLabel extends JLabel
 {
+	public enum DIAL_OBJECTS_SIZE {		
+		MINIMAL(0.2F), SMALL(0.3f), MEDIUM(0.4f), LARGE(0.5f);
+
+		private float dialObjectsSize;
+
+		DIAL_OBJECTS_SIZE (float dialObjectsSize) {
+			this.dialObjectsSize = dialObjectsSize;
+		}
+
+		public float getSizeValue() {
+			return dialObjectsSize;
+		}
+
+		public static String nameOfValue(float value) {
+			for (DIAL_OBJECTS_SIZE currSize : DIAL_OBJECTS_SIZE.values()) {
+				if (currSize.getSizeValue() == value) {
+					return currSize.name();
+				}
+			}
+			return DIAL_OBJECTS_SIZE.LARGE.name();
+		}
+	}
 
 	private transient Graphics2D g2;
 	private transient Image image, backupImage;
@@ -39,10 +61,11 @@ public class TLabel extends JLabel
 	private static final String WRONG_ARGUMENT_ERR = "Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH";
 	private int labelWidth, labelHeight;
 	private int timeHrs, timeMin, timeSec;
-	private boolean clockMode;
+	private boolean clockMode, previewMode;
 	private String timeZn, timeAmPm;
 	private FontMetrics fm;
 	private Font anaClkFnt;
+	private float dialObjSize;
 
 	public TLabel(String s, Image image1)
 	{
@@ -75,20 +98,41 @@ public class TLabel extends JLabel
 	public TLabel(String s)
 	{
 		super(s, 0);
-		hasImage   = false;
-		forceTrans = false;
-		clockMode  = false;
-		g2         = (Graphics2D)getGraphics();
-		anaClkFnt  = getFont().deriveFont(getFont().getSize() >= 12 ? (float)getFont().getSize() - 2 : 10.0f);
-		fm         = getFontMetrics(anaClkFnt);
-		imageAlpha = 1.0f;
+		hasImage    = false;
+		forceTrans  = false;
+		clockMode   = false;
+		g2          = (Graphics2D)getGraphics();
+		dialObjSize = 0.4f;
+		anaClkFnt   = getFont().deriveFont(getFont().getSize() - (20 - dialObjSize * 20) >= 8 ? getFont().getSize() - (20 - dialObjSize * 20) : 8.0f).deriveFont(Font.PLAIN);
+		fm          = getFontMetrics(anaClkFnt);
+		imageAlpha  = 1.0f;
 		setOpaque(false);
 		setVerticalAlignment(0);
-		timeHrs   = 10;
-		timeMin   = 10;
-		timeSec   = 5;
+		timeHrs  = 10;
+		timeMin  = 10;
+		timeSec  = 5;
 		timeAmPm = "";
 		timeZn   = "";
+	}
+
+	public float getDialObjSize() {
+		return dialObjSize;
+	}
+
+	public void setDialObjSize(float dialObjSize) {
+		for (DIAL_OBJECTS_SIZE siz : DIAL_OBJECTS_SIZE.values()) {
+			if (siz.getSizeValue() == dialObjSize) {
+				this.dialObjSize = dialObjSize;
+			}
+		}
+	}
+
+	public boolean isPreviewMode() {
+		return previewMode;
+	}
+
+	public void setPreviewMode(boolean previewMode) {
+		this.previewMode = previewMode;
 	}
 
 	public void setImageAlpha(float imageAlpha) {
@@ -102,17 +146,17 @@ public class TLabel extends JLabel
 	@Override
 	public void setFont(Font font) {
 		super.setFont(font);
-		anaClkFnt  = font.deriveFont(font.getSize() - 10 >= 8 ? (float)font.getSize() - 10 : 8.0f);
+		anaClkFnt  = font.deriveFont(font.getSize() - (20 - dialObjSize * 20) >= 8 ? font.getSize() - (20 - dialObjSize * 20) : 8.0f).deriveFont(Font.PLAIN);
 		fm         = getFontMetrics(anaClkFnt);
 	}
 
 	public void setTime(int hour, int min, int sec, String ampm, String timeZone)
 	{
-		timeHrs         = hour;
-		timeMin         = min;
-		timeSec         = sec;
-		timeAmPm       = ampm;
-		timeZn         = timeZone;
+		timeHrs  = hour;
+		timeMin  = min;
+		timeSec  = sec;
+		timeAmPm = ampm;
+		timeZn   = timeZone;
 		repaint();
 	}
 
@@ -283,7 +327,8 @@ public class TLabel extends JLabel
 		int inuse;
 		Dimension newWH;
 		Composite compositeBackup = g2.getComposite();
-		g2.setComposite(AlphaComposite.Src.derive(getImageAlpha()));
+		AlphaComposite acp = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, getImageAlpha());
+		g2.setComposite(acp);
 		switch (imageLayout)
 		{
 			case TLabel.STRETCH: // For image Stretch to Fit;
@@ -348,6 +393,34 @@ public class TLabel extends JLabel
 				if (i % 30 == 0) drawRadius(0.9, 0.97, i);
 				else if (i % 6 == 0) drawRadius(0.95, 0.97, i);
 			}
+		}
+	}
+
+	private void drawDialLabels(boolean ampmLabel, boolean tzLabel, int clockCenterX, int clockCenterY, Color selectedColor)
+	{
+		if (ampmLabel) {
+			int strX = clockCenterX + GAP - fm.stringWidth(timeAmPm)/2;
+			int strY = clockCenterY + GAP + Math.round(clockCenterY * dialObjSize);
+			g2.setColor(selectedColor.darker());
+			g2.drawString(timeAmPm, strX - 1, strY - 1);
+			if (anaClkFnt.getSize() >= 20) {
+				g2.setColor(selectedColor.brighter());
+				g2.drawString(timeAmPm, strX + 1, strY + 1);
+			}
+			g2.setColor(selectedColor);
+			g2.drawString(timeAmPm, strX, strY);
+		}
+		if (tzLabel) {
+			int strX = clockCenterX + GAP - Math.round(fm.stringWidth(timeZn)/2.00f);
+			int strY = clockCenterY + fm.getHeight() - Math.round(clockCenterY * dialObjSize);
+			g2.setColor(selectedColor.darker());
+			g2.drawString(timeZn, strX - 1, strY - 1);
+			if (anaClkFnt.getSize() >= 20) {
+				g2.setColor(selectedColor.brighter());
+				g2.drawString(timeZn, strX + 1, strY + 1);
+			}
+			g2.setColor(selectedColor);
+			g2.drawString(timeZn, strX, strY);
 		}
 	}
 
@@ -467,11 +540,11 @@ public class TLabel extends JLabel
 				break;
 			}
 
+			Color currColor = isEnabled() ? getForeground() : Color.LIGHT_GRAY;
+			g2.setColor(currColor);
 			// Draw AM/PM and time zone markers
-			g2.setColor(isEnabled() ? getForeground() : Color.LIGHT_GRAY);
-			if (ampm) g2.drawString(timeAmPm, xCenter + GAP - fm.stringWidth(timeAmPm)/2, yCenter + GAP + yCenter / 2);
-			if (tzone) g2.drawString(timeZn, xCenter + GAP - Math.round(fm.stringWidth(timeZn)/2.00f), GAP + Math.round(yCenter * 0.60f));
-			
+			drawDialLabels(ampm, tzone, xCenter, yCenter, currColor);
+
 			// Draw Hour and minute markers
 			g2.setStroke(new BasicStroke(stroke * 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			drawDialTicks(majHrTick, hrTick, minTick);
@@ -480,25 +553,29 @@ public class TLabel extends JLabel
 			g2.setColor(TLabel.darker(getForeground(), 0.50));
 			g2.setStroke(new BasicStroke(stroke * 1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			if (clkBdr) g2.drawOval(xCenter - radius + GAP, yCenter - radius + GAP, 2 * radius, 2 * radius);
+			else if (previewMode) {
+				g2.setColor(Color.LIGHT_GRAY);
+				g2.drawOval(xCenter - radius + GAP, yCenter - radius + GAP, 2 * radius, 2 * radius);
+			}
 			
 			// Draw hour, minute and second hands shadow
 			g2.setColor(SHADOW);
 			g2.setStroke(new ShadowStroke(stroke * 2.0f, shdOffset));
-			drawRadius(-0.1, 0.7, timeMin * 6 + timeSec / 10);  // Minutes
+			drawRadius(-0.1, dialObjSize + 0.15, timeMin * 6 + timeSec / 10);  // Minutes
 			g2.setStroke(new ShadowStroke(stroke * 3.0f, shdOffset));
-			drawRadius(-0.1, 0.5, timeHrs * 30 + timeMin / 2);  // Hours
+			drawRadius(-0.1, dialObjSize + 0.0, timeHrs * 30 + timeMin / 2);  // Hours
 			g2.setStroke(new ShadowStroke(stroke * 1.0f, shdOffset));
-			drawRadius(0, 0.6, timeSec * 6);  // Seconds
+			drawRadius(0, dialObjSize + 0.1, timeSec * 6);  // Seconds
 
 			// Draw hour, minute and second hands
 			g2.setColor(TLabel.darker(getForeground(), 0.50));
-			g2.setStroke(new BasicStroke(stroke * 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			drawBevelRadius(-0.1, 0.7, timeMin * 6 + timeSec / 10);  // Minutes
-			g2.setStroke(new BasicStroke(stroke * 3.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			drawBevelRadius(-0.1, 0.5, timeHrs * 30 + timeMin / 2);  // Hours
+			g2.setStroke(new BasicStroke(stroke * 1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			drawBevelRadius(-0.1, dialObjSize + 0.15, timeMin * 6 + timeSec / 10);  // Minutes
+			g2.setStroke(new BasicStroke(stroke * 2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			drawBevelRadius(-0.1, dialObjSize + 0.0, timeHrs * 30 + timeMin / 2);  // Hours
 			g2.setColor(TLabel.getInvertedColor(getForeground()));
 			g2.setStroke(new BasicStroke(stroke * 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			drawRadius(0, 0.6, timeSec * 6);  // Seconds
+			drawRadius(0, dialObjSize + 0.1, timeSec * 6);  // Seconds
 
 			// Draw center circle
 			int doubleStroke = Math.round(3 * stroke);
