@@ -31,7 +31,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JButton resetDefs,helpFormat,resetImgDir;
 	private JLabel jlTransSlide,jLDateFormat,jLPomFormat, thickLabel;
 	private JSlider transLevel;
-	private TwilightPanel picBackPanel;
+	private TwilightPanel picBackPanel, picPanel;
 	private JCheckBox useImg,useCol,foregroundTrans,useTrans,slowUpd;
 	private ImageFileList imgFileList;
 	private JButton selectDir,selBackCol,resBackCol;
@@ -40,7 +40,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JLabel jLAlmSame, jLAlmDays, jLAlmHrs;
 	private SoundPlayer sndHour, sndUptime, sndWork, sndBrk, sndRest, sndToRun;
 	private JButton add,remove,edit,test;
-	private JPanel bottomCards, digitalPanel, analogPanel, cardComboPanel, borderPanel, picPanel;
+	private JPanel bottomCards, digitalPanel, analogPanel, cardComboPanel, borderPanel;
 	private JComboBox<String> period, dateOrWeek;
 	private JCheckBox rept,runSnd,runMsg;
 	private JTextField alarmName;
@@ -342,7 +342,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		JScrollPane jscrollpane1 = new JScrollPane();
 		jscrollpane1.getViewport().setView(imgFileList);
 		Component component4 = Box.createHorizontalStrut(140);
-		picPanel  = new JPanel();
+		Image backgroundPng = (new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/background-icon.png"))).getImage();
+		picPanel  = new TwilightPanel(backgroundPng);
 		SpringLayout picLayout = new SpringLayout();
 		picPanel.setLayout(picLayout);
 		picBackPanel = new TwilightPanel(new BorderLayout());

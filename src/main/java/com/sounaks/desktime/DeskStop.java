@@ -134,9 +134,12 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		date  = new Date();
 		time  = sd.format(date);
 		UIManager.put("PopupMenu.background", Color.WHITE);
+		UIManager.put("Menu.background", Color.WHITE);
 		UIManager.put("MenuItem.background", Color.WHITE);
 		UIManager.put("CheckBoxMenuItem.background", Color.WHITE);
 		UIManager.put("RadioButtonMenuItem.background", Color.WHITE);
+		UIManager.put("Menu.opaque", true);
+		UIManager.put("MenuItem.opaque", true);
 		pMenu = new JPopupMenu("DeskTime Menu");
 		mFormat = new JMenu("Format");
 		int mCnt = 0;
@@ -710,6 +713,15 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		info.setScreenshotSupport(robotSupport);
 		refreshNow = true;
 		startRefresh();
+		updateCursor();
+	}
+
+	private void updateCursor() {
+		if (pMenu.isShowing() && !tLabel.getCursor().equals(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))) {
+			tLabel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		} else {
+			tLabel.setCursor(info.isFixed() ? Cursor.getDefaultCursor() : Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+		}
 	}
 
 	private void setAnalogClockDialMarks() {
@@ -792,6 +804,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			}
 			ExUtils.showPopup(pMenu, this, (Component)mouseevent.getSource(), mouseevent.getPoint(), scsize);
 		}
+		updateCursor();
 	}
 
 	@Override
@@ -801,6 +814,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			refreshNow = true;
 		}
 		startRefresh();
+		updateCursor();
 	}
 
 	@Override
