@@ -5,13 +5,21 @@ import javax.swing.JPanel;
 
 public class TwilightPanel extends JPanel {
     private float alpha = 1f;
+    private transient Image bgImage;
 
     public TwilightPanel() {
         super();
+        this.bgImage = null;
     }
 
     public TwilightPanel(LayoutManager manager) {
         super(manager);
+        this.bgImage = null;
+    }
+
+    public TwilightPanel(Image bgImage) {
+        super();
+        this.bgImage = bgImage;
     }
 
     public void setAlpha(float value) {
@@ -35,9 +43,13 @@ public class TwilightPanel extends JPanel {
     protected void paintComponent(Graphics g) {
 
         Graphics2D g2d = (Graphics2D) g.create();
-        g2d.setComposite(AlphaComposite.Src.derive(getAlpha()));
+        AlphaComposite apc = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, getAlpha());
+        g2d.setComposite(apc);
         g2d.setColor(getBackground());
-        g2d.fillRect(0, 0, getWidth(), getHeight());
+        if (bgImage == null)
+            g2d.fillRect(0, 0, getWidth(), getHeight());
+        else
+            g2d.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
         super.paintComponent(g2d);
         g2d.dispose();
     }

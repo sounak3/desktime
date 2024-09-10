@@ -26,7 +26,7 @@ class FileCellRenderer extends DefaultListCellRenderer
 		JLabel label = (JLabel) super.getListCellRendererComponent(jlist, obj, i, flag,	flag1);
 		String nameString = ((File)obj).getName();
 		label.setText(nameString);
-		if (nameString.contains("clock") || nameString.contains("dial")) label.setIcon(clockIcon);
+		if (nameString.toLowerCase().contains("clock") || nameString.toLowerCase().contains("dial")) label.setIcon(clockIcon);
 		else label.setIcon(blockIcon);
 		return label;
 	}
