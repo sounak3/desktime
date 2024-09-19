@@ -51,6 +51,8 @@ public class TLabel extends JLabel
 	public static final int SHOW_NONE     = 0;
 	public static final int SHOW_AM_PM    = 1000;
 	public static final int SHOW_TIMEZONE = 2000;
+	public static final int SHOW_DAYMONTH = 4000;
+	public static final int SHOW_WEEKDAY  = 8000;
 	public static final int ANALOG_BORDER = 100;
 	public static final int MAJOR_TICK    = 200;
 	public static final int HOUR_TICK     = 400;
@@ -61,8 +63,8 @@ public class TLabel extends JLabel
 	private static final String WRONG_ARGUMENT_ERR = "Image position must be CENTER, H_TILE, V_TILE, FIT, TILE or STRETCH";
 	private int labelWidth, labelHeight;
 	private int timeHrs, timeMin, timeSec;
-	private boolean clockMode, previewMode;
-	private String timeZn, timeAmPm;
+	private boolean clockMode, previewMode, labelBorder;
+	private String timeZn, timeAmPm, timeWkDy, timeDyMn;
 	private FontMetrics fm;
 	private Font anaClkFnt;
 	private float dialObjSize;
@@ -101,6 +103,7 @@ public class TLabel extends JLabel
 		hasImage    = false;
 		forceTrans  = false;
 		clockMode   = false;
+		labelBorder = false;
 		g2          = (Graphics2D)getGraphics();
 		dialObjSize = 0.4f;
 		anaClkFnt   = getFont().deriveFont(getFont().getSize() - (20 - dialObjSize * 20) >= 8 ? getFont().getSize() - (20 - dialObjSize * 20) : 8.0f).deriveFont(Font.PLAIN);
@@ -113,6 +116,8 @@ public class TLabel extends JLabel
 		timeSec  = 5;
 		timeAmPm = "";
 		timeZn   = "";
+		timeWkDy = "";
+		timeDyMn = "";
 	}
 
 	public float getDialObjSize() {
@@ -125,6 +130,15 @@ public class TLabel extends JLabel
 				this.dialObjSize = dialObjSize;
 			}
 		}
+	}
+
+	public boolean hasAnalogClockLabelBorders() {
+		return labelBorder;
+	}
+
+	public void setAnalogClockLabelBorder(boolean labelBorder) {
+		this.labelBorder = labelBorder;
+		repaint();
 	}
 
 	public boolean isPreviewMode() {
@@ -150,22 +164,24 @@ public class TLabel extends JLabel
 		fm         = getFontMetrics(anaClkFnt);
 	}
 
-	public void setTime(int hour, int min, int sec, String ampm, String timeZone)
+	public void setTime(int hour, int min, int sec, String ampm, String daymonth, String weekD, String timeZone)
 	{
 		timeHrs  = hour;
 		timeMin  = min;
 		timeSec  = sec;
 		timeAmPm = ampm;
 		timeZn   = timeZone;
+		timeDyMn = daymonth;
+		timeWkDy = weekD;
 		repaint();
 	}
 
-	public void setTime(String hour, String min, String sec, String ampm, String timeZone)
+	public void setTime(String hour, String min, String sec, String ampm, String daymonth, String weekday, String timeZone)
 	{
 		timeHrs = Integer.parseInt(hour);
 		timeMin = Integer.parseInt(min);
 		timeSec = Integer.parseInt(sec);
-		this.setTime(timeHrs, timeMin, timeSec, ampm, timeZone);
+		this.setTime(timeHrs, timeMin, timeSec, ampm, daymonth, weekday, timeZone);
 	}
 
 	public void setAnalogClockOptions(int clockOptions)
@@ -396,31 +412,100 @@ public class TLabel extends JLabel
 		}
 	}
 
-	private void drawDialLabels(boolean ampmLabel, boolean tzLabel, int clockCenterX, int clockCenterY, Color selectedColor)
+	private void draw3DLabelRect(String label, int locX, int locY, Color col) {
+		int x = locX;
+		int y = locY - fm.getAscent();
+		int w = fm.stringWidth(label);
+		int h = fm.getHeight();
+		g2.setColor(Color.black);
+		g2.fillRect(x - 5, y - 2, w + 10, h + 2);
+		g2.setColor(col);
+		switch (label.length()) {
+			case 5:
+				int w1 = fm.stringWidth(label.substring(0, 3));
+				g2.fillRect(x - 5, y - 2, w1 + 6, h + 2);
+				break;
+			case 4:
+				int w2 = fm.stringWidth(label.substring(0, 2));
+				g2.fillRect(x - 5, y - 2, w2 + 5, h + 2);
+				break;
+			default:
+				break;
+		}
+		g2.setColor(Color.lightGray);
+		g2.draw3DRect(x - 5, y - 2, w + 10 + 1, h + 3, false);
+		g2.setColor(Color.gray);
+		g2.draw3DRect(x - 5 + 1, y - 1, w + 10 - 1, h + 1, false);
+		g2.setColor(Color.black);
+		g2.draw3DRect(x - 5 + 2, y, w + 10 - 3, h - 1, false);
+	}
+
+	private void draw3DLabelText(String str, int x, int y, Color col) {
+		col = previewMode ? Color.white : col;
+		Color newCol = str.length() > 3 ? Color.darkGray : col;
+		String firstStr = str;
+		switch (str.length()) {
+			case 5:
+				firstStr = str.substring(0, 3);
+				break;
+			case 4:
+				firstStr = str.substring(0, 2);
+				break;
+			default:
+				break;
+		}
+		if (anaClkFnt.getSize() >= 28) {
+			g2.setColor(col.darker());
+			g2.drawString(str, x - 1, y - 1);
+			if (str.length() > 3 && labelBorder) {
+				g2.setColor(newCol.darker());
+				g2.drawString(firstStr, x - 1, y - 1);
+			}
+		}
+		if (anaClkFnt.getSize() >= 20) {
+			g2.setColor(col.brighter());
+			g2.drawString(str, x + 1, y + 1);
+			if (str.length() > 3 && labelBorder) {
+				g2.setColor(newCol.brighter());
+				g2.drawString(firstStr, x + 1, y + 1);
+			}
+		}
+		g2.setColor(col);
+		g2.drawString(str, x, y);
+		if (str.length() > 3 && labelBorder) {
+			g2.setColor(newCol);
+			g2.drawString(firstStr, x, y);
+		}
+	}
+
+	private void drawDialLabels(boolean ampmLabel, boolean tzLabel, boolean dateLabel, boolean wkDyLabel, int clockCenterX, int clockCenterY, Color selectedColor)
 	{
 		if (ampmLabel) {
 			int strX = clockCenterX + GAP - fm.stringWidth(timeAmPm)/2;
 			int strY = clockCenterY + GAP + Math.round(clockCenterY * dialObjSize);
-			g2.setColor(selectedColor.darker());
-			g2.drawString(timeAmPm, strX - 1, strY - 1);
-			if (anaClkFnt.getSize() >= 20) {
-				g2.setColor(selectedColor.brighter());
-				g2.drawString(timeAmPm, strX + 1, strY + 1);
-			}
-			g2.setColor(selectedColor);
-			g2.drawString(timeAmPm, strX, strY);
+			if (labelBorder) draw3DLabelRect(timeAmPm, strX, strY, selectedColor);
+			draw3DLabelText(timeAmPm, strX, strY, selectedColor);
 		}
 		if (tzLabel) {
 			int strX = clockCenterX + GAP - Math.round(fm.stringWidth(timeZn)/2.00f);
 			int strY = clockCenterY + fm.getHeight() - Math.round(clockCenterY * dialObjSize);
-			g2.setColor(selectedColor.darker());
-			g2.drawString(timeZn, strX - 1, strY - 1);
-			if (anaClkFnt.getSize() >= 20) {
-				g2.setColor(selectedColor.brighter());
-				g2.drawString(timeZn, strX + 1, strY + 1);
-			}
-			g2.setColor(selectedColor);
-			g2.drawString(timeZn, strX, strY);
+			if (labelBorder) draw3DLabelRect(timeZn, strX, strY, selectedColor);
+			draw3DLabelText(timeZn, strX, strY, selectedColor);
+		}
+		if (dateLabel) {
+			// int strX = 2 * clockCenterX - Math.round(2 * GAP * dialObjSize) - fm.stringWidth(timeDyMn);
+			// int strX = (int)Math.floor(2 * clockCenterX - fm.stringWidth(timeDyMn) - fm.stringWidth(timeDyMn)/(dialObjSize * 10));
+			int strX = clockCenterX + GAP + Math.round((clockCenterX - fm.stringWidth(timeDyMn)) * dialObjSize);
+			int strY = clockCenterY + GAP - Math.round(fm.getHeight() * dialObjSize) + fm.getAscent();
+			if (labelBorder) draw3DLabelRect(timeDyMn, strX, strY, selectedColor);
+			draw3DLabelText(timeDyMn, strX, strY, selectedColor);
+		}
+		if (wkDyLabel) {
+			// int strX = clockCenterX - fm.stringWidth(timeWkDy) - Math.round(clockCenterX * dialObjSize);
+			int strX = clockCenterX - Math.round((fm.stringWidth(timeWkDy) + clockCenterX) * dialObjSize);
+			int strY = clockCenterY + GAP - Math.round(fm.getHeight() * dialObjSize) + fm.getAscent();
+			if (labelBorder) draw3DLabelRect(timeWkDy, strX, strY, selectedColor);
+			draw3DLabelText(timeWkDy, strX, strY, selectedColor);
 		}
 	}
 
@@ -452,14 +537,18 @@ public class TLabel extends JLabel
 			float   stroke    = (float)radius / 50;
 			boolean ampm      = false;
 			boolean tzone     = false;
+			boolean daymon    = false;
+			boolean weekday   = false;
 			boolean clkBdr    = false;
 			boolean majHrTick = false;
 			boolean hrTick    = false;
 			boolean minTick   = false;
 			double  shdOffset = stroke * 2.0f;
+			int borderOptions = analogClockOptions % 1000;
+			int labelOptions  = Math.floorDiv(analogClockOptions, 1000) * 1000;
 			
 			g2.setFont(anaClkFnt);
-			switch (analogClockOptions) {
+			switch (labelOptions) {
 				case TLabel.SHOW_AM_PM:
 				ampm = true;
 				break;
@@ -468,72 +557,77 @@ public class TLabel extends JLabel
 				tzone = true;
 				break;
 
+				case TLabel.SHOW_DAYMONTH:
+				daymon = true;
+				break;
+
+				case TLabel.SHOW_WEEKDAY:
+				weekday = true;
+				break;
+
 				case (TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE):
 				ampm = tzone = true;
 				break;
 
+				case (TLabel.SHOW_AM_PM + TLabel.SHOW_WEEKDAY):
+				ampm = weekday = true;
+				break;
+
+				case (TLabel.SHOW_AM_PM + TLabel.SHOW_DAYMONTH):
+				ampm = daymon = true;
+				break;
+
+				case (TLabel.SHOW_TIMEZONE + TLabel.SHOW_WEEKDAY):
+				tzone = weekday = true;
+				break;
+
+				case (TLabel.SHOW_TIMEZONE + TLabel.SHOW_DAYMONTH):
+				tzone = daymon = true;
+				break;
+
+				case (TLabel.SHOW_DAYMONTH + TLabel.SHOW_WEEKDAY):
+				daymon = weekday = true;
+				break;
+
+				case (TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE + TLabel.SHOW_DAYMONTH):
+				ampm = tzone = daymon = true;
+				break;
+
+				case (TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE + TLabel.SHOW_WEEKDAY):
+				ampm = tzone = weekday = true;
+				break;
+
+				case (TLabel.SHOW_AM_PM + TLabel.SHOW_DAYMONTH + TLabel.SHOW_WEEKDAY):
+				ampm = daymon = weekday = true;
+				break;
+
+				case (TLabel.SHOW_TIMEZONE + TLabel.SHOW_DAYMONTH + TLabel.SHOW_WEEKDAY):
+				tzone = daymon = weekday = true;
+				break;
+
+				case (TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE + TLabel.SHOW_DAYMONTH + TLabel.SHOW_WEEKDAY):
+				ampm = tzone = daymon = weekday = true;
+				break;
+
+				default:
+				break;
+			}
+
+			switch (borderOptions) {
 				case TLabel.ANALOG_BORDER:
 				clkBdr = true;
-				break;
-
-				case (TLabel.ANALOG_BORDER + TLabel.SHOW_AM_PM):
-				clkBdr = ampm = true;
-				break;
-
-				case (TLabel.ANALOG_BORDER + TLabel.SHOW_TIMEZONE):
-				clkBdr = tzone = true;
-				break;
-
-				case (TLabel.ANALOG_BORDER + TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE):
-				clkBdr = tzone = ampm = true;
 				break;
 
 				case TLabel.ANALOG_BORDER + TLabel.MAJOR_TICK:
 				clkBdr = majHrTick = true;
 				break;
 
-				case (TLabel.ANALOG_BORDER + TLabel.MAJOR_TICK + TLabel.SHOW_AM_PM):
-				clkBdr = majHrTick = ampm = true;
-				break;
-
-				case (TLabel.ANALOG_BORDER + TLabel.MAJOR_TICK + TLabel.SHOW_TIMEZONE):
-				clkBdr = majHrTick = tzone = true;
-				break;
-
-				case (TLabel.ANALOG_BORDER + TLabel.MAJOR_TICK + TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE):
-				clkBdr = majHrTick = tzone = ampm = true;
-				break;
-
 				case TLabel.ANALOG_BORDER + TLabel.HOUR_TICK:
 				clkBdr = hrTick = true;
 				break;
 
-				case (TLabel.ANALOG_BORDER + TLabel.HOUR_TICK + TLabel.SHOW_AM_PM):
-				clkBdr = hrTick = ampm = true;
-				break;
-
-				case (TLabel.ANALOG_BORDER + TLabel.HOUR_TICK + TLabel.SHOW_TIMEZONE):
-				clkBdr = hrTick = tzone = true;
-				break;
-
-				case (TLabel.ANALOG_BORDER + TLabel.HOUR_TICK + TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE):
-				clkBdr = hrTick = tzone = ampm = true;
-				break;
-
 				case TLabel.ANALOG_BORDER + TLabel.MINUTE_TICK:
 				clkBdr = minTick = true;
-				break;
-
-				case (TLabel.ANALOG_BORDER + TLabel.MINUTE_TICK + TLabel.SHOW_AM_PM):
-				clkBdr = minTick = ampm = true;
-				break;
-
-				case (TLabel.ANALOG_BORDER + TLabel.MINUTE_TICK + TLabel.SHOW_TIMEZONE):
-				clkBdr = minTick = tzone = true;
-				break;
-
-				case (TLabel.ANALOG_BORDER + TLabel.MINUTE_TICK + TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE):
-				clkBdr = minTick = tzone = ampm = true;
 				break;
 
 				default:
@@ -543,7 +637,7 @@ public class TLabel extends JLabel
 			Color currColor = isEnabled() ? getForeground() : Color.LIGHT_GRAY;
 			g2.setColor(currColor);
 			// Draw AM/PM and time zone markers
-			drawDialLabels(ampm, tzone, xCenter, yCenter, currColor);
+			drawDialLabels(ampm, tzone, daymon, weekday, xCenter, yCenter, currColor);
 
 			// Draw Hour and minute markers
 			g2.setStroke(new BasicStroke(stroke * 1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));

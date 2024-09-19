@@ -23,11 +23,11 @@
     </void>
     <void method="put">
      <string>IMAGEFILE</string>
-     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\Clock-standard-white-rim.png</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\MathClipArt--Clock-Face.png</string>
     </void>
     <void method="put">
      <string>ANALOG_CLOCK_OPTS</string>
-     <int>3000</int>
+     <int>15000</int>
     </void>
     <void method="put">
      <string>BACKGROUND</string>
@@ -48,14 +48,23 @@
     <void method="put">
      <string>FONT</string>
      <object class="java.awt.Font">
-      <string>Courier New Bold</string>
+      <string>DialogInput.plain</string>
       <object idref="Integer0"/>
-      <int>24</int>
+      <int>28</int>
      </object>
     </void>
     <void method="put">
      <string>HAND_SIZE</string>
-     <float>0.4</float>
+     <float>0.3</float>
+    </void>
+    <void method="put">
+     <string>FOREGROUND</string>
+     <object class="java.awt.Color">
+      <int>102</int>
+      <int>255</int>
+      <int>102</int>
+      <int>255</int>
+     </object>
     </void>
     <void id="Point0" method="get">
      <string>LOCATION</string>
@@ -63,14 +72,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>865</int>
+       <int>600</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>50</int>
+       <int>57</int>
       </void>
      </void>
     </void>

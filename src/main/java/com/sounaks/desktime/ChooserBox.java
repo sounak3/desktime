@@ -26,7 +26,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JList<TLabel.DIAL_OBJECTS_SIZE> handSize;
 	private JRadioButton selTimeZone,sysUpTime,pomodoroTime;
 	private JLabel layLabel, jLDayTxt, jLUptimeTxt, jLHourTxt, jLMinTxt, jLSecTxt, tzLabel, jlRoundBdr;
-	private JCheckBox analogCb2, analogCb1, analogCb0, tzCb, cbPomLabel, cbPomCountdown, cbShowDays;
+	private JCheckBox analogCb2, analogCb1, analogCb0, tzCb, cbPomLabel, cbPomCountdown, cbShowDays, cbLabelBdr1, cbLabelBdr2;
 	private JComboBox<String> dSymbol, uSymbol, hSymbol, mSymbol, sSymbol;
 	private JButton resetDefs,helpFormat,resetImgDir;
 	private JLabel jlTransSlide,jLDateFormat,jLPomFormat, thickLabel;
@@ -40,9 +40,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private JLabel jLAlmSame, jLAlmDays, jLAlmHrs;
 	private SoundPlayer sndHour, sndUptime, sndWork, sndBrk, sndRest, sndToRun;
 	private JButton add,remove,edit,test;
-	private JPanel bottomCards, digitalPanel, analogPanel, cardComboPanel, borderPanel;
+	private JPanel bottomCards, digitalPanel, analogPanel, cardComboPanel, borderPanel, clockFormatsPane;
 	private JComboBox<String> period, dateOrWeek;
-	private JCheckBox rept,runSnd,runMsg;
+	private JCheckBox rept, runSnd, runMsg, cbAmPm, cbTz, cbWkDy, cbDate;
 	private JTextField alarmName;
 	private JRadioButton optStartOn, optStartAfter;
 	private JSpinner timeSpinner1, timeSpinner2, countSpinner1, countSpinner2, thickSpinner;
@@ -74,6 +74,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private static final String CMD_ADD_EDIT       = "AddEdit";
 	private static final String CMD_FINISH_EDIT    = "FinishEdit";
 	private static final String IN_JOINER          = " in \"";
+	private static final String CMD_CB_DIAL_OPTION = "AnalogClockDialOptions";
+	private static final String CB_DIAL_LABEL_BDR  = "Dial label border";
 
 	private static final String BEVELED_RAISED_BORDER  = "Beveled Raised Border";
 	private static final String BEVELED_LOWERED_BORDER = "Beveled Lowered Border";
@@ -138,6 +140,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		JPanel jpanel1 = new JPanel(new GridBagLayout());
 		analogCb1 = new JCheckBox("Analog clock dial");
 		analogCb1.setActionCommand(CMD_ANALOG_CLOCK);
+		cbLabelBdr1 = new JCheckBox(CB_DIAL_LABEL_BDR);
 		borderPanel  = new JPanel();
 		SpringLayout applyLayout = new SpringLayout();
 		borderPanel.setLayout(applyLayout);
@@ -243,14 +246,33 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		topPanePr.add(digitalPanel, BorderLayout.CENTER);
 		analogCb2 = new JCheckBox("Analog clock");
 		analogCb2.setActionCommand(CMD_ANALOG_CLOCK);
+		cbLabelBdr2 = new JCheckBox(CB_DIAL_LABEL_BDR);
 		anaFormats = new Vector<>();
-		anaFormats.add(new Item(TLabel.SHOW_NONE, "No markers"));
-		anaFormats.add(new Item(TLabel.SHOW_AM_PM, "AM-PM markers"));
-		anaFormats.add(new Item(TLabel.SHOW_TIMEZONE, "Time zone marker"));
-		anaFormats.add(new Item((TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE), "AM-PM and Time zone"));
+		anaFormats.add(new Item(TLabel.SHOW_NONE, "No labels"));
+		anaFormats.add(new Item(TLabel.SHOW_AM_PM, "AM-PM label"));
+		anaFormats.add(new Item(TLabel.SHOW_TIMEZONE, "Timezone label"));
+		anaFormats.add(new Item((TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE), "AM-PM and Timezone"));
 		comboClockFmt = new JComboBox<>(anaFormats);
 		comboClockFmt.setEditable(false);
 		comboClockFmt.addItemListener(this);
+		clockFormatsPane = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+		cbTz = new JCheckBox("Timezone");
+		cbTz.setActionCommand(CMD_CB_DIAL_OPTION);
+		cbTz.addActionListener(this);
+		cbAmPm = new JCheckBox("AM/PM");
+		cbAmPm.setActionCommand(CMD_CB_DIAL_OPTION);
+		cbAmPm.addActionListener(this);
+		cbWkDy = new JCheckBox("Weekday");
+		cbWkDy.setActionCommand(CMD_CB_DIAL_OPTION);
+		cbWkDy.addActionListener(this);
+		cbDate = new JCheckBox("Date");
+		cbDate.setActionCommand(CMD_CB_DIAL_OPTION);
+		cbDate.addActionListener(this);
+		clockFormatsPane.add(cbTz);
+		clockFormatsPane.add(cbAmPm);
+		clockFormatsPane.add(cbWkDy);
+		clockFormatsPane.add(cbDate);
+		clockFormatsPane.setBorder(BorderFactory.createEtchedBorder());
 		tzLabel = new JLabel("Select Timezone");
 		tzCb    = new JCheckBox("Use local time");
 		tzCb.setActionCommand("LocalTz");
@@ -265,7 +287,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		jLDateFormat.setLabelFor(comboDateFmt);
 		cardComboPanel = new JPanel(new CardLayout());
 		cardComboPanel.add(comboDateFmt, "DateFormat");
-		cardComboPanel.add(comboClockFmt, "ClockFormat");
+		cardComboPanel.add(clockFormatsPane, "ClockFormat");
+		// cardComboPanel.add(comboClockFmt, "ClockFormat");
 		JSeparator jseparator3 = new JSeparator();
 		cbShowDays  = new JCheckBox("Show Days in Up-time");
 		jLDayTxt    = new JLabel("Day Label");
@@ -496,6 +519,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel1, nBorder, 			new int[]{0, 0, 2, 1}, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, analogCb1,		new int[]{2, 0, 1, 1}, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, comboDialBdr,		new int[]{3, 0, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, cbLabelBdr1,		new int[]{4, 0, 1, 1}, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, bRaised, 			new int[]{0, 2, 2, 1}, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, borderPanel, 		new int[]{2, 2, 2, 4}, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, handSizesPane, 	new int[]{4, 2, 1, 4}, 1.0D, 0.0D, this);
@@ -517,6 +541,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel2, analogPanel,		new int[]{4, 2, 1, 3}, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, selTimeZone, 		new int[]{0, 3, 2, 1}, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, analogCb2,		new int[]{2, 3, 1, 1}, 0.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel2, cbLabelBdr2,		new int[]{3, 3, 1, 1}, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, jLDateFormat, 	new int[]{1, 4, 1, 1}, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, cardComboPanel, 	new int[]{2, 4, 2, 1}, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, timePaneRadSpace, new int[]{0, 5, 1, 1}, 0.0D, 0.0D, this);
@@ -747,6 +772,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				break;
 		}
 		jLAnaPreview.setAnalogClockOptions(Math.floorDiv(initinfo.getAnalogClockOption(), 1000) * 1000);
+		updateAnalogDialOptionCBs(Math.floorDiv(initinfo.getAnalogClockOption(), 1000) * 1000);
+		cbLabelBdr1.setSelected(initinfo.isAnalogClockLabelBorderShowing());
+		cbLabelBdr2.setSelected(initinfo.isAnalogClockLabelBorderShowing());
+		jLAnaPreview.setAnalogClockLabelBorder(initinfo.isAnalogClockLabelBorderShowing());
 		bdrPreview.setAnalogClockOptions(initinfo.getAnalogClockOption() % 1000);
 		bdrPreview.setPreviewMode(true);
 		jLDigiPreview.setText(privT);
@@ -820,7 +849,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	{
 		SimpleDateFormat anaFormat = new SimpleDateFormat("zzz");
 		anaFormat.setTimeZone(updZone);
-		jLAnaPreview.setTime(10, 10, 5, "AM", anaFormat.format(new Date()));
+		jLAnaPreview.setTime(10, 10, 5, "AM", "APR 01", "WED", anaFormat.format(new Date()));
 	}
 
 	private JButton createSmallButton(Image buttonImg, String buttonText, ActionListener actListenter)
@@ -919,6 +948,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			analogCb0.setSelected(true);
 			analogCb1.setSelected(true);
 			analogCb2.setSelected(true);
+			cbLabelBdr1.setEnabled(true);
+			cbLabelBdr2.setEnabled(true);
 			digitalPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
 			analogPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 			jLDigiPreview.setEnabled(false);
@@ -935,6 +966,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			analogCb0.setSelected(false);
 			analogCb1.setSelected(false);
 			analogCb2.setSelected(false);
+			cbLabelBdr1.setEnabled(false);
+			cbLabelBdr2.setEnabled(false);
 			digitalPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 			analogPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
 			jLDigiPreview.setEnabled(true);
@@ -1184,6 +1217,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		information.setOpacity((float)transLevel.getValue() / 20);
 		information.setDialObjectsSize(handSize.getSelectedValue().getSizeValue());
 		information.setBorder(bdrPreview.getBorder());
+		information.setAnalogClockLabelBorder(cbLabelBdr1.isSelected());
 		information.setLineColor(((ButtonIcon)selLineCol.getIcon()).getEnabledColor());
 		information.setTooltip(enTooltip.isSelected());
 		information.setFixed(!cbMovable.isSelected());
@@ -1207,7 +1241,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			}
 			information.setDisplayMethod(tzCb.isSelected() ? DeskStop.DISPLAY_MODE_CURRENT_TIMEZONE : DeskStop.DISPLAY_MODE_SELECTED_TIMEZONE);
 			information.setAnalogClock(analogCb0.isSelected() || analogCb1.isSelected() || analogCb2.isSelected());
-			information.setAnalogClockOption(comboClockFmt.getItemAt(comboClockFmt.getSelectedIndex()).getId() + comboDialBdr.getItemAt(comboDialBdr.getSelectedIndex()).getId());
+			information.setAnalogClockOption(getSelectedAnalogDialOptions() + comboDialBdr.getItemAt(comboDialBdr.getSelectedIndex()).getId());
 			information.setTimeZone(comboTz.getItemAt(comboTz.getSelectedIndex()));
 			information.setZonedTimeFormat(comboDateFmt.getSelectedItem().toString());
 		}
@@ -1424,7 +1458,106 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		} else if (srcCheckBox.equals(analogCb0)) {
 			analogCb1.setSelected(analogCb0.isSelected());
 			analogCb2.setSelected(analogCb0.isSelected());
+		} else if (srcCheckBox.equals(cbLabelBdr1)) {
+			cbLabelBdr2.setSelected(cbLabelBdr1.isSelected());
+		} else if (srcCheckBox.equals(cbLabelBdr2)) {
+			cbLabelBdr1.setSelected(cbLabelBdr2.isSelected());
 		}
+	}
+
+	private void updateAnalogDialOptionCBs(int dialOptions)
+	{
+		switch (dialOptions) {
+			case TLabel.SHOW_AM_PM:
+			cbAmPm.setSelected(true);
+			break;
+
+			case TLabel.SHOW_TIMEZONE:
+			cbTz.setSelected(true);
+			break;
+
+			case TLabel.SHOW_DAYMONTH:
+			cbDate.setSelected(true);
+			break;
+
+			case TLabel.SHOW_WEEKDAY:
+			cbWkDy.setSelected(true);
+			break;
+
+			case (TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE):
+			cbAmPm.setSelected(true);
+			cbTz.setSelected(true);
+			break;
+
+			case (TLabel.SHOW_AM_PM + TLabel.SHOW_WEEKDAY):
+			cbAmPm.setSelected(true);
+			cbWkDy.setSelected(true);
+			break;
+
+			case (TLabel.SHOW_AM_PM + TLabel.SHOW_DAYMONTH):
+			cbAmPm.setSelected(true);
+			cbDate.setSelected(true);
+			break;
+
+			case (TLabel.SHOW_TIMEZONE + TLabel.SHOW_WEEKDAY):
+			cbTz.setSelected(true);
+			cbWkDy.setSelected(true);
+			break;
+
+			case (TLabel.SHOW_TIMEZONE + TLabel.SHOW_DAYMONTH):
+			cbTz.setSelected(true);
+			cbDate.setSelected(true);
+			break;
+
+			case (TLabel.SHOW_DAYMONTH + TLabel.SHOW_WEEKDAY):
+			cbDate.setSelected(true);
+			cbWkDy.setSelected(true);
+			break;
+
+			case (TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE + TLabel.SHOW_DAYMONTH):
+			cbAmPm.setSelected(true);
+			cbTz.setSelected(true);
+			cbDate.setSelected(true);
+			break;
+
+			case (TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE + TLabel.SHOW_WEEKDAY):
+			cbAmPm.setSelected(true);
+			cbTz.setSelected(true);
+			cbWkDy.setSelected(true);
+			break;
+
+			case (TLabel.SHOW_AM_PM + TLabel.SHOW_DAYMONTH + TLabel.SHOW_WEEKDAY):
+			cbAmPm.setSelected(true);
+			cbDate.setSelected(true);
+			cbWkDy.setSelected(true);
+			break;
+
+			case (TLabel.SHOW_TIMEZONE + TLabel.SHOW_DAYMONTH + TLabel.SHOW_WEEKDAY):
+			cbTz.setSelected(true);
+			cbDate.setSelected(true);
+			cbWkDy.setSelected(true);
+			break;
+
+			case (TLabel.SHOW_AM_PM + TLabel.SHOW_TIMEZONE + TLabel.SHOW_DAYMONTH + TLabel.SHOW_WEEKDAY):
+			cbAmPm.setSelected(true);
+			cbTz.setSelected(true);
+			cbDate.setSelected(true);
+			cbWkDy.setSelected(true);
+			break;
+
+			default:
+			break;
+		}
+	}
+
+	private int getSelectedAnalogDialOptions()
+	{
+		int dialOptions = 0;
+		if (cbTz.isSelected()) dialOptions += TLabel.SHOW_TIMEZONE;
+		if (cbAmPm.isSelected()) dialOptions += TLabel.SHOW_AM_PM;
+		if (cbWkDy.isSelected()) dialOptions += TLabel.SHOW_WEEKDAY;
+		if (cbDate.isSelected()) dialOptions += TLabel.SHOW_DAYMONTH;
+		return dialOptions;
 	}
 
 	private void updateBorderPreview(String borderTypeCmd)
@@ -1532,6 +1665,15 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				jLAnaPreview.setPreferredSize(analogPanel.getSize());
 				updateAnalogClockTimezone(TimeZone.getTimeZone(comboTz.getItemAt(comboTz.getSelectedIndex())));
 				updateLayoutCombo();
+				break;
+			case CB_DIAL_LABEL_BDR:
+				JCheckBox analogLabelBdrSrc = (JCheckBox)actionevent.getSource();
+				updateAnalogCheckBoxes(analogLabelBdrSrc);
+				jLAnaPreview.setAnalogClockLabelBorder(analogLabelBdrSrc.isSelected());
+				break;
+			case CMD_CB_DIAL_OPTION:
+				int selOptions = getSelectedAnalogDialOptions();
+				jLAnaPreview.setAnalogClockOptions(selOptions);
 				break;
 			case "LocalTz":
 				comboTz.setSelectedItem(tzCb.isSelected() ? TimeZone.getDefault().getID() : information.getTimeZone());
@@ -1672,11 +1814,6 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				sd.setTimeZone(TimeZone.getTimeZone(tzId));
 				updateAnalogClockTimezone(TimeZone.getTimeZone(tzId));
 				jLDigiPreview.setText(sd.format(new Date()));
-			}
-			else if (source.equals(comboClockFmt))
-			{
-				Item tempFmt = comboClockFmt.getItemAt(comboClockFmt.getSelectedIndex());
-				jLAnaPreview.setAnalogClockOptions(tempFmt.getId());
 			}
 			else if (source.equals(comboDialBdr))
 			{
