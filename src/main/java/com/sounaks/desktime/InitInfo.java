@@ -20,6 +20,7 @@ public class InitInfo extends Hashtable<String, Object>
 	private static final String KEY_FOREGROUND              = "FOREGROUND";
 	private static final String KEY_LINE_COLOR              = "LINE_COLOR";
 	private static final String KEY_BORDER                  = "BORDER";
+	private static final String KEY_LABEL_BORDER            = "LABEL_BORDER";
 	private static final String KEY_LOCATION                = "LOCATION";
 	private static final String KEY_DISPLAY_METHOD          = "DISPLAY_METHOD";
 	private static final String KEY_UPTIME_FORMAT           = "UPTIME_FORMAT";
@@ -71,6 +72,7 @@ public class InitInfo extends Hashtable<String, Object>
 		put(KEY_FOREGROUND, Color.black);
 		put(KEY_LINE_COLOR, Color.black);
 		put(KEY_BORDER, BorderFactory.createEmptyBorder());
+		put(KEY_LABEL_BORDER, true);
 		put(KEY_LOCATION, new Point(10,10));
 		put(KEY_DISPLAY_METHOD, DeskStop.DISPLAY_MODE_CURRENT_TIMEZONE);
 		put(KEY_UPTIME_FORMAT, "'Up-Time: 'HH'-hour(s), 'mm'-minute(s), 'ss'-second(s)'");
@@ -276,6 +278,16 @@ public class InitInfo extends Hashtable<String, Object>
 	{
 		if(border == null) put(KEY_BORDER, BorderFactory.createEmptyBorder());
 		else put(KEY_BORDER, border);
+	}
+
+	public boolean isAnalogClockLabelBorderShowing()
+	{
+		return ((Boolean)get(KEY_LABEL_BORDER)).booleanValue();
+	}
+
+	public void setAnalogClockLabelBorder(boolean flag)
+	{
+		put(KEY_LABEL_BORDER, flag);
 	}
 
 	public Point getLocation()
