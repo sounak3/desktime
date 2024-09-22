@@ -134,6 +134,10 @@ public class ExUtils
 			jpopupmenu.show(component, (int)point.getX(), (int)point.getY());
 	}
 
+	public static boolean containsNumbers(String input) {
+		return input.matches(".*\\d.*");
+	}
+	
 	public static boolean contains(String s, String s1, boolean ignoreCase)
 	{
 		String s2;

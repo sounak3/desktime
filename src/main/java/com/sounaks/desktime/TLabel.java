@@ -419,18 +419,20 @@ public class TLabel extends JLabel
 		int h = fm.getHeight();
 		g2.setColor(Color.black);
 		g2.fillRect(x - 5, y - 2, w + 10, h + 2);
-		g2.setColor(col);
-		switch (label.length()) {
-			case 5:
-				int w1 = fm.stringWidth(label.substring(0, 3));
-				g2.fillRect(x - 5, y - 2, w1 + 6, h + 2);
-				break;
-			case 4:
-				int w2 = fm.stringWidth(label.substring(0, 2));
-				g2.fillRect(x - 5, y - 2, w2 + 5, h + 2);
-				break;
-			default:
-				break;
+		if (ExUtils.containsNumbers(label)) {
+			g2.setColor(col);
+			switch (label.length()) {
+				case 5:
+					int w1 = fm.stringWidth(label.substring(0, 3));
+					g2.fillRect(x - 5, y - 2, w1 + 6, h + 2);
+					break;
+				case 4:
+					int w2 = fm.stringWidth(label.substring(0, 2));
+					g2.fillRect(x - 5, y - 2, w2 + 5, h + 2);
+					break;
+				default:
+					break;
+			}
 		}
 		g2.setColor(Color.lightGray);
 		g2.draw3DRect(x - 5, y - 2, w + 10 + 1, h + 3, false);
@@ -444,6 +446,7 @@ public class TLabel extends JLabel
 		col = previewMode ? Color.white : col;
 		Color newCol = str.length() > 3 ? Color.darkGray : col;
 		String firstStr = str;
+		boolean strHasN = ExUtils.containsNumbers(str);
 		switch (str.length()) {
 			case 5:
 				firstStr = str.substring(0, 3);
@@ -457,7 +460,7 @@ public class TLabel extends JLabel
 		if (anaClkFnt.getSize() >= 28) {
 			g2.setColor(col.darker());
 			g2.drawString(str, x - 1, y - 1);
-			if (str.length() > 3 && labelBorder) {
+			if (str.length() > 3 && labelBorder && strHasN) {
 				g2.setColor(newCol.darker());
 				g2.drawString(firstStr, x - 1, y - 1);
 			}
@@ -465,14 +468,14 @@ public class TLabel extends JLabel
 		if (anaClkFnt.getSize() >= 20) {
 			g2.setColor(col.brighter());
 			g2.drawString(str, x + 1, y + 1);
-			if (str.length() > 3 && labelBorder) {
+			if (str.length() > 3 && labelBorder && strHasN) {
 				g2.setColor(newCol.brighter());
 				g2.drawString(firstStr, x + 1, y + 1);
 			}
 		}
 		g2.setColor(col);
 		g2.drawString(str, x, y);
-		if (str.length() > 3 && labelBorder) {
+		if (str.length() > 3 && labelBorder && strHasN) {
 			g2.setColor(newCol);
 			g2.drawString(firstStr, x, y);
 		}
