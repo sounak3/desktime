@@ -17,7 +17,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private ListChooser cFontList,cFontStyleList,cFontSizeList;
 	private JButton resetFont,selFontCol,resFontCol;
 	private TLabel fontPreview, jLDigiPreview, jLAnaPreview, picLabel, bdrPreview;
-	private JRadioButton bRaised,bLowered,eRaised,eLowered,lBorder;
+	private JRadioButton bRaised, bLowered, eRaised, eLowered, lBorder, rbNoIcon, rbTrayIcon, rbTaskIcon;
 	private JCheckBox nBorder,cbMovable,enTooltip,nativeLook;
 	private JButton selLineCol,resLineCol;
 	private JComboBox<String> comboTz, comboDateFmt, comboPomodoro, comboPomFmt;
@@ -65,6 +65,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	public static final int ALARM_ADD      = 11;
 	public static final int ALARM_EDIT     = 13;
 	public static final int ALARM_DISCARD  = 17;
+
+	public static final int NO_APP_ICON    = 19;
+	public static final int TASK_BAR_ICON  = 23;
+	public static final int SYS_TRAY_ICON  = 29;
 
 	private static final String PREVIEW            = "Preview";
 	private static final String EMPTY              = "";
@@ -207,6 +211,24 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		roundBdrPane.add(jlRoundBdr);
 		roundBdrPane.add(Box.createHorizontalStrut(5));
 		roundBdrPane.add(roundBdr);
+		JPanel iconPane = new JPanel();
+		JLabel appIcon = new JLabel("App icon (needs restart):");
+		BoxLayout iconLay = new BoxLayout(iconPane, BoxLayout.X_AXIS);
+		iconPane.setLayout(iconLay);
+		ButtonGroup bg2 = new ButtonGroup();
+		rbTaskIcon = new JRadioButton("Task bar");
+		rbTrayIcon = new JRadioButton("System tray");
+		rbNoIcon   = new JRadioButton("None");
+		bg2.add(rbTaskIcon);
+		bg2.add(rbTrayIcon);
+		bg2.add(rbNoIcon);
+		iconPane.add(appIcon);
+		iconPane.add(Box.createHorizontalStrut(5));
+		iconPane.add(rbTaskIcon);
+		iconPane.add(Box.createHorizontalStrut(5));
+		iconPane.add(rbTrayIcon);
+		iconPane.add(Box.createHorizontalStrut(5));
+		iconPane.add(rbNoIcon);
 		jpanel1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Looks and Borders"));
 		//All configurations for Time Conf. Panel as follows:
 		JPanel    jpanel2      = new JPanel(new GridBagLayout());
@@ -536,7 +558,8 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			ExUtils.addComponent(jpanel1, enTooltip, 		new int[]{0, 10, 2, 1}, 0.33D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, cbMovable, 		new int[]{2, 10, 1, 1}, 0.33D, 0.0D, this);
 			ExUtils.addComponent(jpanel1, roundBdrPane, 	new int[]{3, 10, 2, 1}, 0.33D, 0.0D, this);
-			ExUtils.addComponent(jpanel1, nativeLook, 		new int[]{0, 11, 5, 1}, 1.0D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, nativeLook, 		new int[]{0, 11, 3, 1}, 0.5D, 0.0D, this);
+			ExUtils.addComponent(jpanel1, iconPane, 		new int[]{3, 11, 2, 1}, 0.5D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, topPanePr,	 	new int[]{0, 2, 4, 1}, 0.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, analogPanel,		new int[]{4, 2, 1, 3}, 1.0D, 0.0D, this);
 			ExUtils.addComponent(jpanel2, selTimeZone, 		new int[]{0, 3, 2, 1}, 1.0D, 0.0D, this);
@@ -651,6 +674,27 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 
 	public Vector<TimeBean> getExistingAlarms() {
 		return alarmsData;
+	}
+
+	private int getSelectedTrayIconInfo() {
+		if (rbTrayIcon.isSelected()) return SYS_TRAY_ICON;
+		else if (rbTaskIcon.isSelected()) return TASK_BAR_ICON;
+		else return NO_APP_ICON;
+	}
+
+	private void updateTrayIconSelection(int iconType) {
+		switch (iconType) {
+			case TASK_BAR_ICON:
+				rbTaskIcon.setSelected(true);
+				break;
+			case SYS_TRAY_ICON:
+				rbTrayIcon.setSelected(true);
+				break;
+			case NO_APP_ICON:
+			default:
+				rbNoIcon.setSelected(true);
+				break;
+		}
 	}
 
 	public static InfoTracker showDialog(String s, int i, InitInfo initinfo, Vector <TimeBean>alarmData)
@@ -776,7 +820,9 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		cbLabelBdr1.setSelected(initinfo.isAnalogClockLabelBorderShowing());
 		cbLabelBdr2.setSelected(initinfo.isAnalogClockLabelBorderShowing());
 		jLAnaPreview.setAnalogClockLabelBorder(initinfo.isAnalogClockLabelBorderShowing());
-		bdrPreview.setAnalogClockOptions(initinfo.getAnalogClockOption() % 1000);
+		jLAnaPreview.setPreviewMode(true);
+		bdrPreview.setAnalogClockOptions(initinfo.getAnalogClockOption());
+		bdrPreview.setAnalogClockLabelBorder(initinfo.isAnalogClockLabelBorderShowing());
 		bdrPreview.setPreviewMode(true);
 		jLDigiPreview.setText(privT);
 		initUptimeFormatValues(initinfo.getUpTimeFormat(), initinfo.isDayShowing());
@@ -792,6 +838,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		sndBrk.setAudioFileName(initinfo.getPomodoroBreakSound());
 		sndRest.setAudioFileName(initinfo.getPomodoroRestSound());
 		sndToRun.setDefaultSoundsDir(initinfo.getDefaultsDir() + "/sounds");
+		updateTrayIconSelection(initinfo.getTrayIconType());
 		setOneEnabled();
 	}
 
@@ -850,6 +897,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		SimpleDateFormat anaFormat = new SimpleDateFormat("zzz");
 		anaFormat.setTimeZone(updZone);
 		jLAnaPreview.setTime(10, 10, 5, "AM", "APR 01", "WED", anaFormat.format(new Date()));
+		bdrPreview.setTime(10, 10, 5, "AM", "APR 01", "WED", anaFormat.format(new Date()));
 	}
 
 	private JButton createSmallButton(Image buttonImg, String buttonText, ActionListener actListenter)
@@ -957,7 +1005,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			((CardLayout)cardComboPanel.getLayout()).show(cardComboPanel, "ClockFormat");
 			bdrPreview.setText(EMPTY);
 			bdrPreview.setClockMode(true);
-			bdrPreview.setPreferredSize(new Dimension(100, 100));
+			bdrPreview.setPreferredSize(new Dimension(130, 130));
 			picLabel.setText(EMPTY);
 			picLabel.setClockMode(true);
 			picLabel.setPreferredSize(new Dimension(150, 150));
@@ -982,6 +1030,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			handSize.setEnabled(false);
 		}
 		comboDialBdr.setEnabled(analogCb1.isSelected());
+		rbTrayIcon.setEnabled(SystemTray.isSupported());
 		
 		try
 		{
@@ -1228,6 +1277,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		information.setPomodoroWorkSound(sndWork.getAudioFileName());
 		information.setPomodoroBreakSound(sndBrk.getAudioFileName());
 		information.setPomodoroRestSound(sndRest.getAudioFileName());
+		information.setTrayIconType(getSelectedTrayIconInfo());
 		SimpleDateFormat simpledateformat = new SimpleDateFormat();
 		if (selTimeZone.isSelected())
 		{
@@ -1670,10 +1720,12 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 				JCheckBox analogLabelBdrSrc = (JCheckBox)actionevent.getSource();
 				updateAnalogCheckBoxes(analogLabelBdrSrc);
 				jLAnaPreview.setAnalogClockLabelBorder(analogLabelBdrSrc.isSelected());
+				bdrPreview.setAnalogClockLabelBorder(analogLabelBdrSrc.isSelected());
 				break;
 			case CMD_CB_DIAL_OPTION:
 				int selOptions = getSelectedAnalogDialOptions();
 				jLAnaPreview.setAnalogClockOptions(selOptions);
+				bdrPreview.setAnalogClockOptions(selOptions);
 				break;
 			case "LocalTz":
 				comboTz.setSelectedItem(tzCb.isSelected() ? TimeZone.getDefault().getID() : information.getTimeZone());

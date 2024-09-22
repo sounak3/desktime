@@ -21,9 +21,12 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 {
 	protected transient ClockThread clockThread; 
 	protected transient Refresher refreshThread;
+	protected transient TrayIcon trayIcon;
+	protected transient SystemTray thisTray;
 	private String time, lastPomFormat, lastPomTask;
 	private Date date;
 	private int locX, locY, locW, locH, cursorX, cursorY, cursorW, cursorH;
+	private static int recentIconType;
 	private TLabel tLabel;
 	private TwilightPanel mainPane;
 	private SimpleDateFormat sd, clk;
@@ -76,12 +79,14 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private static final String CMD_ABOUT					   = "About DeskStop...";
 	private static final String CMD_ANALOG_DIAL_LABEL		   = "AnalogDialLabel";
 	private static final String CMD_HAND_STRING_COMPLEMENT     = "_HANDS";
+	private static final String TITLE_STRING			       = "DeskStop";
 	private static ArrayList<InitInfo> deskstops;
 	private final ImageIcon plusPng  = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/plus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
 	private final ImageIcon minusPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/minus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
 	private final ImageIcon checkPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/checked-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
 	private final ImageIcon clearPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/unchecked-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
-	private final ImageIcon aboutGif = new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/duke.gif"));
+	// private final ImageIcon aboutGif = new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/duke.gif"));
+	private final ImageIcon mainIcon = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/DeskStop-icon.png"))).getImage().getScaledInstance(128, 128, Image.SCALE_SMOOTH));
 
 	public DeskStop(InitInfo info, Vector<TimeBean> alarms)
 	{
@@ -106,8 +111,11 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		contentPane.setLayout(new BorderLayout());
 		contentPane.add(mainPane, BorderLayout.CENTER);
 		setUndecorated(true);
-		setTitle("DeskStop");
-		setType(Type.UTILITY);
+		setTitle(TITLE_STRING);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setIconImage(mainIcon.getImage());
+		thisTray = SystemTray.getSystemTray();
+		updateIconType(); // must be called before visibility
 		pack();
 		setSize(300, 50);
 		setLocation((scsize.width - 200) / 2, (scsize.height - 200) / 2);
@@ -142,7 +150,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		UIManager.put("Menu.opaque", true);
 		UIManager.put("MenuItem.opaque", true);
 		pMenu = new JPopupMenu("DeskTime Menu");
-		mFormat = new JMenu("Format");
+		mFormat = new JMenu("Preferences");
 		int mCnt = 0;
 		mHandSize = new JMenu("Clock Hand and Label size");
 		miDialObjSize = new JRadioButtonMenuItem[TLabel.DIAL_OBJECTS_SIZE.values().length];
@@ -165,11 +173,16 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			mRoundCorners.add(tMenuItem[mCnt]);
 			mCnt++;
 		}
-		mOpacityLevel = new JMenu("Opacity level");
+		mOpacityLevel = new JMenu("Opacity level %");
+		Hashtable<Integer, JLabel> hto = new Hashtable<>();
+		for (int i = 4; i <= 20; i += 4)
+			hto.put(i, new JLabel(String.valueOf(i * 5)));
 		miOpacitySlider  = new JSlider(SwingConstants.VERTICAL, 4, 20, 10);
 		miOpacitySlider.setPreferredSize(new Dimension(miOpacitySlider.getPreferredSize().width + 40, miOpacitySlider.getPreferredSize().height + 40));
 		miOpacitySlider.setMajorTickSpacing(4);
 		miOpacitySlider.setMinorTickSpacing(1);
+		miOpacitySlider.setLabelTable(hto);
+		miOpacitySlider.setPaintLabels(true);
 		miOpacitySlider.setPaintTicks(true);
 		miOpacitySlider.setSnapToTicks(true);
 		miOpacitySlider.addChangeListener(this);
@@ -400,6 +413,55 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		updateDialMarksMenu(anaClkOpts);
 		timeDisplayConfig();
 		validate();
+		updateAllPanelIconTypes(info.getTrayIconType());
+	}
+
+	public static void updateAllPanelIconTypes(int trayIconType) {
+		recentIconType = trayIconType;
+		for (int cnt = 0; cnt < deskstops.size(); cnt++) {
+			InitInfo tmp = deskstops.get(cnt);
+			tmp.setTrayIconType(trayIconType);
+			deskstops.set(cnt, tmp);
+		}
+		ExUtils.saveDeskStops(deskstops);
+	}
+
+	private void updateIconType() {
+		if (!SystemTray.isSupported()) return;
+		trayIcon = new TrayIcon(mainIcon.getImage(), TITLE_STRING);
+		trayIcon.setImageAutoSize(true);
+		PopupMenu sysPMenu = new PopupMenu();
+		MenuItem toFront = new MenuItem("Bring to front");
+		MenuItem exitItm = new MenuItem("Exit");
+		toFront.addActionListener(this);
+		exitItm.addActionListener(this);
+		sysPMenu.add(toFront);
+		sysPMenu.add(exitItm);
+		trayIcon.setPopupMenu(sysPMenu);
+		switch (info.getTrayIconType()) {
+			case ChooserBox.SYS_TRAY_ICON:
+				TrayIcon[] allIcons = thisTray.getTrayIcons();
+				int x = 0;
+				for (TrayIcon currTrayIcon : allIcons) {
+					if (currTrayIcon.getToolTip().equals(TITLE_STRING)) x += 1;
+				}
+				try {
+					if (x == 0) thisTray.add(trayIcon);
+					setType(Type.UTILITY);
+				} catch (AWTException e) {
+					e.printStackTrace();
+				}
+				break;
+			case ChooserBox.NO_APP_ICON:
+				if (trayIcon != null) thisTray.remove(trayIcon);
+				setType(Type.UTILITY);
+				break;
+			case ChooserBox.TASK_BAR_ICON:
+			default:
+				if (trayIcon != null) thisTray.remove(trayIcon);
+				setType(Type.NORMAL);
+				break;
+		}
 	}
 
 	private void updateLayoutOnChange(boolean oldLayout, boolean newLayout) {
@@ -756,7 +818,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 				setAlwaysOnTop(info.getOnTop());
 				break;
 			case CMD_ABOUT:
-				JOptionPane.showMessageDialog(new Frame(), ABOUT_STRING, CMD_ABOUT, 1, aboutGif);
+				JOptionPane.showMessageDialog(new Frame(), ABOUT_STRING, CMD_ABOUT, 1, mainIcon);
 				break;
 			case "Exit":
 				clockThread.terminate();
@@ -782,6 +844,9 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 				break;
 			case CMD_ANALOG_DIAL_LABEL:
 				setAnalogClockDialMarks();
+				break;
+			case "Bring to front":
+				toFront();
 				break;
 			default: {
 					if (comm.startsWith("TZ-")) {
@@ -1380,6 +1445,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		initInfo.setID(newid > 0 ? newid : deskstops.size());
 		Point refLocation = reference.getLocation();
 		initInfo.setLocation(new Point(refLocation.x + 10, refLocation.y + 10));
+		initInfo.setTrayIconType(recentIconType);
 		Vector<TimeBean> allTimeBeans = ExUtils.loadAlarms();
 		DeskStop deskstop = new DeskStop(initInfo, allTimeBeans);
 		deskstop.start();

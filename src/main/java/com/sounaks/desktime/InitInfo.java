@@ -49,7 +49,8 @@ public class InitInfo extends Hashtable<String, Object>
 	private static final String KEY_POMO_BREAK_SOUND        = "POMO_BREAK_SOUND";
 	private static final String KEY_POMO_REST_SOUND         = "POMO_REST_SOUND";
 	private static final String KEY_PANEL_ID                = "PANEL_ID";
-	private static final String KEY_DIAL_OBJECTS_SIZE               = "HAND_SIZE";
+	private static final String KEY_DIAL_OBJECTS_SIZE       = "HAND_SIZE";
+	private static final String KEY_TRAY_ICON_TYPE          = "TRAY_ICON_TYPE";
 
 	public InitInfo()
 	{
@@ -102,6 +103,7 @@ public class InitInfo extends Hashtable<String, Object>
 		put(KEY_POMO_REST_SOUND, defaultsDir.getAbsolutePath() + "/sounds/" + "chiptune-alarm-clock-112869.mp3");
 		put(KEY_PANEL_ID, 0);
 		put(KEY_DIAL_OBJECTS_SIZE, 0.5f);
+		put(KEY_TRAY_ICON_TYPE, ChooserBox.NO_APP_ICON);
 	}
 
 	@Override
@@ -126,6 +128,16 @@ public class InitInfo extends Hashtable<String, Object>
 	@Override
 	public synchronized int hashCode() {
 		return Objects.hash(this);
+	}
+
+	public int getTrayIconType()
+	{
+		return ((Integer)get(KEY_TRAY_ICON_TYPE)).intValue();
+	}
+
+	public void setTrayIconType(int trayOption)
+	{
+		put(KEY_TRAY_ICON_TYPE, trayOption);
 	}
 
 	public float getDialObjectsSize()
