@@ -24,12 +24,6 @@
   <!-- <img alt="Github stars" src="https://img.shields.io/github/stars/sounak3/desktime?color=56BEB8" /> -->
 </p>
 
-Status
-
-<h4 align="center"> 
-	🚧  DeskStop 🚀 Under construction...  🚧
-</h4> 
-
 <hr>
 
 <p align="center">
@@ -50,14 +44,14 @@ DeskStop is a versatile, multi-feature clock and timer application designed for 
 
 ## :sparkles: Features ##
 
-:heavy_check_mark: Uptime Tracker: Monitor your system’s uptime to gauge productivity or device longevity.;\
-:heavy_check_mark: Analog & Digital Clocks: Choose between classic analog or modern digital displays to suit your style.;\
-:heavy_check_mark: Multiple Time Zones: View and manage time across multiple regions—ideal for remote teams and frequent travelers.;\
-:heavy_check_mark: Pomodoro Timer: Integrated Pomodoro timer to boost productivity with customizable work and break intervals.;\
-:heavy_check_mark: Customizable UI: Personalize DeskStop’s look with a range user interface settings like font, Background Color & Opacity to blend with your desktop environment.;\
-:heavy_check_mark: Various Dial Images: Select from different dial styles for the analog clock, adding a unique touch to your time display.;\
-:heavy_check_mark: Alarms: Set one-time or recurring alarms with custom tones for reminders, tasks, or events.;\
-:heavy_check_mark: Pomodoro Sounds: Choose from various sound effects for the Pomodoro timer to suit your work rhythm.;
+:heavy_check_mark: **`Uptime Tracker:`** Monitor your system’s uptime to gauge productivity or device longevity;\
+:heavy_check_mark: **`Analog & Digital Clocks:`** Choose between classic analog or modern digital displays to suit your style;\
+:heavy_check_mark: **`Multiple Time Zones:`** View and manage time across multiple regions—ideal for remote teams and frequent travelers;\
+:heavy_check_mark: **`Pomodoro Timer:`** Integrated Pomodoro timer to boost productivity with customizable work and break intervals;\
+:heavy_check_mark: **`Customizable UI:`** Personalize DeskStop’s look with a range user interface settings like font, Background Color & Opacity to blend with your desktop environment;\
+:heavy_check_mark: **`Various Dial Images:`** Select from different dial styles for the analog clock, adding a unique touch to your time display;\
+:heavy_check_mark: **`Alarms:`** Set one-time or recurring alarms with custom tones for reminders, tasks, or events;\
+:heavy_check_mark: **`Pomodoro Sounds:`** Choose from various sound effects for the Pomodoro timer to suit your work rhythm;
 
 ## :rocket: Technologies ##
 
