@@ -74,7 +74,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	public  static final String WINDOW_SHADOW_PROPERTY         = "Window.shadow";
 	public  static final String PREFERENCES_TITLE              = "Preferences...";
 	private static final String ANALOG_CLOCK_USE_PATTERN       = "zzz':'hh':'mm':'ss':'a':'dd':'MMM':'EEE";
-	private static final String ABOUT_STRING                   = "<html>Created and Developed by : Sounak Choudhury<p>E-mail Address : <a href='mailto:sounak_s@rediffmail.com'>sounak_s@rediffmail.com</a><p>The software, information and documentation<p>is provided \"AS IS\" without warranty of any<p>kind, either express or implied. The Readme.txt<p>file containing EULA must be read before use.<p>Suggestions and credits are Welcomed.</html>";
+	private static final String ABOUT_STRING                   = "<html>Made by : Sounak Choudhury<p>E-mail : <a href='mailto:sounak_s@rediffmail.com'>sounak_s@rediffmail.com</a><p><p>The software, information and documentation is provided \"AS IS\" without<p>warranty of any kind, either express or implied. By downloading, installing<p>or using this software, you signify acceptance of and agree to the terms<p>and conditions mentioned in LICENSE.md. Suggestions and credits are<p>Welcomed. Thank you for using DeskStop!</html>";
 	private static final String CMD_TIME_SETTINGS              = "Time Settings";
 	private static final String CMD_ABOUT					   = "About DeskStop...";
 	private static final String CMD_ANALOG_DIAL_LABEL		   = "AnalogDialLabel";
