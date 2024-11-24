@@ -39,7 +39,10 @@ public class ExUtils
 	public static final int BEEP_ALARM    = 2;
 	public static final int MESSAGE_ALARM = 4;
 
-	public static final String SETTINGS_FILE = "DeskTime.xml";
+	public static final String SETTINGS_FILE          = "DeskTime.xml";
+	public static final String INTERNAL_SETTINGS_FILE = "app/DeskTime.xml";
+	public static final String ALARMS_FILE            = "Alarms.xml";
+	public static final String INTERNAL_ALARMS_FILE   = "app/Alarms.xml";
 
 	public enum ROUND_CORNERS {		
 		SQUARE(0), MINIMAL(1), STANDARD(4), SQUIRCLE(16), CIRCLE(20);
@@ -434,7 +437,15 @@ public class ExUtils
 		ArrayList<InitInfo> data = new ArrayList<>();
 		try
 		{
-			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(SETTINGS_FILE)));
+			XMLDecoder decoder;
+			File settingsFile = new File(SETTINGS_FILE);
+			File internalSettings = new File(INTERNAL_SETTINGS_FILE);
+			if (!settingsFile.exists() && internalSettings.exists()) {
+				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(internalSettings)));
+			} else {
+				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(settingsFile)));
+			}
+
 			Object content = decoder.readObject();
 			decoder.close();
 			if (content instanceof ArrayList) {
@@ -469,7 +480,14 @@ public class ExUtils
 
 		try
 		{
-			XMLEncoder xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(SETTINGS_FILE)));
+			XMLEncoder xencode;
+			File settingsFile = new File(SETTINGS_FILE);
+			File internalSettings = new File(INTERNAL_SETTINGS_FILE);
+			if (!settingsFile.exists() && internalSettings.exists()) {
+				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(internalSettings)));
+			} else {
+				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(settingsFile)));
+			}
 			xencode.writeObject(currDeskStops);
 			xencode.close();
 		}
@@ -484,7 +502,14 @@ public class ExUtils
 	{
 		try
 		{
-			XMLEncoder xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(SETTINGS_FILE)));
+			XMLEncoder xencode;
+			File settingsFile = new File(SETTINGS_FILE);
+			File internalSettings = new File(INTERNAL_SETTINGS_FILE);
+			if (!settingsFile.exists() && internalSettings.exists()) {
+				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(internalSettings)));
+			} else {
+				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(settingsFile)));
+			}
 			xencode.writeObject(currDeskStops);
 			xencode.close();
 		}
@@ -500,7 +525,14 @@ public class ExUtils
 		Vector<TimeBean> data = new Vector<>();
 		try
 		{
-			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream("Smrala.xml")));
+			XMLDecoder decoder;
+			File alarmsFile = new File(ALARMS_FILE);
+			File internalAlarms = new File(INTERNAL_ALARMS_FILE);
+			if (!alarmsFile.exists() && internalAlarms.exists()) {
+				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(internalAlarms)));
+			} else {
+				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(alarmsFile)));
+			}
 			Object settingsObj = decoder.readObject();
 			decoder.close();
 			if (settingsObj instanceof Vector) {
@@ -512,7 +544,7 @@ public class ExUtils
 		}
 		catch (Exception exclusive)
 		{// Ignoring missing file...
-			System.out.println("Exception while loading properties file-\"Smarla.xml\": " + exclusive.getMessage());
+			System.out.println("Exception while loading properties file-\"" + ALARMS_FILE + "\": " + exclusive.getMessage());
 			exclusive.printStackTrace();
 		}
 		return data;
@@ -522,13 +554,20 @@ public class ExUtils
 	{
 		try
 		{
-			XMLEncoder xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream("Smrala.xml")));
+			XMLEncoder xencode;
+			File alarmsFile = new File(ALARMS_FILE);
+			File internalAlarms = new File(INTERNAL_ALARMS_FILE);
+			if (!alarmsFile.exists() && internalAlarms.exists()) {
+				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(internalAlarms)));
+			} else {
+				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(alarmsFile)));
+			}
 			xencode.writeObject(data);
 			xencode.close();
 		}
 		catch (FileNotFoundException fne)
 		{
-			System.out.println("Exception while saving alarms file \"Smarla.xml\": " + fne.toString());
+			System.out.println("Exception while saving alarms file \"" + ALARMS_FILE + "\": " + fne.toString());
 			fne.printStackTrace();
 		}
 	}
