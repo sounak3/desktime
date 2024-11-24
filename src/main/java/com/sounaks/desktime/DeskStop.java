@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
 import java.awt.image.*;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
@@ -74,7 +74,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	public  static final String WINDOW_SHADOW_PROPERTY         = "Window.shadow";
 	public  static final String PREFERENCES_TITLE              = "Preferences...";
 	private static final String ANALOG_CLOCK_USE_PATTERN       = "zzz':'hh':'mm':'ss':'a':'dd':'MMM':'EEE";
-	private static final String ABOUT_STRING                   = "<html>Made by : Sounak Choudhury<p>E-mail : <a href='mailto:sounak_s@rediffmail.com'>sounak_s@rediffmail.com</a><p><p>The software, information and documentation is provided \"AS IS\" without<p>warranty of any kind, either express or implied. By downloading, installing<p>or using this software, you signify acceptance of and agree to the terms<p>and conditions mentioned in LICENSE.md. Suggestions and credits are<p>Welcomed. Thank you for using DeskStop!</html>";
+	private static final String ABOUT_STRING                   = "<html>Made by : Sounak Choudhury<p>E-mail : <a href='mailto:sounak_s@rediffmail.com'>sounak_s@rediffmail.com</a><p><p>The software, information and documentation is provided \"AS IS\" without<p>warranty of any kind, either express or implied. By downloading, installing<p>or using this software, you signify acceptance of and agree to the terms<p>and conditions mentioned in LICENSE.txt. Suggestions and credits are<p>Welcomed. Thank you for using DeskStop!</html>";
 	private static final String CMD_TIME_SETTINGS              = "Time Settings";
 	private static final String CMD_ABOUT					   = "About DeskStop...";
 	private static final String CMD_ANALOG_DIAL_LABEL		   = "AnalogDialLabel";
@@ -818,7 +818,10 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 				setAlwaysOnTop(info.getOnTop());
 				break;
 			case CMD_ABOUT:
-				JOptionPane.showMessageDialog(new Frame(), ABOUT_STRING, CMD_ABOUT, 1, mainIcon);
+				Object[] options = {"Show LICENSE.txt", "OK"};
+				int choice = JOptionPane.showOptionDialog(new Frame(), ABOUT_STRING, CMD_ABOUT, JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, mainIcon, options, JOptionPane.NO_OPTION);
+				if (choice == 0)
+					openLicense();
 				break;
 			case "Exit":
 				clockThread.terminate();
@@ -868,6 +871,32 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		refreshNow = true;
 		startRefresh();
 		updateCursor();
+	}
+
+	private void openLicense() {
+		File licFile     = new File("LICENSE.md");       // in build
+		File internalLic = new File("app/LICENSE.txt");  // in deploy
+		try {
+			File tmpfile = File.createTempFile("License", ".txt");
+			FileInputStream fis;
+			FileOutputStream fos = new FileOutputStream(tmpfile);
+			if (!licFile.exists() && internalLic.exists()) {
+				fis = new FileInputStream(internalLic);
+			} else {
+				fis = new FileInputStream(licFile);
+			}
+			byte[] buffer = new byte[1024];
+			int length;
+			while ((length = fis.read(buffer)) > 0) {
+				fos.write(buffer, 0, length);
+			}
+			fis.close();
+			fos.close();
+			Desktop.getDesktop().open(tmpfile);
+		} catch (IOException ie) {
+			JOptionPane.showMessageDialog(this, "License file not found. Exiting!", "Error", JOptionPane.ERROR_MESSAGE);
+			System.exit(1);
+		}
 	}
 
 	private void updateCursor() {
