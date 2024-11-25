@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
@@ -43,6 +44,7 @@ public class ExUtils
 	public static final String INTERNAL_SETTINGS_FILE = "app/DeskTime.xml";
 	public static final String ALARMS_FILE            = "Alarms.xml";
 	public static final String INTERNAL_ALARMS_FILE   = "app/Alarms.xml";
+	private static File jarDir;
 
 	public enum ROUND_CORNERS {		
 		SQUARE(0), MINIMAL(1), STANDARD(4), SQUIRCLE(16), CIRCLE(20);
@@ -432,14 +434,33 @@ public class ExUtils
 		return "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
 	}
 
+	public static File getJarDir() {
+		if (jarDir != null && jarDir.exists()) {
+			return jarDir;
+		}
+		File jarFile;
+		try {
+			jarFile = new File(DeskStop.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+		} catch (URISyntaxException ue) {
+			jarFile = new File(System.getProperty("user.home"));
+		}
+		if (jarFile.isDirectory() && jarFile.getName().equals("classes")) {
+			jarFile = jarFile.getParentFile();
+		}
+
+		return jarFile.getParentFile();
+	}
+
 	public static java.util.List<InitInfo> loadDeskStops()
 	{
 		ArrayList<InitInfo> data = new ArrayList<>();
 		try
 		{
 			XMLDecoder decoder;
-			File settingsFile = new File(SETTINGS_FILE);
-			File internalSettings = new File(INTERNAL_SETTINGS_FILE);
+			File parentDir        = getJarDir();
+			System.out.println(parentDir.toString());
+			File settingsFile     = new File(parentDir, SETTINGS_FILE);
+			File internalSettings = new File(parentDir, INTERNAL_SETTINGS_FILE);
 			if (!settingsFile.exists() && internalSettings.exists()) {
 				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(internalSettings)));
 			} else {
@@ -481,8 +502,10 @@ public class ExUtils
 		try
 		{
 			XMLEncoder xencode;
-			File settingsFile = new File(SETTINGS_FILE);
-			File internalSettings = new File(INTERNAL_SETTINGS_FILE);
+			File jarDir           = getJarDir();
+			System.out.println(jarDir.toString());
+			File settingsFile     = new File(jarDir, SETTINGS_FILE);
+			File internalSettings = new File(jarDir, INTERNAL_SETTINGS_FILE);
 			if (!settingsFile.exists() && internalSettings.exists()) {
 				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(internalSettings)));
 			} else {
@@ -491,7 +514,7 @@ public class ExUtils
 			xencode.writeObject(currDeskStops);
 			xencode.close();
 		}
-		catch (FileNotFoundException fne)
+		catch (Exception fne)
 		{
 			System.out.println("Exception while saving properties file-\"" + SETTINGS_FILE + "\": " + fne.toString());
 			fne.printStackTrace();
@@ -503,8 +526,10 @@ public class ExUtils
 		try
 		{
 			XMLEncoder xencode;
-			File settingsFile = new File(SETTINGS_FILE);
-			File internalSettings = new File(INTERNAL_SETTINGS_FILE);
+			File jarDir           = getJarDir();
+			System.out.println(jarDir.toString());
+			File settingsFile     = new File(jarDir, SETTINGS_FILE);
+			File internalSettings = new File(jarDir, INTERNAL_SETTINGS_FILE);
 			if (!settingsFile.exists() && internalSettings.exists()) {
 				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(internalSettings)));
 			} else {
@@ -513,7 +538,7 @@ public class ExUtils
 			xencode.writeObject(currDeskStops);
 			xencode.close();
 		}
-		catch (FileNotFoundException fne)
+		catch (Exception fne)
 		{
 			System.out.println("Exception while saving properties file-\"" + SETTINGS_FILE + "\": " + fne.toString());
 			fne.printStackTrace();
@@ -526,8 +551,10 @@ public class ExUtils
 		try
 		{
 			XMLDecoder decoder;
-			File alarmsFile = new File(ALARMS_FILE);
-			File internalAlarms = new File(INTERNAL_ALARMS_FILE);
+			File jarDir         = getJarDir();
+			System.out.println(jarDir.toString());
+			File alarmsFile     = new File(jarDir, ALARMS_FILE);
+			File internalAlarms = new File(jarDir, INTERNAL_ALARMS_FILE);
 			if (!alarmsFile.exists() && internalAlarms.exists()) {
 				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(internalAlarms)));
 			} else {
@@ -555,8 +582,10 @@ public class ExUtils
 		try
 		{
 			XMLEncoder xencode;
-			File alarmsFile = new File(ALARMS_FILE);
-			File internalAlarms = new File(INTERNAL_ALARMS_FILE);
+			File jarDir         = getJarDir();
+			System.out.println(jarDir.toString());
+			File alarmsFile     = new File(jarDir, ALARMS_FILE);
+			File internalAlarms = new File(jarDir, INTERNAL_ALARMS_FILE);
 			if (!alarmsFile.exists() && internalAlarms.exists()) {
 				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(internalAlarms)));
 			} else {
@@ -565,7 +594,7 @@ public class ExUtils
 			xencode.writeObject(data);
 			xencode.close();
 		}
-		catch (FileNotFoundException fne)
+		catch (Exception fne)
 		{
 			System.out.println("Exception while saving alarms file \"" + ALARMS_FILE + "\": " + fne.toString());
 			fne.printStackTrace();
