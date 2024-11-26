@@ -462,7 +462,9 @@ public class InitInfo extends Hashtable<String, Object>
 		}
 		else
 		{
-			return new File(defaultsDir.getAbsolutePath() + "/images/" + ff.getName());
+			String debugFile = defaultsDir.getAbsolutePath() + "/images/" + ff.getName();
+			System.out.println(debugFile);
+			return new File(debugFile);
 		}
 	}
 	
