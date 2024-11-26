@@ -461,7 +461,9 @@ public class InitInfo extends Hashtable<String, Object>
 			return ff;
 		}
 		else
-			return new File(".");
+		{
+			return new File(defaultsDir.getAbsolutePath() + "/images/" + ff.getName());
+		}
 	}
 	
 	public void setGlassEffect(boolean flag)
