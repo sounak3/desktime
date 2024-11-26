@@ -876,7 +876,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private void openLicense() {
 		File jarDir;
 		try {
-			jarDir = (new File(DeskStop.class.getProtectionDomain().getCodeSource().getLocation().toURI())).getParentFile();
+			jarDir = ExUtils.getJarDir();
 		} catch (Exception e) {
 			jarDir = new File(System.getProperty("user.home"));
 			JOptionPane.showMessageDialog(this, "Unable to locate jar file. License file not found. Exiting!", "Error", JOptionPane.ERROR_MESSAGE);

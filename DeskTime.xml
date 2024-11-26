@@ -158,14 +158,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point1"/>
-       <int>840</int>
+       <int>824</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point1"/>
-       <int>57</int>
+       <int>48</int>
       </void>
      </void>
     </void>
