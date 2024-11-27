@@ -458,7 +458,6 @@ public class ExUtils
 		{
 			XMLDecoder decoder;
 			File parentDir        = getJarDir();
-			System.out.println(parentDir.toString());
 			File settingsFile     = new File(parentDir, SETTINGS_FILE);
 			File internalSettings = new File(parentDir, INTERNAL_SETTINGS_FILE);
 			if (!settingsFile.exists() && internalSettings.exists()) {
@@ -502,10 +501,9 @@ public class ExUtils
 		try
 		{
 			XMLEncoder xencode;
-			File jarDir           = getJarDir();
-			System.out.println(jarDir.toString());
-			File settingsFile     = new File(jarDir, SETTINGS_FILE);
-			File internalSettings = new File(jarDir, INTERNAL_SETTINGS_FILE);
+			File parentDir        = getJarDir();
+			File settingsFile     = new File(parentDir, SETTINGS_FILE);
+			File internalSettings = new File(parentDir, INTERNAL_SETTINGS_FILE);
 			if (!settingsFile.exists() && internalSettings.exists()) {
 				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(internalSettings)));
 			} else {
@@ -526,10 +524,9 @@ public class ExUtils
 		try
 		{
 			XMLEncoder xencode;
-			File jarDir           = getJarDir();
-			System.out.println(jarDir.toString());
-			File settingsFile     = new File(jarDir, SETTINGS_FILE);
-			File internalSettings = new File(jarDir, INTERNAL_SETTINGS_FILE);
+			File parentDir        = getJarDir();
+			File settingsFile     = new File(parentDir, SETTINGS_FILE);
+			File internalSettings = new File(parentDir, INTERNAL_SETTINGS_FILE);
 			if (!settingsFile.exists() && internalSettings.exists()) {
 				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(internalSettings)));
 			} else {
@@ -551,10 +548,9 @@ public class ExUtils
 		try
 		{
 			XMLDecoder decoder;
-			File jarDir         = getJarDir();
-			System.out.println(jarDir.toString());
-			File alarmsFile     = new File(jarDir, ALARMS_FILE);
-			File internalAlarms = new File(jarDir, INTERNAL_ALARMS_FILE);
+			File parentDir      = getJarDir();
+			File alarmsFile     = new File(parentDir, ALARMS_FILE);
+			File internalAlarms = new File(parentDir, INTERNAL_ALARMS_FILE);
 			if (!alarmsFile.exists() && internalAlarms.exists()) {
 				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(internalAlarms)));
 			} else {
@@ -582,10 +578,9 @@ public class ExUtils
 		try
 		{
 			XMLEncoder xencode;
-			File jarDir         = getJarDir();
-			System.out.println(jarDir.toString());
-			File alarmsFile     = new File(jarDir, ALARMS_FILE);
-			File internalAlarms = new File(jarDir, INTERNAL_ALARMS_FILE);
+			File parentDir      = getJarDir();
+			File alarmsFile     = new File(parentDir, ALARMS_FILE);
+			File internalAlarms = new File(parentDir, INTERNAL_ALARMS_FILE);
 			if (!alarmsFile.exists() && internalAlarms.exists()) {
 				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(internalAlarms)));
 			} else {
