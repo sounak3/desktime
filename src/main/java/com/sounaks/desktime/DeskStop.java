@@ -249,7 +249,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		mDialMarks.add(miTzMark);
 		mDialMarks.add(miWkDyMark);
 		mDialMarks.add(miDateMark);
-		miLabBorder  = new JMenuItem("Dial label border");
+		miLabBorder  = new JMenuItem("Dial marker labels border");
 		miLabBorder.addActionListener(this);
 		sysClk = new JMenuItem("System Clock");
 		alm    = new JMenuItem("Alarm & sounds");
@@ -794,7 +794,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			case "System Clock":
 				runSystemClock();
 				break;
-			case "Dial label border":
+			case "Dial marker labels border":
 				info.setAnalogClockLabelBorder(!info.isAnalogClockLabelBorderShowing());
 				tLabel.setAnalogClockLabelBorder(info.isAnalogClockLabelBorderShowing());
 				ExUtils.saveDeskStops(info, deskstops);

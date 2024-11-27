@@ -80,11 +80,11 @@ public class InitInfo extends Hashtable<String, Object>
 		put(KEY_FONT, new Font("Courier New", Font.BOLD, 16));
 		put(KEY_BACKGROUND, Color.black);
 		put(KEY_OPACITY, 1.0F);
-		put(KEY_FORE_TRANSLUCENT, true);
+		put(KEY_FORE_TRANSLUCENT, false);
 		put(KEY_FOREGROUND, Color.black);
 		put(KEY_LINE_COLOR, Color.black);
 		put(KEY_BORDER, BorderFactory.createEmptyBorder());
-		put(KEY_LABEL_BORDER, true);
+		put(KEY_LABEL_BORDER, false);
 		put(KEY_LOCATION, new Point(10,10));
 		put(KEY_DISPLAY_METHOD, DeskStop.DISPLAY_MODE_CURRENT_TIMEZONE);
 		put(KEY_UPTIME_FORMAT, "'Up-Time: 'HH'-hour(s), 'mm'-minute(s), 'ss'-second(s)'");
