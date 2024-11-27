@@ -73,7 +73,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	public  static final String DISPLAY_MODE_POMODORO_TIMER    = "POMODORO";
 	public  static final String WINDOW_SHADOW_PROPERTY         = "Window.shadow";
 	public  static final String PREFERENCES_TITLE              = "Preferences...";
-	private static final String ANALOG_CLOCK_USE_PATTERN       = "zzz':'hh':'mm':'ss':'a':'dd':'MMM':'EEE";
+	private static final String ANALOG_CLOCK_USE_PATTERN       = "zzz'|'hh'|'mm'|'ss'|'a'|'dd'|'MMM'|'EEE";
 	private static final String ABOUT_STRING                   = "<html>Made by : Sounak Choudhury<p>E-mail : <a href='mailto:sounak_s@rediffmail.com'>sounak_s@rediffmail.com</a><p><p>The software, information and documentation is provided \"AS IS\" without<p>warranty of any kind, either express or implied. By downloading, installing<p>or using this software, you signify acceptance of and agree to the terms<p>and conditions mentioned in LICENSE.txt. Suggestions and credits are<p>Welcomed. Thank you for using DeskStop!</html>";
 	private static final String CMD_TIME_SETTINGS              = "Time Settings";
 	private static final String CMD_ABOUT					   = "About DeskStop...";
@@ -1232,8 +1232,17 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			if (info.isAnalogClock())
 			{
 				clk.setTimeZone(sd.getTimeZone());
-				clockTime = clk.format(date).split(":");
+				clockTime = clk.format(date).split("\\|");
 				tLabel.setText("");
+				// bugfix for os where zzz gives timezone as GMT-8:00 for PST. Taking the timezone ID instead and splitting if contains a number. Ex. PST8PDT
+				if (clockTime[0].length() >= 5 && clk.getTimeZone().getID().split("\\d").length == 2) {
+					if (clk.getTimeZone().inDaylightTime(date)) {
+						clockTime[0] = clk.getTimeZone().getID().split("\\d")[1];
+					} else {
+						clockTime[0] = clk.getTimeZone().getID().split("\\d")[0];
+					}
+				}
+				//          clockTime hour, clockTime min, clockTime sec, clockTime ampm, clockTime daymonth,                     clockTime weekday, clockTime timeZone
 				tLabel.setTime(clockTime[1], clockTime[2], clockTime[3], clockTime[4], clockTime[6].toUpperCase() + clockTime[5], clockTime[7].toUpperCase(), clockTime[0]);
 			}
 			else
