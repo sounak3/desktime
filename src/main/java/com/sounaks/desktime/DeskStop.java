@@ -1495,6 +1495,9 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		Point refLocation = reference.getLocation();
 		initInfo.setLocation(new Point(refLocation.x + 10, refLocation.y + 10));
 		initInfo.setTrayIconType(recentIconType);
+		if (!duplicate) {
+			initInfo.setTimeZone(TimeZone.getDefault().getID());
+		}
 		Vector<TimeBean> allTimeBeans = ExUtils.loadAlarms();
 		DeskStop deskstop = new DeskStop(initInfo, allTimeBeans);
 		deskstop.start();
