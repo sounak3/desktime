@@ -1500,8 +1500,10 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			initInfo.setTimeZone(TimeZone.getDefault().getID());
 		}
 		Vector<TimeBean> allTimeBeans = ExUtils.loadAlarms();
-		DeskStop deskstop = new DeskStop(initInfo, allTimeBeans);
-		deskstop.start();
+		SwingUtilities.invokeLater(() -> {
+			DeskStop deskstop = new DeskStop(initInfo, allTimeBeans);
+			deskstop.start();
+		});
 		deskstops.add(initInfo);
 		ExUtils.saveDeskStops(deskstops);
 	}
@@ -1549,8 +1551,10 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			} else {
 				initInfo = deskstops.get(count);
 			}
-			DeskStop deskstop = new DeskStop(initInfo, allTimeBeans);
-			deskstop.start();
+			SwingUtilities.invokeLater(() -> {
+				DeskStop deskstop = new DeskStop(initInfo, allTimeBeans);
+				deskstop.start();
+			});
 			count++;
 		} while (count < deskstops.size());
 	}
