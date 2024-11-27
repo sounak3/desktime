@@ -117,18 +117,18 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		thisTray = SystemTray.getSystemTray();
 		updateIconType(); // must be called before visibility
 		pack();
-		setSize(300, 50);
-		setLocation((scsize.width - 200) / 2, (scsize.height - 200) / 2);
-		if(info.getID() == 0) setVisible(true);
-		try
-		{
-			if(info.getID() == 0) Thread.sleep(3000L);
-		} 
-		catch (InterruptedException e1)
-		{
-			e1.printStackTrace();
-			Thread.currentThread().interrupt();
-		}
+		// setSize(300, 50);
+		// setLocation((scsize.width - 200) / 2, (scsize.height - 200) / 2);
+		// if(info.getID() == 0) setVisible(true);
+		// try
+		// {
+		// 	if(info.getID() == 0) Thread.sleep(3000L);
+		// } 
+		// catch (InterruptedException e1)
+		// {
+		// 	e1.printStackTrace();
+		// 	Thread.currentThread().interrupt();
+		// }
 		info.setPixelAlphaSupport(pixelTranslucency);
 		info.setWindowAlphaSupport(wholeTranslucency);
 		info.setScreenshotSupport(robotSupport);
@@ -405,7 +405,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			getRootPane().putClientProperty(WINDOW_SHADOW_PROPERTY, Boolean.TRUE);
 			stopRefresh();
 		}
-		if(info.getID() != 0) setVisible(true);
+		// if(info.getID() != 0) setVisible(true);
+		setVisible(true);
 		setRoundedCorners(info.getRoundCorners());
 		updatePopupMenuIcons();
 		updateOpacitySlider(info.getOpacity(), info.isPixelAlphaSupported(), info.isForegroundTranslucent());
