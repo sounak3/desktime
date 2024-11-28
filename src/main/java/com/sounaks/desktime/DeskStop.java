@@ -405,6 +405,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			getRootPane().putClientProperty(WINDOW_SHADOW_PROPERTY, Boolean.TRUE);
 			stopRefresh();
 		}
+		timeDisplayConfig();
 		// if(info.getID() != 0) setVisible(true);
 		setVisible(true);
 		setRoundedCorners(info.getRoundCorners());
@@ -412,7 +413,6 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		updateOpacitySlider(info.getOpacity(), info.isPixelAlphaSupported(), info.isForegroundTranslucent());
 		int anaClkOpts = Math.floorDiv(info.getAnalogClockOption(), 1000) * 1000;
 		updateDialMarksMenu(anaClkOpts);
-		timeDisplayConfig();
 		validate();
 		updateAllPanelIconTypes(info.getTrayIconType());
 	}
@@ -1546,6 +1546,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			InitInfo initInfo;
 			if (deskstops.isEmpty()) {
 				initInfo = new InitInfo();
+				initInfo.setTimeZone(TimeZone.getDefault().getID());
 				deskstops.add(initInfo);
 				ExUtils.saveDeskStops(initInfo, deskstops);
 			} else {
