@@ -363,11 +363,11 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			tLabel.setTransparency(false);
 			opacityMethod(info.isUsingImage());
 			stopRefresh();
-			boolean lastClockMode = tLabel.isClockMode();
-			boolean newClockMode  = info.isAnalogClock();
-			tLabel.setBackImage((new ImageIcon(info.getImageFile().toString())).getImage());
+			boolean lastWasClockMode = tLabel.isClockMode();
+			boolean newIsClockMode   = info.isAnalogClock();
 			// Bugfix: set image style as tile-horizontal when changing from analog to others and stretch when vice versa.
-			updateLayoutOnChange(lastClockMode, newClockMode);
+			// Bugfix: set non-analog-clock image when changing from analog to others and analog-clock image when vice versa.
+			updateImageAndStyleOnModeChange(lastWasClockMode, newIsClockMode);
 
 			info.setImageStyle(tLabel.getImageLayout());
 			tLabel.setBackground(null);
@@ -465,14 +465,29 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		}
 	}
 
-	private void updateLayoutOnChange(boolean oldLayout, boolean newLayout) {
-		boolean clockImage = info.getImageFile().getName().toLowerCase().contains("dial") || info.getImageFile().getName().toLowerCase().contains("clock");
-		int     newStyle   = 0;
-		if (oldLayout == newLayout) newStyle = info.getImageStyle();
-		else if (oldLayout && !clockImage) newStyle = TLabel.H_TILE;
-		else if (oldLayout && clockImage) newStyle  = TLabel.TILE;
-		else newStyle  = TLabel.STRETCH;
+	private void updateImageAndStyleOnModeChange(boolean oldModeIsClock, boolean newModeIsClock) {
+		boolean isClockImage = info.getImageFile().getName().toLowerCase().contains("dial") || info.getImageFile().getName().toLowerCase().contains("clock");
+		int     newStyle     = 0;
+		File newBkImageFile  = info.getImageFile();
+		ImageIcon newBkImage = new ImageIcon(newBkImageFile.getAbsolutePath());
+		if (oldModeIsClock == newModeIsClock) {  // old and new mode is analog clock
+			newStyle     = info.getImageStyle();
+		} else if (oldModeIsClock && !isClockImage) {  // old is analog, new is digital, image not analog clock
+			newStyle = TLabel.H_TILE;
+		} else if (oldModeIsClock && isClockImage) {    // old is analog, new is digital, image is analog clock
+			newBkImageFile = info.getPreviousBlockImageFile();
+			newBkImage = new ImageIcon(newBkImageFile.getAbsolutePath()); // mk image to digital clock
+			newStyle  = TLabel.H_TILE;
+		} else if (!oldModeIsClock && !isClockImage) {  // old is digital, new is analog, image is not analog clock
+			newBkImageFile = info.getNextClockImageFile();
+			newBkImage = new ImageIcon(newBkImageFile.getAbsolutePath());  // make image to analog clock
+			newStyle  = TLabel.STRETCH;
+		} else {  // old is digital, new is analog, image is analog clock and every other condition
+			newStyle  = TLabel.STRETCH;
+		}
+		tLabel.setBackImage(newBkImage.getImage());
 		tLabel.setImageLayout(newStyle);
+		info.setImageFile(newBkImageFile.getAbsolutePath());
 		info.setImageStyle(newStyle);
 		ExUtils.saveDeskStops(info, deskstops);
 	}

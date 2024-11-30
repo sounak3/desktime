@@ -713,4 +713,82 @@ public class InitInfo extends Hashtable<String, Object>
 	{
 		put(KEY_POMO_REST_SOUND, pomoRestSound);
 	}
+
+	/*
+	 * This method sorts the image files in the current images dir. Then it looks forward
+	 * for a clock image (clock in the name) and returns the same.
+	 */
+	public File getNextClockImageFile()
+	{
+		File[] imageList = new File(defaultsDir.getAbsolutePath() + IMAGES_DIR).listFiles(new ImageFileFilter());
+		Arrays.sort(imageList, (f1, f2) -> f1.getName().compareToIgnoreCase(f2.getName()));
+		File    currImagFile      = getImageFile();
+		int     currFilePosition  = 0;
+		int     firstFilePosition = 0;
+		boolean currImageFound    = false;
+		boolean firstImageFound   = false;
+		String  searchRegexStr    = "(?i).*(clock|dial).*";
+
+		if (imageList.length == 0) {
+			return currImagFile;
+		}
+
+		for (int i = 0; i < imageList.length; i++) {
+			if (!firstImageFound && imageList[i].getName().matches(searchRegexStr)) {
+				firstFilePosition = i;
+				firstImageFound   = true;
+			}
+			if (imageList[i].getName().equalsIgnoreCase(currImagFile.getName())) {
+				currFilePosition = i;
+				currImageFound   = true;
+				continue;
+			}
+			if (currImageFound && imageList[i].getName().matches(searchRegexStr)) {
+				return imageList[i];
+			}
+			if (firstImageFound && i == imageList.length - 1) {
+				return imageList[firstFilePosition];
+			}
+		}
+		return imageList[currFilePosition];
+	}
+
+	/*
+	 * This method sorts the image files in the current images dir. Then it looks backward
+	 * for a block image (no clock word in the name) and returns the same.
+	 */
+	public File getPreviousBlockImageFile()
+	{
+		File[] imageList = new File(defaultsDir.getAbsolutePath() + IMAGES_DIR).listFiles(new ImageFileFilter());
+		Arrays.sort(imageList, (f1, f2) -> f1.getName().compareToIgnoreCase(f2.getName()));
+		File    currImagFile      = getImageFile();
+		int     currFilePosition  = imageList.length;
+		int     lastFilePosition  = imageList.length;
+		boolean currImageFound    = false;
+		boolean lastImageFound    = false;
+		String  searchString      = "(?i).*(clock|dial).*";
+
+		if (imageList.length == 0) {
+			return currImagFile;
+		}
+
+		for (int i = imageList.length - 1; i >= 0; i--) {
+			if (!lastImageFound && !imageList[i].getName().matches(searchString)) {
+				lastFilePosition = i;
+				lastImageFound   = true;
+			}
+			if (imageList[i].getName().equalsIgnoreCase(currImagFile.getName())) {
+				currFilePosition = i;
+				currImageFound   = true;
+				continue;
+			}
+			if (currImageFound && !imageList[i].getName().matches(searchString)) {
+				return imageList[i];
+			}
+			if (lastImageFound && i == 0) {
+				return imageList[lastFilePosition];
+			}
+		}
+		return imageList[currFilePosition];
+	}
 }

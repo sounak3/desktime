@@ -7,6 +7,10 @@
      <string>ROUND_CORNERS</string>
      <int>1</int>
     </void>
+    <void method="put">
+     <string>POMO_WORK_SOUND</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\beep-warning-6387.mp3</string>
+    </void>
     <void id="Boolean0" method="get">
      <string>SLOW_TRANS</string>
     </void>
@@ -25,6 +29,10 @@
     <void method="put">
      <string>ANALOG_CLOCK_OPTS</string>
      <int>15000</int>
+    </void>
+    <void method="put">
+     <string>UPTIME_HOUR_SOUND</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\ambient-flute-notification-3-185275.mp3</string>
     </void>
     <void method="put">
      <string>BACKGROUND</string>
@@ -87,6 +95,18 @@
     <void method="put">
      <string>LABEL_BORDER</string>
      <boolean>true</boolean>
+    </void>
+    <void method="put">
+     <string>POMO_REST_SOUND</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\chiptune-alarm-clock-112869.mp3</string>
+    </void>
+    <void method="put">
+     <string>POMO_BREAK_SOUND</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\bright-phone-ringing-3-152490.mp3</string>
+    </void>
+    <void method="put">
+     <string>HOUR_SOUND</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\beep-beep-6151.mp3</string>
     </void>
    </object>
   </void>
