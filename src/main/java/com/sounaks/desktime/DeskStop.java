@@ -117,18 +117,6 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		thisTray = SystemTray.getSystemTray();
 		updateIconType(); // must be called before visibility
 		pack();
-		// setSize(300, 50);
-		// setLocation((scsize.width - 200) / 2, (scsize.height - 200) / 2);
-		// if(info.getID() == 0) setVisible(true);
-		// try
-		// {
-		// 	if(info.getID() == 0) Thread.sleep(3000L);
-		// } 
-		// catch (InterruptedException e1)
-		// {
-		// 	e1.printStackTrace();
-		// 	Thread.currentThread().interrupt();
-		// }
 		info.setPixelAlphaSupport(pixelTranslucency);
 		info.setWindowAlphaSupport(wholeTranslucency);
 		info.setScreenshotSupport(robotSupport);
@@ -1548,30 +1536,35 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 
 	public static void main(String[] args)
 	{
-		java.util.List<InitInfo> readList = ExUtils.loadDeskStops();
-		if (readList instanceof ArrayList) {
-			deskstops = (ArrayList<InitInfo>)readList;
-		} else {
-			throw new ArrayStoreException("DeskTime.xml is not in ArrayList format.");
-		}
-		
-		Vector<TimeBean> allTimeBeans = ExUtils.loadAlarms();
-		int count = 0;
-		do {
-			InitInfo initInfo;
-			if (deskstops.isEmpty()) {
-				initInfo = new InitInfo();
-				initInfo.setTimeZone(TimeZone.getDefault().getID());
-				deskstops.add(initInfo);
-				ExUtils.saveDeskStops(initInfo, deskstops);
+		if (ExUtils.lockInstance()) {
+			java.util.List<InitInfo> readList = ExUtils.loadDeskStops();
+			if (readList instanceof ArrayList) {
+				deskstops = (ArrayList<InitInfo>)readList;
 			} else {
-				initInfo = deskstops.get(count);
+				throw new ArrayStoreException("DeskTime.xml is not in ArrayList format.");
 			}
-			SwingUtilities.invokeLater(() -> {
-				DeskStop deskstop = new DeskStop(initInfo, allTimeBeans);
-				deskstop.start();
-			});
-			count++;
-		} while (count < deskstops.size());
+			
+			Vector<TimeBean> allTimeBeans = ExUtils.loadAlarms();
+			int count = 0;
+			do {
+				InitInfo initInfo;
+				if (deskstops.isEmpty()) {
+					initInfo = new InitInfo();
+					initInfo.setTimeZone(TimeZone.getDefault().getID());
+					deskstops.add(initInfo);
+					ExUtils.saveDeskStops(initInfo, deskstops);
+				} else {
+					initInfo = deskstops.get(count);
+				}
+				SwingUtilities.invokeLater(() -> {
+					DeskStop deskstop = new DeskStop(initInfo, allTimeBeans);
+					deskstop.start();
+				});
+				count++;
+			} while (count < deskstops.size());
+		} else {
+			JOptionPane.showMessageDialog(new JFrame(), "<html>DeskStop is already running. To add additional clock panel, please<p>Right click on it and click \"Add clock panel\" sub-menu options.</html>", TITLE_STRING, JOptionPane.ERROR_MESSAGE);
+			System.exit(1);
+		}
 	}
 }
