@@ -27,6 +27,10 @@
      <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\MathClipArt--Clock-Face.png</string>
     </void>
     <void method="put">
+     <string>ZTIME_FORMAT</string>
+     <string>z&apos;:&apos; hh:mm a</string>
+    </void>
+    <void method="put">
      <string>ANALOG_CLOCK_OPTS</string>
      <int>15000</int>
     </void>
@@ -57,7 +61,7 @@
     <void method="put">
      <string>FONT</string>
      <object class="java.awt.Font">
-      <string>DialogInput.plain</string>
+      <string>DialogInput.bold</string>
       <object idref="Integer0"/>
       <int>24</int>
      </object>
@@ -69,9 +73,9 @@
     <void method="put">
      <string>FOREGROUND</string>
      <object class="java.awt.Color" id="Color1">
-      <int>102</int>
-      <int>255</int>
-      <int>102</int>
+      <int>0</int>
+      <int>153</int>
+      <int>0</int>
       <int>255</int>
      </object>
     </void>
@@ -114,7 +118,11 @@
    <object class="com.sounaks.desktime.InitInfo" id="InitInfo1">
     <void method="put">
      <string>ROUND_CORNERS</string>
-     <int>1</int>
+     <int>4</int>
+    </void>
+    <void method="put">
+     <string>POMO_WORK_SOUND</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\beep-warning-6387.mp3</string>
     </void>
     <void method="put">
      <string>ON_TOP</string>
@@ -129,6 +137,10 @@
      <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\MathClipArt--Clock-Face.png</string>
     </void>
     <void method="put">
+     <string>ZTIME_FORMAT</string>
+     <string>z&apos;:&apos; hh:mm:ss a</string>
+    </void>
+    <void method="put">
      <string>PANEL_ID</string>
      <int>1</int>
     </void>
@@ -139,6 +151,10 @@
     <void method="put">
      <string>DISPLAY_METHOD</string>
      <string>GMTTZ</string>
+    </void>
+    <void method="put">
+     <string>UPTIME_HOUR_SOUND</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\ambient-flute-notification-3-185275.mp3</string>
     </void>
     <void method="put">
      <string>BACKGROUND</string>
@@ -154,8 +170,8 @@
     </void>
     <void method="put">
      <string>FONT</string>
-     <object class="java.awt.Font">
-      <string>DialogInput.plain</string>
+     <object class="java.awt.Font" id="Font0">
+      <string>DialogInput.bold</string>
       <object idref="Integer0"/>
       <int>24</int>
      </object>
@@ -174,14 +190,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point1"/>
-       <int>865</int>
+       <int>863</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point1"/>
-       <int>25</int>
+       <int>27</int>
       </void>
      </void>
     </void>
@@ -189,13 +205,29 @@
      <string>LABEL_BORDER</string>
      <boolean>true</boolean>
     </void>
+    <void method="put">
+     <string>POMO_REST_SOUND</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\chiptune-alarm-clock-112869.mp3</string>
+    </void>
+    <void method="put">
+     <string>POMO_BREAK_SOUND</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\bright-phone-ringing-3-152490.mp3</string>
+    </void>
+    <void method="put">
+     <string>HOUR_SOUND</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\beep-beep-6151.mp3</string>
+    </void>
    </object>
   </void>
   <void method="add">
    <object class="com.sounaks.desktime.InitInfo" id="InitInfo2">
     <void method="put">
      <string>ROUND_CORNERS</string>
-     <int>1</int>
+     <int>4</int>
+    </void>
+    <void method="put">
+     <string>POMO_WORK_SOUND</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\beep-warning-6387.mp3</string>
     </void>
     <void method="put">
      <string>ON_TOP</string>
@@ -222,6 +254,10 @@
      <string>GMTTZ</string>
     </void>
     <void method="put">
+     <string>UPTIME_HOUR_SOUND</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\ambient-flute-notification-3-185275.mp3</string>
+    </void>
+    <void method="put">
      <string>BACKGROUND</string>
      <object idref="Color0"/>
     </void>
@@ -235,11 +271,7 @@
     </void>
     <void method="put">
      <string>FONT</string>
-     <object class="java.awt.Font">
-      <string>DialogInput.plain</string>
-      <object idref="Integer0"/>
-      <int>24</int>
-     </object>
+     <object idref="Font0"/>
     </void>
     <void method="put">
      <string>HAND_SIZE</string>
@@ -255,20 +287,32 @@
       <string>x</string>
       <void method="set">
        <object idref="Point2"/>
-       <int>1091</int>
+       <int>1088</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point2"/>
-       <int>17</int>
+       <int>22</int>
       </void>
      </void>
     </void>
     <void method="put">
      <string>LABEL_BORDER</string>
      <boolean>true</boolean>
+    </void>
+    <void method="put">
+     <string>POMO_REST_SOUND</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\chiptune-alarm-clock-112869.mp3</string>
+    </void>
+    <void method="put">
+     <string>POMO_BREAK_SOUND</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\bright-phone-ringing-3-152490.mp3</string>
+    </void>
+    <void method="put">
+     <string>HOUR_SOUND</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\beep-beep-6151.mp3</string>
     </void>
    </object>
   </void>

@@ -34,12 +34,12 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private InitInfo info;
 	private Vector <TimeBean>alarms;
 	private JPopupMenu pMenu;
-	private JMenu addPanel, mFormat, timeMode, timeZone, mSize, mOpacityLevel, mRoundCorners, mDialMarks, mHandSize;
+	private JMenu addPanel, mFormat, timeMode, timeZone, mSize, mOpacityLevel, mRoundCorners, mDialMarks, mHandSize, mDigiFormat;
 	private JSlider sizer, miOpacitySlider;
 	private JMenuItem miAnaTime, miDigTime, miUptime, miPomo, miSeltz, miDeftz, timSet, zonSet, mAllOpacity, miLabBorder;
 	private JMenuItem fore, back, alm, bdr, exit, about, newItem, dupItem, removePanel, miMovable, ontop, sysClk;
 	private JCheckBoxMenuItem miAmPmMark, miTzMark, miWkDyMark, miDateMark, miSelectAll;
-	private JMenuItem[] impZon;
+	private JMenuItem[] impZon, miDigiFormats;
 	private JRadioButtonMenuItem[] tMenuItem;
 	private JRadioButtonMenuItem[] miDialObjSize;
 	private transient PointerInfo pi;
@@ -79,6 +79,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private static final String CMD_ABOUT					   = "About DeskStop...";
 	private static final String CMD_ANALOG_DIAL_LABEL		   = "AnalogDialLabel";
 	private static final String CMD_HAND_STRING_COMPLEMENT     = "_HANDS";
+	private static final String CMD_TIMEFORMAT                 = "TIMEFORMAT";
 	private static final String TITLE_STRING			       = "DeskStop";
 	private static ArrayList<InitInfo> deskstops;
 	private final ImageIcon plusPng  = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/plus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
@@ -140,6 +141,15 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		pMenu = new JPopupMenu("DeskTime Menu");
 		mFormat = new JMenu("Preferences");
 		int mCnt = 0;
+		mDigiFormat = new JMenu("Digital clock format");
+		String[] formatsList = ChooserBox.getDigitalTimeFormats();
+		miDigiFormats = new JMenuItem[formatsList.length];
+		for (int i = 0; i < formatsList.length; i++) {
+			miDigiFormats[i] = new JMenuItem(formatsList[i]);
+			miDigiFormats[i].addActionListener(this);
+			miDigiFormats[i].setActionCommand(CMD_TIMEFORMAT + formatsList[i]);
+			mDigiFormat.add(miDigiFormats[i]);
+		}
 		mHandSize = new JMenu("Clock Hand and Label size");
 		miDialObjSize = new JRadioButtonMenuItem[TLabel.DIAL_OBJECTS_SIZE.values().length];
 		for (TLabel.DIAL_OBJECTS_SIZE sizes : TLabel.DIAL_OBJECTS_SIZE.values()) {
@@ -293,6 +303,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		mFormat.add(back);
 		mFormat.add(bdr);
 		mFormat.addSeparator();
+		mFormat.add(mDigiFormat);
 		mFormat.add(mHandSize);
 		mFormat.add(mDialMarks);
 		mFormat.add(miLabBorder);
@@ -342,6 +353,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		checkUpdateRoundedCorners(ExUtils.ROUND_CORNERS.nameOfValue(info.getRoundCorners()));
 		checkUpdateDialObjectsSizes(TLabel.DIAL_OBJECTS_SIZE.nameOfValue(info.getDialObjectsSize()) + CMD_HAND_STRING_COMPLEMENT);
 		mHandSize.setEnabled(info.isAnalogClock());
+		mDigiFormat.setEnabled(info.getDisplayMethod().endsWith("TZ") && !info.isAnalogClock());
 		miSeltz.setText("Last selected (" + info.getTimeZone() + ")");
 		miDeftz.setText("System (" + TimeZone.getDefault().getID() + ")");
 		timeZone.setEnabled(info.getDisplayMethod().endsWith("TZ"));
@@ -865,12 +877,14 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 						info.setDisplayMethod(getDisplayMethodBasedOnTZ(comm.split("-")[1]));
 						info.setTimeZone(comm.split("-")[1]);
 						ExUtils.saveDeskStops(info, deskstops);
-						reInitialize();
+					} else if (comm.startsWith(CMD_TIMEFORMAT)) {
+						info.setZonedTimeFormat(comm.split(CMD_TIMEFORMAT)[1]);
+						ExUtils.saveDeskStops(info, deskstops);
 					} else {
 						checkUpdateRoundedCorners(comm);
 						checkUpdateDialObjectsSizes(comm);
-						reInitialize();
 					}
+					reInitialize();
 				}
 				break;
 		}
