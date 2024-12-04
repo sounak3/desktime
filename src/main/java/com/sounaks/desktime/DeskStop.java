@@ -39,7 +39,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private JMenuItem miAnaTime, miDigTime, miUptime, miPomo, miSeltz, miDeftz, timSet, zonSet, mAllOpacity, miLabBorder;
 	private JMenuItem fore, back, alm, bdr, exit, about, newItem, dupItem, removePanel, miMovable, ontop, sysClk;
 	private JCheckBoxMenuItem miAmPmMark, miTzMark, miWkDyMark, miDateMark, miSelectAll;
-	private JMenuItem[] impZon, miDigiFormats;
+	private JRadioButtonMenuItem[] impZon, miDigiFormats;
 	private JRadioButtonMenuItem[] tMenuItem;
 	private JRadioButtonMenuItem[] miDialObjSize;
 	private transient PointerInfo pi;
@@ -143,31 +143,37 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		int mCnt = 0;
 		mDigiFormat = new JMenu("Digital clock format");
 		String[] formatsList = ChooserBox.getDigitalTimeFormats();
-		miDigiFormats = new JMenuItem[formatsList.length];
+		ButtonGroup digiFmtButtonGroup = new ButtonGroup();
+		miDigiFormats = new JRadioButtonMenuItem[formatsList.length];
 		for (int i = 0; i < formatsList.length; i++) {
-			miDigiFormats[i] = new JMenuItem(formatsList[i]);
+			miDigiFormats[i] = new JRadioButtonMenuItem(formatsList[i]);
 			miDigiFormats[i].addActionListener(this);
 			miDigiFormats[i].setActionCommand(CMD_TIMEFORMAT + formatsList[i]);
+			digiFmtButtonGroup.add(miDigiFormats[i]);
 			mDigiFormat.add(miDigiFormats[i]);
 		}
 		mHandSize = new JMenu("Clock Hand and Label size");
+		ButtonGroup dialObjButtonGroup = new ButtonGroup();
 		miDialObjSize = new JRadioButtonMenuItem[TLabel.DIAL_OBJECTS_SIZE.values().length];
 		for (TLabel.DIAL_OBJECTS_SIZE sizes : TLabel.DIAL_OBJECTS_SIZE.values()) {
 			miDialObjSize[mCnt] = new JRadioButtonMenuItem(ExUtils.toCamelCase(sizes.name()));
 			miDialObjSize[mCnt].setSelected(info.getDialObjectsSize() == sizes.getSizeValue());
 			miDialObjSize[mCnt].setActionCommand(sizes.name() + CMD_HAND_STRING_COMPLEMENT);
 			miDialObjSize[mCnt].addActionListener(this);
+			dialObjButtonGroup.add(miDialObjSize[mCnt]);
 			mHandSize.add(miDialObjSize[mCnt]);
 			mCnt++;
 		}
 		mCnt = 0;
 		mRoundCorners = new JMenu("Rounded corners");
+		ButtonGroup rCornersButtonGroup = new ButtonGroup();
 		tMenuItem = new JRadioButtonMenuItem[ExUtils.ROUND_CORNERS.values().length];
 		for (ExUtils.ROUND_CORNERS corner : ExUtils.ROUND_CORNERS.values()) {
 			tMenuItem[mCnt] = new JRadioButtonMenuItem(ExUtils.toCamelCase(corner.name()));
 			tMenuItem[mCnt].setSelected(info.getRoundCorners() == corner.getRoundType());
 			tMenuItem[mCnt].setActionCommand(corner.name());
 			tMenuItem[mCnt].addActionListener(this);
+			rCornersButtonGroup.add(tMenuItem[mCnt]);
 			mRoundCorners.add(tMenuItem[mCnt]);
 			mCnt++;
 		}
@@ -218,11 +224,13 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		timeZone.add(miSeltz);
 		timeZone.add(miDeftz);
 		timeZone.addSeparator();
-		impZon = new JMenuItem[impZoneList.length];
+		ButtonGroup zonesButtonGroup = new ButtonGroup();
+		impZon = new JRadioButtonMenuItem[impZoneList.length];
 		for (int i = 0; i < impZoneList.length; i++) {
-			impZon[i] = new JMenuItem(impZoneList[i]);
+			impZon[i] = new JRadioButtonMenuItem(impZoneList[i]);
 			impZon[i].addActionListener(this);
 			impZon[i].setActionCommand("TZ-" + impZoneList[i].split("[\\(|\\)]")[1]);
+			zonesButtonGroup.add(impZon[i]);
 			timeZone.add(impZon[i]);
 		}
 		zonSet   = new JMenuItem("More Timezones...");
@@ -312,17 +320,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		pMenu.add(timeMode);
 		pMenu.add(mFormat);
 		pMenu.add(alm);
-		switch (ExUtils.getOS()) {
-			case WINDOWS:
-			case LINUX:
-				pMenu.add(sysClk);
-				break;
-			case MAC:
-				// to be included later
-				break;
-			default:
-				break;
-		}
+		pMenu.add(sysClk);
 		pMenu.addSeparator();
 		pMenu.add(mSize);
 		pMenu.add(mOpacityLevel);
@@ -591,6 +589,18 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		miPomo.setIcon(info.getDisplayMethod().equals(DISPLAY_MODE_POMODORO_TIMER) ? checkPng : clearPng);
 		mAllOpacity.setIcon(info.isForegroundTranslucent() ? checkPng : clearPng);
 		miLabBorder.setIcon(info.isAnalogClockLabelBorderShowing() ? checkPng : clearPng);
+
+		TimeZone curTz = TimeZone.getTimeZone(info.getTimeZone());
+		for (JRadioButtonMenuItem miZButtonMenuItem : impZon) {
+			TimeZone tmpZone = TimeZone.getTimeZone(miZButtonMenuItem.getText().split("[\\(|\\)]")[1]);
+			miZButtonMenuItem.setSelected(tmpZone.equals(curTz));
+		}
+
+		String curFmt = info.getZonedTimeFormat();
+		for (JRadioButtonMenuItem miFButtonMenuItem : miDigiFormats) {
+			String tmpFmt = miFButtonMenuItem.getText();
+			miFButtonMenuItem.setSelected(tmpFmt.equals(curFmt));
+		}
 	}
 
 	private void updateOpacitySlider(float opacityLevel, boolean pixelTransSupport, boolean foregroundTranslucent)
@@ -972,7 +982,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 				ExUtils.runProgram(sysClkCmd, this);
 				break;
 			case MAC:
-				// to be included later
+				sysClkCmd = new String[]{"open", "/System/Applications/Clock.app"};
+				ExUtils.runProgram(sysClkCmd, this);
 				break;
 			default:
 				break;

@@ -27,10 +27,6 @@
      <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\MathClipArt--Clock-Face.png</string>
     </void>
     <void method="put">
-     <string>ZTIME_FORMAT</string>
-     <string>z&apos;:&apos; hh:mm a</string>
-    </void>
-    <void method="put">
      <string>ANALOG_CLOCK_OPTS</string>
      <int>15000</int>
     </void>
