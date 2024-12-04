@@ -5,7 +5,7 @@
    <object class="com.sounaks.desktime.InitInfo" id="InitInfo0">
     <void method="put">
      <string>ROUND_CORNERS</string>
-     <int>1</int>
+     <int>4</int>
     </void>
     <void method="put">
      <string>POMO_WORK_SOUND</string>
@@ -81,14 +81,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>594</int>
+       <int>635</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>67</int>
+       <int>29</int>
       </void>
      </void>
     </void>
@@ -174,14 +174,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point1"/>
-       <int>824</int>
+       <int>865</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point1"/>
-       <int>48</int>
+       <int>25</int>
       </void>
      </void>
     </void>
@@ -255,14 +255,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point2"/>
-       <int>1072</int>
+       <int>1091</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point2"/>
-       <int>48</int>
+       <int>17</int>
       </void>
      </void>
     </void>
