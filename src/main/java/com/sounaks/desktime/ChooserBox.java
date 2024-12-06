@@ -967,7 +967,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			picLabel.setTransparency(true);
 			picLabel.setText(PREVIEW);
 		}
-		foregroundTrans.setEnabled(information.isPixelAlphaSupported());
+		foregroundTrans.setEnabled(information.isPixelAlphaSupported() && information.getOpacity() != 1.0f);
 		transLevel.setEnabled(information.isWindowAlphaSupported() || information.isPixelAlphaSupported());
 		jlTransSlide.setEnabled(information.isWindowAlphaSupported() || information.isPixelAlphaSupported());
 		slowUpd.setEnabled(useTrans.isSelected());
@@ -1951,6 +1951,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			} else {
 				picBackPanel.setAlpha(derived);
 			}
+			foregroundTrans.setEnabled(derived != 1.0f);
 			picBackPanel.repaint();
 			picLabel.repaint();
 		}

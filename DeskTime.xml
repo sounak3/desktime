@@ -12,15 +12,11 @@
      <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\beep-warning-6387.mp3</string>
     </void>
     <void id="Boolean0" method="get">
-     <string>SLOW_TRANS</string>
-    </void>
-    <void method="put">
      <string>ON_TOP</string>
-     <object idref="Boolean0"/>
     </void>
     <void method="put">
      <string>ANALOG_CLOCK</string>
-     <boolean>true</boolean>
+     <object idref="Boolean0"/>
     </void>
     <void method="put">
      <string>IMAGEFILE</string>
@@ -81,20 +77,20 @@
       <string>x</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>635</int>
+       <int>651</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>29</int>
+       <int>34</int>
       </void>
      </void>
     </void>
     <void method="put">
      <string>LABEL_BORDER</string>
-     <boolean>true</boolean>
+     <object idref="Boolean0"/>
     </void>
     <void method="put">
      <string>POMO_REST_SOUND</string>
@@ -121,12 +117,8 @@
      <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\beep-warning-6387.mp3</string>
     </void>
     <void method="put">
-     <string>ON_TOP</string>
-     <object idref="Boolean0"/>
-    </void>
-    <void method="put">
      <string>ANALOG_CLOCK</string>
-     <boolean>true</boolean>
+     <object idref="Boolean0"/>
     </void>
     <void method="put">
      <string>IMAGEFILE</string>
@@ -186,7 +178,7 @@
       <string>x</string>
       <void method="set">
        <object idref="Point1"/>
-       <int>863</int>
+       <int>873</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
@@ -199,7 +191,7 @@
     </void>
     <void method="put">
      <string>LABEL_BORDER</string>
-     <boolean>true</boolean>
+     <object idref="Boolean0"/>
     </void>
     <void method="put">
      <string>POMO_REST_SOUND</string>
@@ -226,12 +218,8 @@
      <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\beep-warning-6387.mp3</string>
     </void>
     <void method="put">
-     <string>ON_TOP</string>
-     <object idref="Boolean0"/>
-    </void>
-    <void method="put">
      <string>ANALOG_CLOCK</string>
-     <boolean>true</boolean>
+     <object idref="Boolean0"/>
     </void>
     <void method="put">
      <string>IMAGEFILE</string>
@@ -296,7 +284,7 @@
     </void>
     <void method="put">
      <string>LABEL_BORDER</string>
-     <boolean>true</boolean>
+     <object idref="Boolean0"/>
     </void>
     <void method="put">
      <string>POMO_REST_SOUND</string>

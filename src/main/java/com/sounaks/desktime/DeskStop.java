@@ -193,7 +193,6 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		mOpacityLevel.add(miOpacitySlider);
 		mAllOpacity = new JMenuItem("Blend foreground opacity");
 		mAllOpacity.addActionListener(this);
-		mAllOpacity.setEnabled(pixelTranslucency);
 		fore  = new JMenuItem("Font & Foreground...");
 		fore.addActionListener(this);
 		back  = new JMenuItem("Background & Dials...");
@@ -357,6 +356,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		timeZone.setEnabled(info.getDisplayMethod().endsWith("TZ"));
 		mDialMarks.setEnabled(info.isAnalogClock());
 		miLabBorder.setEnabled(info.isAnalogClock());
+		mAllOpacity.setEnabled(pixelTranslucency && info.getOpacity() != 1.0f);
 		Rectangle screen = new Rectangle(scsize);
 		Point savedLocation = info.getLocation();
 		setLocation(screen.contains(savedLocation) ? savedLocation : new Point(10, 10));
@@ -1184,6 +1184,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			float derived = (float)miOpacitySlider.getValue() / 20;
 			if (derived != info.getOpacity()) {
 				info.setOpacity(derived);
+				mAllOpacity.setEnabled(pixelTranslucency && derived != 1.0f);
 				opacityMethod(info.isUsingImage());
 				ExUtils.saveDeskStops(info, deskstops);
 			}
