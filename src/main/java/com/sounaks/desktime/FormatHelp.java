@@ -25,6 +25,7 @@ class FormatHelp extends JDialog
 		getContentPane().add(close,	"South");
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		pack();
+		setResizable(false);
 		Dimension dimension	= Toolkit.getDefaultToolkit().getScreenSize();
 		setLocation((dimension.width - getWidth()) / 2,	(dimension.height -	getHeight()) / 2);
 		setModal(true);

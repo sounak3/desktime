@@ -88,18 +88,19 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 	private static final String LINE_BORDER            = "Line Border";
 	private static final String NO_BORDER              = "Don't Use Any Border";
 
-	final String[] digiFormats = {
+	private static final String[] digiFormats = {
 		"yyyy.MM.dd G 'at' HH:mm:ss z",
 		"zzz':' hh:mm:ss a',' EEEE',' dd-MMM-yyyy",
 		"hh:mm a, z",
+		"z':' hh:mm a",
 		"h:mm a",
 		"hh:mm:ss a",
+		"z':' hh:mm:ss a",
 		"H:mm:ss",
 		"hh 'o''clock' a, zzzz",
 		"K:mm a, z",
 		"yyyyy.MMMMM.dd GGG hh:mm aaa",
 		"EEE, d MMM yyyy HH:mm:ss Z",
-		"yyMMddHHmmssZ",
 		"YYYY-'W'ww-u",
 		"EEE, MMM d, ''yy",
 		"dd MMMMM yyyy",
@@ -303,7 +304,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		comboTz.setRenderer(new TimezoneCellRenderer());
 		comboTz.addItemListener(this);
 		jLDateFormat = new JLabel("Date/Time Format");
-		comboDateFmt = new JComboBox<>(digiFormats);
+		comboDateFmt = new JComboBox<>(getDigitalTimeFormats());
 		comboDateFmt.setEditable(true);
 		comboDateFmt.addItemListener(this);
 		jLDateFormat.setLabelFor(comboDateFmt);
@@ -668,6 +669,10 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		initialize(initinfo, alarminfo);
 	}
 
+	public static String[] getDigitalTimeFormats() {
+		return digiFormats;
+	}
+
 	public InitInfo getExistingInfo() {
 		return information;
 	}
@@ -962,7 +967,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			picLabel.setTransparency(true);
 			picLabel.setText(PREVIEW);
 		}
-		foregroundTrans.setEnabled(information.isPixelAlphaSupported());
+		foregroundTrans.setEnabled(information.isPixelAlphaSupported() && information.getOpacity() != 1.0f);
 		transLevel.setEnabled(information.isWindowAlphaSupported() || information.isPixelAlphaSupported());
 		jlTransSlide.setEnabled(information.isWindowAlphaSupported() || information.isPixelAlphaSupported());
 		slowUpd.setEnabled(useTrans.isSelected());
@@ -1946,6 +1951,7 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 			} else {
 				picBackPanel.setAlpha(derived);
 			}
+			foregroundTrans.setEnabled(derived != 1.0f);
 			picBackPanel.repaint();
 			picLabel.repaint();
 		}

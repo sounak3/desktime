@@ -17,7 +17,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
+import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
@@ -594,5 +596,44 @@ public class ExUtils
 			System.out.println("Exception while saving alarms file \"" + ALARMS_FILE + "\": " + fne.toString());
 			fne.printStackTrace();
 		}
+	}
+
+	protected static boolean lockInstance()
+	{
+		final String lockFile = "DeskStop.lck";
+		try
+		{
+			final File file = new File(getJarDir(), lockFile);
+			final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+			final FileLock fileLock = randomAccessFile.getChannel().tryLock();
+			if (fileLock != null)
+			{
+				Runtime.getRuntime().addShutdownHook(new Thread("RemoveLock")
+				{
+					@Override
+					public void run()
+					{
+						try
+						{
+							fileLock.release();
+							randomAccessFile.close();
+							Files.delete(file.toPath());
+						}
+						catch (Exception e)
+						{
+							System.out.println("Unable to remove lock file: " + lockFile);
+							e.printStackTrace();
+						}
+					}
+				});
+				return true;
+			}
+		}
+		catch (Exception e)
+		{
+			System.out.println("Unable to create and/or lock file: " + lockFile);
+			e.printStackTrace();
+		}
+		return false;
 	}
 }
