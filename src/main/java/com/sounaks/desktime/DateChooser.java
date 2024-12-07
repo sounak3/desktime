@@ -18,8 +18,8 @@ public class DateChooser extends JComponent implements ActionListener
 	
 	protected boolean showing;
 	protected SimpleDateFormat ownFormat           = new SimpleDateFormat("EEEE',' MMM dd',' yyyy ");
-	private   final transient ButtonIcon upArrow   = new ButtonIcon(ButtonIcon.UP_ARROW, Color.BLACK);
-	private   final transient ButtonIcon downArrow = new ButtonIcon(ButtonIcon.DOWN_ARROW, Color.BLACK);
+	private   final transient ButtonIcon upArrow   = new ButtonIcon(ButtonIcon.UP_ARROW_SMALL, Color.BLACK);
+	private   final transient ButtonIcon downArrow = new ButtonIcon(ButtonIcon.DOWN_ARROW_SMALL, Color.BLACK);
 	private transient WindowHandler handler;
 	
 	public DateChooser()

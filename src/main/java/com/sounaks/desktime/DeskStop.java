@@ -34,10 +34,10 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private InitInfo info;
 	private Vector <TimeBean>alarms;
 	private JPopupMenu pMenu;
-	private JMenu addPanel, mFormat, timeMode, timeZone, mSize, mOpacityLevel, mRoundCorners, mDialMarks, mHandSize, mDigiFormat;
+	private JMenu addPanel, mFormat, timeMode, timeZone, mSize, mOpacityLevel, mRoundCorners, mDialMarks, mHandSize, mDigiFormat, mAlign;
 	private JSlider sizer, miOpacitySlider;
-	private JMenuItem miAnaTime, miDigTime, miUptime, miPomo, miSeltz, miDeftz, timSet, zonSet, mAllOpacity, miLabBorder;
-	private JMenuItem fore, back, alm, bdr, exit, about, newItem, dupItem, removePanel, miMovable, ontop, sysClk;
+	private JMenuItem miAnaTime, miDigTime, miUptime, miPomo, miSeltz, miDeftz, timSet, zonSet, mAllOpacity, miLabBorder, miLeft, miRight;
+	private JMenuItem fore, back, alm, bdr, exit, about, newItem, dupItem, removePanel, miMovable, ontop, sysClk, miTop, miBottom;
 	private JCheckBoxMenuItem miAmPmMark, miTzMark, miWkDyMark, miDateMark, miSelectAll;
 	private JRadioButtonMenuItem[] impZon, miDigiFormats;
 	private JRadioButtonMenuItem[] tMenuItem;
@@ -82,6 +82,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private static final String CMD_TIMEFORMAT                 = "TIMEFORMAT";
 	private static final String TITLE_STRING			       = "DeskStop";
 	private static ArrayList<InitInfo> deskstops;
+	private static ArrayList<DeskStop> instances = new ArrayList<>();
 	private final ImageIcon plusPng  = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/plus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
 	private final ImageIcon minusPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/minus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
 	private final ImageIcon checkPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/checked-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
@@ -294,8 +295,21 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		removePanel = new JMenuItem("Remove this panel", minusPng);
 		removePanel.addActionListener(this);
 		removePanel.setEnabled(info.getID() != 0);
+		mAlign = new JMenu("Align with this");
+		miLeft = new JMenuItem("Left", new ButtonIcon(ButtonIcon.LEFT_ARROW, Color.BLUE.darker()));
+		miLeft.addActionListener(this);
+		miRight = new JMenuItem("Right", new ButtonIcon(ButtonIcon.RIGHT_ARROW, Color.BLUE.darker()));
+		miRight.addActionListener(this);
+		miTop = new JMenuItem("Top", new ButtonIcon(ButtonIcon.UP_ARROW, Color.BLUE.darker()));
+		miTop.addActionListener(this);
+		miBottom = new JMenuItem("Bottom", new ButtonIcon(ButtonIcon.DOWN_ARROW, Color.BLUE.darker()));
+		miBottom.addActionListener(this);
 		about = new JMenuItem(CMD_ABOUT);
 		about.addActionListener(this);
+		mAlign.add(miLeft);
+		mAlign.add(miRight);
+		mAlign.add(miTop);
+		mAlign.add(miBottom);
 		exit  = new JMenuItem("Exit");
 		exit.addActionListener(this);
 		timeMode.add(timeZone);
@@ -328,12 +342,14 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		pMenu.addSeparator();
 		pMenu.add(addPanel);
 		pMenu.add(removePanel);
+		pMenu.add(mAlign);
 		pMenu.addSeparator();
 		pMenu.add(about);
 		pMenu.add(exit);
 		pMenu.pack();
 		reInitialize();
 		tLabel.addMouseListener(this);
+		instances.add(this);
 	}
 
 	private void reInitialize()
@@ -882,6 +898,18 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			case "Bring to front":
 				toFront();
 				break;
+			case "Left":
+				updateAllPanelLocations(getBounds(), SwingConstants.LEFT);
+				break;
+			case "Right":
+				updateAllPanelLocations(getBounds(), SwingConstants.RIGHT);
+				break;
+			case "Top":
+				updateAllPanelLocations(getBounds(), SwingConstants.TOP);
+				break;
+			case "Bottom":
+				updateAllPanelLocations(getBounds(), SwingConstants.BOTTOM);
+				break;
 			default: {
 					if (comm.startsWith("TZ-")) {
 						info.setDisplayMethod(getDisplayMethodBasedOnTZ(comm.split("-")[1]));
@@ -904,6 +932,35 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		refreshNow = true;
 		startRefresh();
 		updateCursor();
+	}
+
+	public static void updateAllPanelLocations(Rectangle destBounds, int alignDir) {
+		for (int cnt = 0; cnt < instances.size(); cnt++) {
+			DeskStop currDeskStop = instances.get(cnt);
+			InitInfo currInfo     = deskstops.get(cnt);
+			int currID = currInfo.getID();
+			Point newPoint = new Point(10, 10);
+			switch (alignDir) {
+				case SwingConstants.LEFT:
+					newPoint = new Point(destBounds.x, currDeskStop.getY());
+					break;
+				case SwingConstants.RIGHT:
+					newPoint = new Point(destBounds.x + destBounds.width - currDeskStop.getWidth(), currDeskStop.getY());
+					break;
+				case SwingConstants.TOP:
+					newPoint = new Point(currDeskStop.getX(), destBounds.y);
+					break;
+				case SwingConstants.BOTTOM:
+					newPoint = new Point(currDeskStop.getX(), destBounds.y + destBounds.height - currDeskStop.getHeight());
+					break;
+				default:
+					break;
+			}
+			currDeskStop.setLocation(newPoint);
+			currInfo.setLocation(newPoint);
+			deskstops.set(currID, currInfo);
+		}
+		ExUtils.saveDeskStops(deskstops);
 	}
 
 	private void openLicense() {

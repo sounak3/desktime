@@ -77,14 +77,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>651</int>
+       <int>657</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>34</int>
+       <int>36</int>
       </void>
      </void>
     </void>
@@ -178,14 +178,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point1"/>
-       <int>873</int>
+       <int>1107</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point1"/>
-       <int>27</int>
+       <int>36</int>
       </void>
      </void>
     </void>
@@ -271,14 +271,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point2"/>
-       <int>1088</int>
+       <int>887</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point2"/>
-       <int>22</int>
+       <int>36</int>
       </void>
      </void>
     </void>

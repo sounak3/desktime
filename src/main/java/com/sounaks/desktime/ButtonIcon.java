@@ -5,12 +5,14 @@ import javax.swing.*;
 
 public class ButtonIcon implements Icon
 {
-	public static final int DOWN_ARROW  = 101;
-	public static final int LEFT_ARROW  = 102;
-	public static final int RIGHT_ARROW = 103;
-	public static final int UP_ARROW    = 104;
-	public static final int SQUARE      = 105;
-	public static final int RECTANGLE   = 106;
+	public static final int DOWN_ARROW_SMALL = 101;
+	public static final int DOWN_ARROW       = 107;
+	public static final int LEFT_ARROW       = 102;
+	public static final int RIGHT_ARROW      = 103;
+	public static final int UP_ARROW_SMALL   = 104;
+	public static final int UP_ARROW         = 108;
+	public static final int SQUARE           = 105;
+	public static final int RECTANGLE        = 106;
 
 	private int shape;
 	private Color enabledColor;
@@ -40,12 +42,24 @@ public class ButtonIcon implements Icon
 		g.setColor( component.isEnabled() ? enabledColor : Color.gray);
 		switch (shape)
 		{
-			case UP_ARROW:
+			case UP_ARROW_SMALL:
 				g.drawLine(0, iconHeight - 1, iconWidth - 1, iconHeight - 1);
 				g.drawLine(1, iconHeight - 2, 1 + iconWidth - 3, iconHeight - 2);
 				g.drawLine(2, iconHeight - 3, 2 + iconWidth - 5, iconHeight - 3);
 				g.drawLine(3, iconHeight - 4, 3 + iconWidth - 7, iconHeight - 4);
 				g.drawLine(4, iconHeight - 5, 4 + iconWidth - 9, iconHeight - 5);
+				break;
+			case UP_ARROW:
+				g.drawLine(0, iconHeight - 1, iconWidth - 0, iconHeight - 1);
+				g.drawLine(0, iconHeight - 2, iconWidth - 0, iconHeight - 2);
+				g.drawLine(1, iconHeight - 3, iconWidth - 1, iconHeight - 3);
+				g.drawLine(1, iconHeight - 4, iconWidth - 1, iconHeight - 4);
+				g.drawLine(2, iconHeight - 5, iconWidth - 2, iconHeight - 5);
+				g.drawLine(2, iconHeight - 6, iconWidth - 2, iconHeight - 6);
+				g.drawLine(3, iconHeight - 7, iconWidth - 3, iconHeight - 7);
+				g.drawLine(3, iconHeight - 8, iconWidth - 3, iconHeight - 8);
+				g.drawLine(4, iconHeight - 9, iconWidth - 4, iconHeight - 9);
+				g.drawLine(4, iconHeight - 10, iconWidth - 4, iconHeight - 10);
 				break;
 			case RIGHT_ARROW:
 				g.drawLine(0, 0, 1, 0);
@@ -83,6 +97,18 @@ public class ButtonIcon implements Icon
 				g.drawRect(0, 0, iconWidth, getIconHeight());
 				break;
 			case DOWN_ARROW:
+				g.drawLine( 0, 0, iconWidth - 0, 0 );
+				g.drawLine( 0, 1, iconWidth - 0, 1 );
+				g.drawLine( 1, 2, iconWidth - 1, 2 );
+				g.drawLine( 1, 3, iconWidth - 1, 3 );
+				g.drawLine( 2, 4, iconWidth - 2, 4 );
+				g.drawLine( 2, 5, iconWidth - 2, 5 );
+				g.drawLine( 3, 6, iconWidth - 3, 6 );
+				g.drawLine( 3, 7, iconWidth - 3, 7 );
+				g.drawLine( 4, 8, iconWidth - 4, 8 );
+				g.drawLine( 4, 9, iconWidth - 4, 9 );
+				break;
+			case DOWN_ARROW_SMALL:
 			default:
 				g.drawLine( 0, 0, iconWidth - 1, 0 );
 				g.drawLine( 1, 1, 1 + (iconWidth - 3), 1 );
@@ -102,9 +128,9 @@ public class ButtonIcon implements Icon
 				return 10;
 			case RECTANGLE:
 				return 20;
-			case DOWN_ARROW:
+			case DOWN_ARROW_SMALL:
 				return 10;
-			case UP_ARROW:
+			case UP_ARROW_SMALL:
 				return 10;
 			default:
 				return 10;
@@ -119,13 +145,13 @@ public class ButtonIcon implements Icon
 				return 10;
 			case RECTANGLE:
 				return 10;
-			case DOWN_ARROW:
+			case DOWN_ARROW_SMALL:
 				return 5;
 			case LEFT_ARROW:
 				return 10;
 			case RIGHT_ARROW:
 				return 10;
-			case UP_ARROW:
+			case UP_ARROW_SMALL:
 				return 5;
 			default:
 				return 10;
