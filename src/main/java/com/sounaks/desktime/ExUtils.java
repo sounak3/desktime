@@ -600,10 +600,11 @@ public class ExUtils
 
 	protected static boolean lockInstance()
 	{
+		File tmpLocation = new File(System.getProperty("java.io.tmpdir"));
 		final String lockFile = "DeskStop.lck";
 		try
 		{
-			final File file = new File(getJarDir(), lockFile);
+			final File file = new File(tmpLocation, lockFile);
 			final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
 			final FileLock fileLock = randomAccessFile.getChannel().tryLock();
 			if (fileLock != null)
