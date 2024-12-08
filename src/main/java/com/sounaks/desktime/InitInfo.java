@@ -35,6 +35,7 @@ public class InitInfo extends Hashtable<String, Object>
 	private static final String KEY_TOOLTIP                 = "TOOLTIP";
 	private static final String KEY_NATIVE_LOOK             = "NATIVE_LOOK";
 	private static final String KEY_FIXED                   = "FIXED";
+	private static final String KEY_MOVE_TOGETHER           = "MOVE_TOGETHER";
 	private static final String KEY_USING_IMAGE             = "USING_IMAGE";
 	private static final String KEY_GLASS_EFFECT            = "GLASS_EFFECT";
 	private static final String KEY_IMAGEFILE               = "IMAGEFILE";
@@ -99,6 +100,7 @@ public class InitInfo extends Hashtable<String, Object>
 		put(KEY_TOOLTIP, true);
 		put(KEY_NATIVE_LOOK, false);
 		put(KEY_FIXED, false);
+		put(KEY_MOVE_TOGETHER, false);
 		put(KEY_USING_IMAGE, true);
 		put(KEY_GLASS_EFFECT, false);
 		put(KEY_IMAGEFILE, defaultsDir.getAbsolutePath() + IMAGES_DIR + DEFAULT_BACKGROUND_IMAGE);
@@ -159,6 +161,16 @@ public class InitInfo extends Hashtable<String, Object>
 	public void setDialObjectsSize(float dialObjectsSize)
 	{
 		put(KEY_DIAL_OBJECTS_SIZE, dialObjectsSize);
+	}
+
+	public boolean isMoveTogether()
+	{
+		return ((Boolean)get(KEY_MOVE_TOGETHER)).booleanValue();
+	}
+
+	public void setMoveTogether(boolean moveTogether)
+	{
+		put(KEY_MOVE_TOGETHER, moveTogether);
 	}
 
 	public boolean isAnalogClock()

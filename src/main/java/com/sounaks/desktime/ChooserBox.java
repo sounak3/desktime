@@ -1036,7 +1036,11 @@ public class ChooserBox extends JDialog implements ActionListener, ItemListener,
 		}
 		comboDialBdr.setEnabled(analogCb1.isSelected());
 		rbTrayIcon.setEnabled(SystemTray.isSupported());
-		
+		updateLooknFeelAsRequired();
+	}
+
+	private void updateLooknFeelAsRequired()
+	{
 		try
 		{
 			if (nativeLook.isSelected())
