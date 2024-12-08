@@ -46,6 +46,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private Point pointerLoc;
 	private Dimension scsize;
 	protected transient Robot robot;
+	private int evtInitiatorID = -1;
 	private boolean refreshNow = true;
 	private boolean pixelTranslucency, wholeTranslucency, robotSupport, allowMoveOutOfScreen, alreadyOutOfScreen;
 	private transient Pomodoro pom;
@@ -53,6 +54,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private String tipCur = "<html><b>Currently Displaying:</b> Time of your location (Time-Zone) time. <p>(This is with reference to system time and not internet).</html>";
 	private String tipUpt = "<html><b>Currently Displaying:</b> System Up-Time <p>The time your computer is running <p>without a shut-down or log-off.</html>";
 	private String tipPom = "<html><b>Currently Displaying:</b> Pomodoro Timer <p>Timer slots of pomodoro task. <p>One rest slot after 4 repetations of regular slots.</html>";
+	protected transient Object pomodoroLock  = new Object();
 	protected final String[] impZoneList = new String[]{
 		"Australia Eastern Standard Time (AET)",
 		"British Summer Time (BST)",
@@ -65,23 +67,22 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		"India Standard Time (IST)",
 		"Japan Standard Time (JST)",
 		"Coordinated Universal Time (UTC)"};
-	private static int evtInitiatorID                          = -1;
-	private static final int[] fontSizes                       = {6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 64, 72, 80, 96, 112, 128, 144, 160, 192, 224, 256, 288, 320};
-	private static final GraphicsDevice gd                     = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-	public  static final String DISPLAY_MODE_CURRENT_TIMEZONE  = "CURTZ";
-	public  static final String DISPLAY_MODE_SELECTED_TIMEZONE = "GMTTZ";
-	public  static final String DISPLAY_MODE_SYSTEM_UPTIME     = "UPTIME";
-	public  static final String DISPLAY_MODE_POMODORO_TIMER    = "POMODORO";
-	public  static final String WINDOW_SHADOW_PROPERTY         = "Window.shadow";
-	public  static final String PREFERENCES_TITLE              = "Preferences...";
-	private static final String ANALOG_CLOCK_USE_PATTERN       = "zzz'|'hh'|'mm'|'ss'|'a'|'dd'|'MMM'|'EEE";
-	private static final String ABOUT_STRING                   = "<html>Made by : Sounak Choudhury<p>E-mail : <a href='mailto:sounak_s@rediffmail.com'>sounak_s@rediffmail.com</a><p><p>The software, information and documentation is provided \"AS IS\" without<p>warranty of any kind, either express or implied. By downloading, installing<p>or using this software, you signify acceptance of and agree to the terms<p>and conditions mentioned in LICENSE.txt. Suggestions and credits are<p>Welcomed. Thank you for using DeskStop!</html>";
-	private static final String CMD_TIME_SETTINGS              = "Time Settings";
-	private static final String CMD_ABOUT                      = "About DeskStop...";
-	private static final String CMD_ANALOG_DIAL_LABEL          = "AnalogDialLabel";
-	private static final String CMD_HAND_STRING_COMPLEMENT     = "_HANDS";
-	private static final String CMD_TIMEFORMAT                 = "TIMEFORMAT";
-	private static final String TITLE_STRING                   = "DeskStop";
+	private   static final int[] fontSizes                       = {6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 64, 72, 80, 96, 112, 128, 144, 160, 192, 224, 256, 288, 320};
+	private   static final GraphicsDevice gd                     = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	public    static final String DISPLAY_MODE_CURRENT_TIMEZONE  = "CURTZ";
+	public    static final String DISPLAY_MODE_SELECTED_TIMEZONE = "GMTTZ";
+	public    static final String DISPLAY_MODE_SYSTEM_UPTIME     = "UPTIME";
+	public    static final String DISPLAY_MODE_POMODORO_TIMER    = "POMODORO";
+	public    static final String WINDOW_SHADOW_PROPERTY         = "Window.shadow";
+	public    static final String PREFERENCES_TITLE              = "Preferences...";
+	private   static final String ANALOG_CLOCK_USE_PATTERN       = "zzz'|'hh'|'mm'|'ss'|'a'|'dd'|'MMM'|'EEE";
+	private   static final String ABOUT_STRING                   = "<html>Made by : Sounak Choudhury<p>E-mail : <a href='mailto:sounak_s@rediffmail.com'>sounak_s@rediffmail.com</a><p><p>The software, information and documentation is provided \"AS IS\" without<p>warranty of any kind, either express or implied. By downloading, installing<p>or using this software, you signify acceptance of and agree to the terms<p>and conditions mentioned in LICENSE.txt. Suggestions and credits are<p>Welcomed. Thank you for using DeskStop!</html>";
+	private   static final String CMD_TIME_SETTINGS              = "Time Settings";
+	private   static final String CMD_ABOUT                      = "About DeskStop...";
+	private   static final String CMD_ANALOG_DIAL_LABEL          = "AnalogDialLabel";
+	private   static final String CMD_HAND_STRING_COMPLEMENT     = "_HANDS";
+	private   static final String CMD_TIMEFORMAT                 = "TIMEFORMAT";
+	private   static final String TITLE_STRING                   = "DeskStop";
 	private static ArrayList<InitInfo> deskstops;
 	private static ArrayList<DeskStop> instances = new ArrayList<>();
 	private final ImageIcon plusPng  = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/plus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
@@ -861,25 +862,16 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 				info.setFixed(!info.isFixed());
 				miMovable.setIcon(info.isFixed() ? clearPng : checkPng);
 				tLabel.setCursor(info.isFixed() ? Cursor.getDefaultCursor() : Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-				if (info.isFixed()) {
-					for (InitInfo deskstop_element : deskstops) {
-						deskstop_element.setMoveTogether(false);
-						ExUtils.saveDeskStops(deskstop_element, deskstops);
-					}
-				}
+				cancelMoveAllTogether(info.isFixed());
 				break;
 			case "Move all panels":
 				info.setMoveTogether(!info.isMoveTogether());
-				miMoveAll.setIcon(info.isMoveTogether() ? checkPng : clearPng);
-				for (InitInfo deskstop_element : deskstops) {
-					if (info.isMoveTogether()) deskstop_element.setFixed(false);
-					deskstop_element.setMoveTogether(info.isMoveTogether());
-					ExUtils.saveDeskStops(deskstop_element, deskstops);
-				}
+				updatePopupMenuIcons();
+				moveAllTogether(info.isMoveTogether());
 				break;
 			case "Always on top":
 				info.setOnTop(!info.getOnTop());
-				ontop.setIcon(info.getOnTop() ? checkPng : clearPng);
+				updatePopupMenuIcons();
 				ExUtils.saveDeskStops(info, deskstops);
 				setAlwaysOnTop(info.getOnTop());
 				break;
@@ -951,6 +943,40 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		refreshNow = true;
 		startRefresh();
 		updateCursor();
+	}
+
+	private void moveAllTogether(boolean moveTogether) {
+		for (InitInfo deskstop_element : deskstops) {
+			if (moveTogether) deskstop_element.setFixed(false);
+			deskstop_element.setMoveTogether(moveTogether);
+			ExUtils.saveDeskStops(deskstop_element, deskstops);
+		}
+	}
+
+	private void cancelMoveAllTogether(boolean cancel) {
+		if (cancel) {
+			for (InitInfo deskstop_element : deskstops) {
+				deskstop_element.setMoveTogether(false);
+				ExUtils.saveDeskStops(deskstop_element, deskstops);
+			}
+		}
+	}
+
+	private void saveAllDeskStopLocations() {
+		if (evtInitiatorID != -1 && info.isMoveTogether())
+		{
+			for (int cnt = 0; cnt < instances.size(); cnt++)
+			{
+				DeskStop currDeskStop = instances.get(cnt);
+				InitInfo currInfo     = deskstops.get(cnt);
+				if (evtInitiatorID != currInfo.getID())
+				{
+					currInfo.setLocation(currDeskStop.getLocation());
+					deskstops.set(currInfo.getID(), currInfo);
+					ExUtils.saveDeskStops(currInfo, deskstops);
+				}
+			}
+		}
 	}
 
 	public static void alignAllPanelsWithThis(Rectangle destBounds, int alignSide) {
@@ -1199,20 +1225,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			startRefresh();
 
 			// For component event. Save the current panel locations.
-			if (evtInitiatorID != -1 && info.isMoveTogether())
-			{
-				for (int cnt = 0; cnt < instances.size(); cnt++)
-				{
-					DeskStop currDeskStop = instances.get(cnt);
-					InitInfo currInfo     = deskstops.get(cnt);
-					if (evtInitiatorID != currInfo.getID())
-					{
-						currInfo.setLocation(currDeskStop.getLocation());
-						deskstops.set(currInfo.getID(), currInfo);
-						ExUtils.saveDeskStops(currInfo, deskstops);
-					}
-				}
-			}
+			saveAllDeskStopLocations();
 		}
 	}
 
@@ -1341,9 +1354,9 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 							checkUptimeAndRunHourSound(uptimeNow);
 							break;
 						case DISPLAY_MODE_POMODORO_TIMER:
-							synchronized(pom) {
+							synchronized(pomodoroLock) {
 								while (pom == null) {
-									wait(); // wait for first time pom to be created in timeDisplayConfig
+									pomodoroLock.wait(); // wait for first time pom to be created in timeDisplayConfig
 								}
 							}
 							time = ExUtils.formatPomodoroTime(pom.getRunningLabelDuration(info.isPomodoroCountdown()), info.getPomodoroFormat(), pom.getRunningLabel(), info.isPomodoroLeadingLabel());

@@ -20,7 +20,11 @@
     </void>
     <void method="put">
      <string>IMAGEFILE</string>
-     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\MathClipArt--Clock-Face.png</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\nature-dial-2.png</string>
+    </void>
+    <void method="put">
+     <string>MOVE_TOGETHER</string>
+     <object idref="Boolean0"/>
     </void>
     <void method="put">
      <string>ANALOG_CLOCK_OPTS</string>
@@ -77,14 +81,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>621</int>
+       <int>609</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point0"/>
-       <int>17</int>
+       <int>20</int>
       </void>
      </void>
     </void>
@@ -125,6 +129,10 @@
      <int>1</int>
     </void>
     <void method="put">
+     <string>MOVE_TOGETHER</string>
+     <object idref="Boolean0"/>
+    </void>
+    <void method="put">
      <string>UPTIME_HOUR_SOUND</string>
      <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\sounds\ambient-flute-notification-3-185275.mp3</string>
     </void>
@@ -138,7 +146,7 @@
     </void>
     <void method="put">
      <string>FONT</string>
-     <object class="java.awt.Font" id="Font0">
+     <object class="java.awt.Font">
       <string>Courier New Bold</string>
       <object idref="Integer0"/>
       <int>16</int>
@@ -146,7 +154,7 @@
     </void>
     <void method="put">
      <string>FOREGROUND</string>
-     <object class="java.awt.Color" id="Color1">
+     <object class="java.awt.Color">
       <int>255</int>
       <int>204</int>
       <int>153</int>
@@ -159,14 +167,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point1"/>
-       <int>827</int>
+       <int>815</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point1"/>
-       <int>24</int>
+       <int>27</int>
       </void>
      </void>
     </void>
@@ -201,6 +209,10 @@
     <void method="put">
      <string>PANEL_ID</string>
      <int>2</int>
+    </void>
+    <void method="put">
+     <string>MOVE_TOGETHER</string>
+     <object idref="Boolean0"/>
     </void>
     <void method="put">
      <string>DISPLAY_METHOD</string>
@@ -241,14 +253,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point2"/>
-       <int>827</int>
+       <int>815</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point2"/>
-       <int>187</int>
+       <int>190</int>
       </void>
      </void>
     </void>
@@ -291,6 +303,10 @@
     <void method="put">
      <string>PANEL_ID</string>
      <int>3</int>
+    </void>
+    <void method="put">
+     <string>MOVE_TOGETHER</string>
+     <object idref="Boolean0"/>
     </void>
     <void method="put">
      <string>ANALOG_CLOCK_OPTS</string>
@@ -343,14 +359,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point3"/>
-       <int>819</int>
+       <int>807</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point3"/>
-       <int>8</int>
+       <int>11</int>
       </void>
      </void>
     </void>
@@ -399,8 +415,16 @@
      <int>4</int>
     </void>
     <void method="put">
+     <string>MOVE_TOGETHER</string>
+     <object idref="Boolean0"/>
+    </void>
+    <void method="put">
      <string>ANALOG_CLOCK_OPTS</string>
      <int>3100</int>
+    </void>
+    <void method="put">
+     <string>DISPLAY_METHOD</string>
+     <string>GMTTZ</string>
     </void>
     <void method="put">
      <string>UPTIME_HOUR_SOUND</string>
@@ -416,14 +440,14 @@
     </void>
     <void method="put">
      <string>TIMEZONE</string>
-     <string>IST</string>
+     <string>CET</string>
     </void>
     <void method="put">
      <string>FONT</string>
      <object class="java.awt.Font">
       <string>DialogInput.bold</string>
       <object idref="Integer0"/>
-      <int>14</int>
+      <int>16</int>
      </object>
     </void>
     <void method="put">
@@ -445,14 +469,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point4"/>
-       <int>1188</int>
+       <int>1175</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point4"/>
-       <int>50</int>
+       <int>35</int>
       </void>
      </void>
     </void>
@@ -482,11 +506,15 @@
     </void>
     <void method="put">
      <string>IMAGEFILE</string>
-     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\blue-capsule.png</string>
+     <string>C:\Users\Sounak\Documents\NetBeansProjects\desktime\target\classes\images\brown-capsule.png</string>
     </void>
     <void method="put">
      <string>PANEL_ID</string>
      <int>5</int>
+    </void>
+    <void method="put">
+     <string>MOVE_TOGETHER</string>
+     <object idref="Boolean0"/>
     </void>
     <void method="put">
      <string>DISPLAY_METHOD</string>
@@ -506,11 +534,20 @@
     </void>
     <void method="put">
      <string>FONT</string>
-     <object idref="Font0"/>
+     <object class="java.awt.Font">
+      <string>Courier New Bold</string>
+      <object idref="Integer0"/>
+      <int>16</int>
+     </object>
     </void>
     <void method="put">
      <string>FOREGROUND</string>
-     <object idref="Color1"/>
+     <object class="java.awt.Color">
+      <int>255</int>
+      <int>255</int>
+      <int>0</int>
+      <int>255</int>
+     </object>
     </void>
     <void id="Point5" method="get">
      <string>LOCATION</string>
@@ -518,14 +555,14 @@
       <string>x</string>
       <void method="set">
        <object idref="Point5"/>
-       <int>1017</int>
+       <int>1011</int>
       </void>
      </void>
      <void class="java.awt.Point" method="getField">
       <string>y</string>
       <void method="set">
        <object idref="Point5"/>
-       <int>101</int>
+       <int>104</int>
       </void>
      </void>
     </void>
