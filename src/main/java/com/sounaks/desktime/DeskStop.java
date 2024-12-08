@@ -91,6 +91,8 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private final ImageIcon clearPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/unchecked-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
 	// private final ImageIcon aboutGif = new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/duke.gif"));
 	private final ImageIcon mainIcon = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/DeskStop-icon.png"))).getImage().getScaledInstance(128, 128, Image.SCALE_SMOOTH));
+	private final ImageIcon blockPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/block-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
+	private final ImageIcon dupliPng = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/duplicate-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
 
 	public DeskStop(InitInfo info, Vector<TimeBean> alarms)
 	{
@@ -288,9 +290,9 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		ontop.addActionListener(this);
 		addPanel = new JMenu("Add clock panel");
 		addPanel.setIcon(plusPng);
-		newItem = new JMenuItem("New");
+		newItem = new JMenuItem("New", blockPng);
 		newItem.addActionListener(this);
-		dupItem = new JMenuItem("Duplicate");
+		dupItem = new JMenuItem("Duplicate", dupliPng);
 		dupItem.addActionListener(this);
 		addPanel.add(newItem);
 		addPanel.add(dupItem);
@@ -298,6 +300,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		removePanel.addActionListener(this);
 		removePanel.setEnabled(info.getID() != 0);
 		mAlign = new JMenu("Align with this");
+		mAlign.setIcon(UIManager.getIcon("FileChooser.detailsViewIcon"));
 		miLeft = new JMenuItem("Left", new ButtonIcon(ButtonIcon.LEFT_ARROW, Color.BLUE.darker()));
 		miLeft.addActionListener(this);
 		miRight = new JMenuItem("Right", new ButtonIcon(ButtonIcon.RIGHT_ARROW, Color.BLUE.darker()));
