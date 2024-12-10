@@ -364,7 +364,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	{
 		setAlwaysOnTop(info.getOnTop());
 		tLabel.setFont(info.getFont());
-		tLabel.setCursor(info.isFixed() ? Cursor.getDefaultCursor() : Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+		updateCursor();
 		metrics = tLabel.getFontMetrics(info.getFont());
 		tLabel.setForeground(info.getForeground());
 		tLabel.setBorder(info.getBorder());
@@ -864,7 +864,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			case "Movable":
 				info.setFixed(!info.isFixed());
 				miMovable.setIcon(info.isFixed() ? clearPng : checkPng);
-				tLabel.setCursor(info.isFixed() ? Cursor.getDefaultCursor() : Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+				updateCursor();
 				cancelMoveAllTogether(info.isFixed());
 				break;
 			case "Move all panels":
@@ -1051,7 +1051,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		if (pMenu.isShowing()) {
 			tLabel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		} else {
-			tLabel.setCursor(info.isFixed() ? Cursor.getDefaultCursor() : Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+			tLabel.setCursor(info.isFixed() ? Cursor.getDefaultCursor() : Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		}
 	}
 
