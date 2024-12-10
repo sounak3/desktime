@@ -46,7 +46,6 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 	private Point pointerLoc;
 	private Dimension scsize;
 	protected transient Robot robot;
-	private int evtInitiatorID = -1;
 	private boolean refreshNow = true;
 	private boolean pixelTranslucency, wholeTranslucency, robotSupport, allowMoveOutOfScreen, alreadyOutOfScreen;
 	private transient Pomodoro pom;
@@ -67,22 +66,23 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		"India Standard Time (IST)",
 		"Japan Standard Time (JST)",
 		"Coordinated Universal Time (UTC)"};
-	private   static final int[] fontSizes                       = {6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 64, 72, 80, 96, 112, 128, 144, 160, 192, 224, 256, 288, 320};
-	private   static final GraphicsDevice gd                     = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-	public    static final String DISPLAY_MODE_CURRENT_TIMEZONE  = "CURTZ";
-	public    static final String DISPLAY_MODE_SELECTED_TIMEZONE = "GMTTZ";
-	public    static final String DISPLAY_MODE_SYSTEM_UPTIME     = "UPTIME";
-	public    static final String DISPLAY_MODE_POMODORO_TIMER    = "POMODORO";
-	public    static final String WINDOW_SHADOW_PROPERTY         = "Window.shadow";
-	public    static final String PREFERENCES_TITLE              = "Preferences...";
-	private   static final String ANALOG_CLOCK_USE_PATTERN       = "zzz'|'hh'|'mm'|'ss'|'a'|'dd'|'MMM'|'EEE";
-	private   static final String ABOUT_STRING                   = "<html>Made by : Sounak Choudhury<p>E-mail : <a href='mailto:sounak_s@rediffmail.com'>sounak_s@rediffmail.com</a><p><p>The software, information and documentation is provided \"AS IS\" without<p>warranty of any kind, either express or implied. By downloading, installing<p>or using this software, you signify acceptance of and agree to the terms<p>and conditions mentioned in LICENSE.txt. Suggestions and credits are<p>Welcomed. Thank you for using DeskStop!</html>";
-	private   static final String CMD_TIME_SETTINGS              = "Time Settings";
-	private   static final String CMD_ABOUT                      = "About DeskStop...";
-	private   static final String CMD_ANALOG_DIAL_LABEL          = "AnalogDialLabel";
-	private   static final String CMD_HAND_STRING_COMPLEMENT     = "_HANDS";
-	private   static final String CMD_TIMEFORMAT                 = "TIMEFORMAT";
-	private   static final String TITLE_STRING                   = "DeskStop";
+	private static int evtInitiatorID                          = -1;
+	private static final int[] fontSizes                       = {6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 64, 72, 80, 96, 112, 128, 144, 160, 192, 224, 256, 288, 320};
+	private static final GraphicsDevice gd                     = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	public  static final String DISPLAY_MODE_CURRENT_TIMEZONE  = "CURTZ";
+	public  static final String DISPLAY_MODE_SELECTED_TIMEZONE = "GMTTZ";
+	public  static final String DISPLAY_MODE_SYSTEM_UPTIME     = "UPTIME";
+	public  static final String DISPLAY_MODE_POMODORO_TIMER    = "POMODORO";
+	public  static final String WINDOW_SHADOW_PROPERTY         = "Window.shadow";
+	public  static final String PREFERENCES_TITLE              = "Preferences...";
+	private static final String ANALOG_CLOCK_USE_PATTERN       = "zzz'|'hh'|'mm'|'ss'|'a'|'dd'|'MMM'|'EEE";
+	private static final String ABOUT_STRING                   = "<html>Made by : Sounak Choudhury<p>E-mail : <a href='mailto:sounak_s@rediffmail.com'>sounak_s@rediffmail.com</a><p><p>The software, information and documentation is provided \"AS IS\" without<p>warranty of any kind, either express or implied. By downloading, installing<p>or using this software, you signify acceptance of and agree to the terms<p>and conditions mentioned in LICENSE.txt. Suggestions and credits are<p>Welcomed. Thank you for using DeskStop!</html>";
+	private static final String CMD_TIME_SETTINGS              = "Time Settings";
+	private static final String CMD_ABOUT                      = "About DeskStop...";
+	private static final String CMD_ANALOG_DIAL_LABEL          = "AnalogDialLabel";
+	private static final String CMD_HAND_STRING_COMPLEMENT     = "_HANDS";
+	private static final String CMD_TIMEFORMAT                 = "TIMEFORMAT";
+	private static final String TITLE_STRING                   = "DeskStop";
 	private static ArrayList<InitInfo> deskstops;
 	private static ArrayList<DeskStop> instances = new ArrayList<>();
 	private final ImageIcon plusPng  = new ImageIcon((new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("images/plus-icon.png"))).getImage().getScaledInstance(12, 12, Image.SCALE_SMOOTH));
@@ -975,7 +975,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 				if (evtInitiatorID != currInfo.getID())
 				{
 					currInfo.setLocation(currDeskStop.getLocation());
-					deskstops.set(currInfo.getID(), currInfo);
+					deskstops.set(cnt, currInfo);
 					ExUtils.saveDeskStops(currInfo, deskstops);
 				}
 			}
@@ -986,7 +986,6 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 		for (int cnt = 0; cnt < instances.size(); cnt++) {
 			DeskStop currDeskStop = instances.get(cnt);
 			InitInfo currInfo     = deskstops.get(cnt);
-			int currID = currInfo.getID();
 			Point newPoint = new Point(10, 10);
 			switch (alignSide) {
 				case SwingConstants.LEFT:
@@ -1006,7 +1005,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 			}
 			currDeskStop.setLocation(newPoint);
 			currInfo.setLocation(newPoint);
-			deskstops.set(currID, currInfo);
+			deskstops.set(cnt, currInfo);
 		}
 		ExUtils.saveDeskStops(deskstops);
 	}
@@ -1229,6 +1228,7 @@ public class DeskStop extends JFrame implements MouseInputListener, ActionListen
 
 			// For component event. Save the current panel locations.
 			saveAllDeskStopLocations();
+			evtInitiatorID = -1;
 		}
 	}
 
