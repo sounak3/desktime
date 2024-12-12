@@ -456,6 +456,27 @@ public class ExUtils
 	}
 
 	/*
+	 * Creates .deskstop dir under user home dir and returns it as File.
+	 * In case it cannot create or any exception, it returns the home dir.
+	 */
+	public static File getDeskStopHomeDir() {
+		File homeDir = new File(System.getProperty(USER_HOME));
+		File appDir  = new File(homeDir, ".deskstop");
+		if (appDir.exists()) {
+			return appDir;
+		} else {
+			try {
+				if (appDir.mkdirs())
+					return appDir;
+				else
+					return homeDir;
+			} catch (Exception e) {
+				return homeDir;
+			}
+		}
+	}
+
+	/*
 	 * 1. Check settings exist in user.home and decode XML.
 	 * 2. Else check in JAR dir/app/DeskTime.xml and decode XML.
 	 * 3. Else check in JAR dir/DeskTime.xml and decode XML.
@@ -468,8 +489,7 @@ public class ExUtils
 		{
 			XMLDecoder decoder;
 			File parentDir        = getJarDir();
-			File homeDir          = new File(System.getProperty(USER_HOME));
-			File externalSettings = new File(homeDir, SETTINGS_FILE);
+			File externalSettings = new File(getDeskStopHomeDir(), SETTINGS_FILE);
 			File settingsFile     = new File(parentDir, SETTINGS_FILE);
 			File internalSettings = new File(parentDir, INTERNAL_SETTINGS_FILE);
 			if (externalSettings.exists()) {
@@ -524,8 +544,7 @@ public class ExUtils
 		{
 			XMLEncoder xencode;
 			File parentDir        = getJarDir();
-			File homeDir          = new File(System.getProperty(USER_HOME));
-			File externalSettings = new File(homeDir, SETTINGS_FILE);
+			File externalSettings = new File(getDeskStopHomeDir(), SETTINGS_FILE);
 			File settingsFile     = new File(parentDir, SETTINGS_FILE);
 			File internalSettings = new File(parentDir, INTERNAL_SETTINGS_FILE);
 			if (externalSettings.exists()) {
@@ -563,8 +582,7 @@ public class ExUtils
 		{
 			XMLEncoder xencode;
 			File parentDir        = getJarDir();
-			File homeDir          = new File(System.getProperty(USER_HOME));
-			File externalSettings = new File(homeDir, SETTINGS_FILE);
+			File externalSettings = new File(getDeskStopHomeDir(), SETTINGS_FILE);
 			File settingsFile     = new File(parentDir, SETTINGS_FILE);
 			File internalSettings = new File(parentDir, INTERNAL_SETTINGS_FILE);
 			if (externalSettings.exists()) {
@@ -603,8 +621,7 @@ public class ExUtils
 		{
 			XMLDecoder decoder;
 			File parentDir      = getJarDir();
-			File homeDir        = new File(System.getProperty(USER_HOME));
-			File externalAlarms = new File(homeDir, ALARMS_FILE);
+			File externalAlarms = new File(getDeskStopHomeDir(), ALARMS_FILE);
 			File alarmsFile     = new File(parentDir, ALARMS_FILE);
 			File internalAlarms = new File(parentDir, INTERNAL_ALARMS_FILE);
 			if (externalAlarms.exists()) {
@@ -643,8 +660,7 @@ public class ExUtils
 		{
 			XMLEncoder xencode;
 			File parentDir      = getJarDir();
-			File homeDir        = new File(System.getProperty(USER_HOME));
-			File externalAlarms = new File(homeDir, ALARMS_FILE);
+			File externalAlarms = new File(getDeskStopHomeDir(), ALARMS_FILE);
 			File alarmsFile     = new File(parentDir, ALARMS_FILE);
 			File internalAlarms = new File(parentDir, INTERNAL_ALARMS_FILE);
 			if (externalAlarms.exists()) {
