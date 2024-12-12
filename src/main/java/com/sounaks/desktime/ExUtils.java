@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
@@ -42,6 +43,7 @@ public class ExUtils
 	public static final int BEEP_ALARM    = 2;
 	public static final int MESSAGE_ALARM = 4;
 
+	public static final String USER_HOME              = "user.home";
 	public static final String SETTINGS_FILE          = "DeskTime.xml";
 	public static final String INTERNAL_SETTINGS_FILE = "app/DeskTime.xml";
 	public static final String ALARMS_FILE            = "Alarms.xml";
@@ -406,7 +408,7 @@ public class ExUtils
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			destLocation = new File(System.getProperty("user.home"));
+			destLocation = new File(System.getProperty(USER_HOME));
 		}
 		// System.out.println(destLocation.getAbsolutePath());
 		return destLocation;
@@ -444,7 +446,7 @@ public class ExUtils
 		try {
 			jarFile = new File(DeskStop.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 		} catch (URISyntaxException ue) {
-			jarFile = new File(System.getProperty("user.home"));
+			jarFile = new File(System.getProperty(USER_HOME));
 		}
 		if (jarFile.isDirectory() && jarFile.getName().equals("classes")) {
 			jarFile = jarFile.getParentFile();
@@ -453,6 +455,12 @@ public class ExUtils
 		return jarFile.getParentFile();
 	}
 
+	/*
+	 * 1. Check settings exist in user.home and decode XML.
+	 * 2. Else check in JAR dir/app/DeskTime.xml and decode XML.
+	 * 3. Else check in JAR dir/DeskTime.xml and decode XML.
+	 * 4. Load decoded XML into InitInfo objects ArrayList and return the same.
+	 */
 	public static java.util.List<InitInfo> loadDeskStops()
 	{
 		ArrayList<InitInfo> data = new ArrayList<>();
@@ -460,9 +468,13 @@ public class ExUtils
 		{
 			XMLDecoder decoder;
 			File parentDir        = getJarDir();
+			File homeDir          = new File(System.getProperty(USER_HOME));
+			File externalSettings = new File(homeDir, SETTINGS_FILE);
 			File settingsFile     = new File(parentDir, SETTINGS_FILE);
 			File internalSettings = new File(parentDir, INTERNAL_SETTINGS_FILE);
-			if (!settingsFile.exists() && internalSettings.exists()) {
+			if (externalSettings.exists()) {
+				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(externalSettings)));
+			} else if (!settingsFile.exists() && internalSettings.exists()) {
 				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(internalSettings)));
 			} else {
 				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(settingsFile)));
@@ -485,6 +497,14 @@ public class ExUtils
 		return data;
 	}
 	
+	/*
+	 * 1. Checks if @currDeskStops list is empty and adds the @currInitInfo as the 0th element.
+	 * 2. Else finds @currInitInfo ID by iterating through @currDeskStops and sets at that position of ArrayList.
+	 * 3. Get's the JAR directory and hence File objects for apps/DeskTime.xml and ./DeskTime.xml
+	 * 4. Get File object for user.home/DeskTime.xml. If exists then create XML and write settings and close.
+	 * 5. Else check settingsFile and internalSettings as in (3) and copy to user.home/DeskTime.xml.
+	 * 6. Then create XML and write settings and close.
+	 */
 	public static void saveDeskStops(InitInfo currInitInfo, java.util.List<InitInfo> currDeskStops)
 	{
 		int id = currInitInfo.getID();
@@ -504,12 +524,22 @@ public class ExUtils
 		{
 			XMLEncoder xencode;
 			File parentDir        = getJarDir();
+			File homeDir          = new File(System.getProperty(USER_HOME));
+			File externalSettings = new File(homeDir, SETTINGS_FILE);
 			File settingsFile     = new File(parentDir, SETTINGS_FILE);
 			File internalSettings = new File(parentDir, INTERNAL_SETTINGS_FILE);
-			if (!settingsFile.exists() && internalSettings.exists()) {
-				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(internalSettings)));
+			if (externalSettings.exists()) {
+				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(externalSettings)));
 			} else {
-				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(settingsFile)));
+				Path sourcePath;
+				Path destPath = externalSettings.toPath();
+				if (!settingsFile.exists() && internalSettings.exists()) {
+					sourcePath = internalSettings.toPath();
+				} else {
+					sourcePath = settingsFile.toPath();
+				}
+				Files.copy(sourcePath, destPath, StandardCopyOption.REPLACE_EXISTING);
+				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(externalSettings)));
 			}
 			xencode.writeObject(currDeskStops);
 			xencode.close();
@@ -521,18 +551,34 @@ public class ExUtils
 		}
 	}
 
+	/*
+	 * 1. Get's the JAR directory and hence File objects for apps/DeskTime.xml and ./DeskTime.xml
+	 * 2. Get File object for user.home/DeskTime.xml. If exists then create XML and write settings and close.
+	 * 3. Else check settingsFile and internalSettings as in (1) and copy to user.home/DeskTime.xml.
+	 * 4. Then create XML and write settings and close.
+	 */
 	public static void saveDeskStops(java.util.List<InitInfo> currDeskStops)
 	{
 		try
 		{
 			XMLEncoder xencode;
 			File parentDir        = getJarDir();
+			File homeDir          = new File(System.getProperty(USER_HOME));
+			File externalSettings = new File(homeDir, SETTINGS_FILE);
 			File settingsFile     = new File(parentDir, SETTINGS_FILE);
 			File internalSettings = new File(parentDir, INTERNAL_SETTINGS_FILE);
-			if (!settingsFile.exists() && internalSettings.exists()) {
-				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(internalSettings)));
+			if (externalSettings.exists()) {
+				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(externalSettings)));
 			} else {
-				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(settingsFile)));
+				Path sourcePath;
+				Path destPath = externalSettings.toPath();
+				if (!settingsFile.exists() && internalSettings.exists()) {
+					sourcePath = internalSettings.toPath();
+				} else {
+					sourcePath = settingsFile.toPath();
+				}
+				Files.copy(sourcePath, destPath, StandardCopyOption.REPLACE_EXISTING);
+				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(externalSettings)));
 			}
 			xencode.writeObject(currDeskStops);
 			xencode.close();
@@ -544,6 +590,12 @@ public class ExUtils
 		}
 	}
 
+	/*
+	 * 1. Check alarms exist in user.home and decode XML.
+	 * 2. Else check in JAR dir/app/Alarms.xml and decode XML.
+	 * 3. Else check in JAR dir/Alarms.xml and decode XML.
+	 * 4. Load decoded XML into TimeBean objects Vector and return the same.
+	 */
 	public static Vector<TimeBean> loadAlarms()
 	{
 		Vector<TimeBean> data = new Vector<>();
@@ -551,9 +603,13 @@ public class ExUtils
 		{
 			XMLDecoder decoder;
 			File parentDir      = getJarDir();
+			File homeDir        = new File(System.getProperty(USER_HOME));
+			File externalAlarms = new File(homeDir, ALARMS_FILE);
 			File alarmsFile     = new File(parentDir, ALARMS_FILE);
 			File internalAlarms = new File(parentDir, INTERNAL_ALARMS_FILE);
-			if (!alarmsFile.exists() && internalAlarms.exists()) {
+			if (externalAlarms.exists()) {
+				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(externalAlarms)));
+			} else if (!alarmsFile.exists() && internalAlarms.exists()) {
 				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(internalAlarms)));
 			} else {
 				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(alarmsFile)));
@@ -575,18 +631,34 @@ public class ExUtils
 		return data;
 	}
 
+	/*
+	 * 1. Get's the JAR directory and hence File objects for apps/Alarms.xml and ./Alarms.xml
+	 * 2. Get File object for user.home/Alarms.xml. If exists then create XML and write settings and close.
+	 * 3. Else check alarmsFile and internalAlarms as in (1) and copy to user.home/Alarms.xml.
+	 * 4. Then create XML and write settings and close.
+	 */
 	public static void saveAlarms(Vector <TimeBean>data)
 	{
 		try
 		{
 			XMLEncoder xencode;
 			File parentDir      = getJarDir();
+			File homeDir        = new File(System.getProperty(USER_HOME));
+			File externalAlarms = new File(homeDir, ALARMS_FILE);
 			File alarmsFile     = new File(parentDir, ALARMS_FILE);
 			File internalAlarms = new File(parentDir, INTERNAL_ALARMS_FILE);
-			if (!alarmsFile.exists() && internalAlarms.exists()) {
-				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(internalAlarms)));
+			if (externalAlarms.exists()) {
+				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(externalAlarms)));
 			} else {
-				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(alarmsFile)));
+				Path sourcePath;
+				Path destPath = externalAlarms.toPath();
+				if (!alarmsFile.exists() && internalAlarms.exists()) {
+					sourcePath = internalAlarms.toPath();
+				} else {
+					sourcePath = alarmsFile.toPath();
+				}
+				Files.copy(sourcePath, destPath, StandardCopyOption.REPLACE_EXISTING);
+				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(externalAlarms)));
 			}
 			xencode.writeObject(data);
 			xencode.close();
