@@ -67,10 +67,28 @@ The following tools were used in this project:
 
 ## :white_check_mark: Requirements ##
 
-Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) and [Java SDK](https://openjdk.org/install/) installed.
+Before starting :checkered_flag:, you need to have:
+- This is a GUI desktop application. Hence, should be run in Windows / Linux / MacOS GUI desktop environment.
+
+In case you're cloning this repository and running:
+- Need to have [Git](https://git-scm.com) and [Java SDK](https://openjdk.org/install/) installed.
+
+In case you're installing from releases, please download the appropriate OS package and install:
+
+|  OS  | Download file | MD5 hash |
+| ---  | ------------- | -------- |
+| Windows | [DeskStop-1.0.msi](https://github.com/sounak3/desktime/releases/latest/download/DeskStop-1.0.msi) | 1b258bdd3c937c19e7ce364eaade5422 |
+| Ubuntu / Debian | [deskstop_1.0-release_amd64.deb](https://github.com/sounak3/desktime/releases/latest/download/deskstop_1.0-release_amd64.deb) | e3c96c6069815efa179943b6b3cd5f49 |
+| Mac OS | [DeskStop-1.0.dmg](https://github.com/sounak3/desktime/releases/latest/download/DeskStop-1.0.dmg) | c76b8c515bf5d3b12229d4c6bef311f0 |
 
 ## :checkered_flag: Starting ##
 
+In case you've installed from releases:
+- Ubuntu: Click DeskStop under Main/Start Menu --> Office sub-menu
+- Windows: Click DeskStop in Start menu
+- Mac OS: Clock DeskStop in Launcher
+
+In case you're cloning this repository and running:
 ```bash
 # Clone this project
 $ git clone https://github.com/sounak3/desktime
