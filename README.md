@@ -67,13 +67,15 @@ The following tools were used in this project:
 
 ## :white_check_mark: Requirements ##
 
-Before starting :checkered_flag:, you need to have:
-- This is a GUI desktop application. Hence, should be run in Windows / Linux / MacOS GUI desktop environment.
+Before starting :checkered_flag: :
+- Need to have either of Windows / Linux / MacOS GUI desktop environment.
 
-In case you're cloning this repository and running:
+In case you're cloning this repository and running :
 - Need to have [Git](https://git-scm.com) and [Java SDK](https://openjdk.org/install/) installed.
 
-In case you're installing from releases, please download the appropriate OS package and install:
+## :shopping_cart: Download ##
+
+In case you want to install latest release, please download the appropriate OS package and install:
 
 |  OS  | Download file | MD5 hash |
 | ---  | ------------- | -------- |
@@ -81,19 +83,23 @@ In case you're installing from releases, please download the appropriate OS pack
 | Ubuntu / Debian | [deskstop_1.0-release_amd64.deb](https://github.com/sounak3/desktime/releases/latest/download/deskstop_1.0-release_amd64.deb) | e3c96c6069815efa179943b6b3cd5f49 |
 | Mac OS | [DeskStop-1.0.dmg](https://github.com/sounak3/desktime/releases/latest/download/DeskStop-1.0.dmg) | c76b8c515bf5d3b12229d4c6bef311f0 |
 
-## :checkered_flag: Starting ##
-
-In case you've installed from releases:
-- Ubuntu: Click DeskStop under Main/Start Menu --> Office sub-menu
-- Windows: Click DeskStop in Start menu
-- Mac OS: Clock DeskStop in Launcher
-
-In case you're cloning this repository and running:
+In case you're cloning this repository:
 ```bash
 # Clone this project
 $ git clone https://github.com/sounak3/desktime
 
-# Access
+```
+
+## :checkered_flag: Starting ##
+
+In case you've installed from releases:
+- Ubuntu &emsp;: Click Main/Start Menu --> Office sub-menu --> DeskStop
+- Windows &emsp;: Click Start menu --> DeskStop
+- Mac OS &emsp;: Clock Launcher --> DeskStop
+
+In case you're cloning this repository and running:
+```bash
+# Go to cloned directory
 $ cd desktime
 
 # Run the project
