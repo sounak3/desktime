@@ -31,6 +31,7 @@
   <a href="#sparkles-features">Features</a> &#xa0; | &#xa0;
   <a href="#rocket-technologies">Technologies</a> &#xa0; | &#xa0;
   <a href="#white_check_mark-requirements">Requirements</a> &#xa0; | &#xa0;
+  <a href="#shopping_cart-download">Download</a> &#xa0; | &#xa0;
   <a href="#checkered_flag-starting">Starting</a> &#xa0; | &#xa0;
   <a href="#memo-license">License</a> &#xa0; | &#xa0;
   <a href="https://github.com/sounak3" target="_blank">Author</a>
@@ -53,29 +54,47 @@ DeskStop is a versatile, multi-feature clock and timer application designed for 
 :heavy_check_mark: **`Alarms:`** Set one-time or recurring alarms with custom tones for reminders, tasks, or events;\
 :heavy_check_mark: **`Pomodoro Sounds:`** Choose from various sound effects for the Pomodoro timer to suit your work rhythm;
 
-## :rocket: Technologies ##
+## :computer: Development ##
 
-The following tools were used in this project:
+The following tools were used in this project for development:
 
-<img src="https://img.shields.io/badge/GIT-black?style=for-the-badge&logo=GIT&logoColor=F05032"/>
-<img src="https://img.shields.io/badge/JAVA-black?style=for-the-badge&logo=openjdk&logoColor=F37626"/>
-
-- [Java](https://openjdk.org/)
-- [Maven](https://maven.apache.org/index.html)
-- [Git](https://git-scm.com/)
-- [VSCode](https://code.visualstudio.com/)
+<a href="https://git-scm.com/" target="_blank"><img src="https://img.shields.io/badge/GIT-black?style=for-the-badge&logo=GIT&logoColor=F05032"/></a> &nbsp; <a href="https://openjdk.org/" target="_blank"><img src="https://img.shields.io/badge/JAVA-black?style=for-the-badge&logo=openjdk&logoColor=F37626"/></a> &nbsp; <a href="https://maven.apache.org/index.html" target="_blank"><img src="https://img.shields.io/badge/maven-central?style=for-the-badge&logo=apachemaven&logoColor=violet&color=black"/></a> &nbsp; <a href="https://www.gimp.org/" target="_blank"><img src="https://img.shields.io/badge/GIMP-logo?logo=gimp&logoColor=gray&labelColor=white&color=white"/></a> &nbsp; <a href="https://code.visualstudio.com/" target="_blank"><img src="https://img.shields.io/badge/VScode-logo?logo=xing&logoColor=skyblue&labelColor=black&color=black"/></a>
 
 ## :white_check_mark: Requirements ##
 
-Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) and [Java SDK](https://openjdk.org/install/) installed.
+Before starting :checkered_flag: :
+- Need to have either of Windows / Linux / MacOS GUI desktop environment.
 
-## :checkered_flag: Starting ##
+In case you're cloning this repository and running :
+- Need to have [Git](https://git-scm.com) and [Java SDK](https://openjdk.org/install/) installed.
 
+## :shopping_cart: Download ##
+
+In case you want to install latest release, please download the appropriate OS package and install:
+
+|  OS  | Download file | MD5 hash |
+| ---  | ------------- | -------- |
+| Windows | [DeskStop-1.0.msi](https://github.com/sounak3/desktime/releases/latest/download/DeskStop-1.0.msi) | 1b258bdd3c937c19e7ce364eaade5422 |
+| Ubuntu / Debian | [deskstop_1.0-release_amd64.deb](https://github.com/sounak3/desktime/releases/latest/download/deskstop_1.0-release_amd64.deb) | e3c96c6069815efa179943b6b3cd5f49 |
+| Mac OS | [DeskStop-1.0.dmg](https://github.com/sounak3/desktime/releases/latest/download/DeskStop-1.0.dmg) | c76b8c515bf5d3b12229d4c6bef311f0 |
+
+In case you're cloning this repository:
 ```bash
 # Clone this project
 $ git clone https://github.com/sounak3/desktime
 
-# Access
+```
+
+## :checkered_flag: Starting ##
+
+In case you've installed from releases:
+- Ubuntu  &emsp;: Click Main/Start Menu --> Office sub-menu --> DeskStop
+- Windows &emsp;: Click Start menu --> DeskStop
+- Mac OS  &emsp;: Clock Launcher --> DeskStop
+
+In case you're cloning this repository and running:
+```bash
+# Go to cloned directory
 $ cd desktime
 
 # Run the project
