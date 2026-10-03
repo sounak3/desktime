@@ -1,3 +1,11 @@
 /.vscode
 /archive
 /desktime_latest.jar
+
+# Maven build output
+/target/
+/dependency-reduced-pom.xml
+
+# Local Claude Code / tooling state
+/.claude/
+/.github/java-upgrade/
