@@ -1,12 +1,19 @@
+// Fallback for a job's first run, before Jenkins has registered the parameters below.
+def defaultJarPath = '/home/sounak/Documents/NetBeansProjects/desktime/target/desktime.jar'
+
 pipeline {
     agent none
     options {
         buildDiscarder(logRotator(numToKeepStr: '30'))
         disableConcurrentBuilds()
         quietPeriod(15)
+        skipDefaultCheckout()
     }
     parameters {
-        string(name: 'JAR_PATH', defaultValue: '/home/sounak/Documents/NetBeansProjects/desktime/target/desktime.jar', description: 'IDE-built jar on the lin host (dell5558)')
+        string(name: 'JAR_PATH', defaultValue: defaultJarPath, description: 'IDE-built jar on the lin host (dell5558)')
+    }
+    environment {
+        JAR = "${params.JAR_PATH ?: defaultJarPath}"
     }
     stages {
         stage('Collect jar') {
@@ -14,14 +21,14 @@ pipeline {
             steps {
                 cleanWs()
                 sh '''
-                    test -s "$JAR_PATH" || { echo "Jar not found: $JAR_PATH"; exit 1; }
-                    unzip -tq "$JAR_PATH"
-                    cp "$JAR_PATH" desktime_latest.jar
+                    test -s "$JAR" || { echo "Jar not found: $JAR"; exit 1; }
+                    unzip -tq "$JAR"
+                    cp "$JAR" desktime_latest.jar
                     sha256sum desktime_latest.jar
                 '''
                 script {
-                    def commit = sh(returnStdout: true, script: 'git -C "$(dirname "$(dirname "$JAR_PATH")")" rev-parse --short HEAD').trim()
-                    def changes = sh(returnStdout: true, script: 'git -C "$(dirname "$(dirname "$JAR_PATH")")" status --porcelain').trim()
+                    def commit = sh(returnStdout: true, script: 'git -C "$(dirname "$(dirname "$JAR")")" rev-parse --short HEAD').trim()
+                    def changes = sh(returnStdout: true, script: 'git -C "$(dirname "$(dirname "$JAR")")" status --porcelain').trim()
                     currentBuild.description = changes ? "${commit} + uncommitted changes" : commit
                 }
                 archiveArtifacts artifacts: 'desktime_latest.jar', fingerprint: true
@@ -63,7 +70,7 @@ pipeline {
             agent { label 'lin' }
             steps {
                 sh '''
-                    REPO="$(dirname "$(dirname "$JAR_PATH")")"
+                    REPO="$(dirname "$(dirname "$JAR")")"
                     rsync -a --delete --exclude /target --exclude /.git --exclude /archive --exclude '/*.jar' "$REPO/" src/
                     cd src && mvn -B -ntp -Dmaven.test.failure.ignore=true test
                 '''
