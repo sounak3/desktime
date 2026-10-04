@@ -1,15 +1,19 @@
 pipeline {
     agent none
-    parameters {
-        string(name: 'APP_VERSION', defaultValue: '1.0', description: 'Installer version (numeric, e.g. 1.0 or 1.2.3). MSI requires this format.')
-    }
     stages {
         stage('Build jar') {
             agent { label 'lin' }
             steps {
                 cleanWs()
-                checkout scm
-                sh 'mvn -B -ntp clean package'
+                script {
+                    def scmVars = checkout scm
+                    env.APP_VERSION = sh(returnStdout: true, script: 'mvn -B -q help:evaluate -Dexpression=project.version -DforceStdout').trim().replace('-SNAPSHOT', '')
+                    if (!(env.APP_VERSION ==~ /\d+(\.\d+){0,2}/)) {
+                        error("pom.xml version '${env.APP_VERSION}' is not a valid installer version; use e.g. 1.2 or 1.2.3")
+                    }
+                    currentBuild.description = "v${env.APP_VERSION} @ ${scmVars.GIT_COMMIT.substring(0, 8)}"
+                }
+                sh 'mvn -B -ntp clean verify'
                 sh '''
                     mkdir -p app
                     cp target/desktime.jar DeskTime.xml Alarms.xml app/
@@ -18,6 +22,11 @@ pipeline {
                 stash name: 'app', includes: 'app/**'
                 stash name: 'icons', includes: 'extras/DeskStop.*'
                 archiveArtifacts artifacts: 'app/desktime.jar', fingerprint: true
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+                }
             }
         }
         stage('Package') {

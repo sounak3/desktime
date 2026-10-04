@@ -19,6 +19,11 @@ pipeline {
                     cp "$JAR_PATH" desktime_latest.jar
                     sha256sum desktime_latest.jar
                 '''
+                script {
+                    def commit = sh(returnStdout: true, script: 'git -C "$(dirname "$(dirname "$JAR_PATH")")" rev-parse --short HEAD').trim()
+                    def changes = sh(returnStdout: true, script: 'git -C "$(dirname "$(dirname "$JAR_PATH")")" status --porcelain').trim()
+                    currentBuild.description = changes ? "${commit} + uncommitted changes" : commit
+                }
                 archiveArtifacts artifacts: 'desktime_latest.jar', fingerprint: true
                 stash name: 'jar', includes: 'desktime_latest.jar'
             }
@@ -52,6 +57,17 @@ pipeline {
                         bat 'java -version && copy /Y desktime_latest.jar "%USERPROFILE%\\Desktop\\desktime_latest.jar"'
                     }
                 }
+            }
+        }
+        stage('Unit tests') {
+            agent { label 'lin' }
+            steps {
+                sh '''
+                    REPO="$(dirname "$(dirname "$JAR_PATH")")"
+                    rsync -a --delete --exclude /target --exclude /.git --exclude /archive --exclude '/*.jar' "$REPO/" src/
+                    cd src && mvn -B -ntp -Dmaven.test.failure.ignore=true test
+                '''
+                junit allowEmptyResults: true, testResults: 'src/target/surefire-reports/*.xml'
             }
         }
     }
