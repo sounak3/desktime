@@ -1,0 +1,58 @@
+pipeline {
+    agent none
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '30'))
+        disableConcurrentBuilds()
+        quietPeriod(15)
+    }
+    parameters {
+        string(name: 'JAR_PATH', defaultValue: '/home/sounak/Documents/NetBeansProjects/desktime/target/desktime.jar', description: 'IDE-built jar on the lin host (dell5558)')
+    }
+    stages {
+        stage('Collect jar') {
+            agent { label 'lin' }
+            steps {
+                cleanWs()
+                sh '''
+                    test -s "$JAR_PATH" || { echo "Jar not found: $JAR_PATH"; exit 1; }
+                    unzip -tq "$JAR_PATH"
+                    cp "$JAR_PATH" desktime_latest.jar
+                    sha256sum desktime_latest.jar
+                '''
+                archiveArtifacts artifacts: 'desktime_latest.jar', fingerprint: true
+                stash name: 'jar', includes: 'desktime_latest.jar'
+            }
+        }
+        stage('Deploy to test machines') {
+            parallel {
+                stage('lin') {
+                    agent { label 'lin' }
+                    options { timeout(time: 5, unit: 'MINUTES') }
+                    steps {
+                        cleanWs()
+                        unstash 'jar'
+                        sh 'java -version; cp desktime_latest.jar "$HOME/Desktop/desktime_latest.jar"'
+                    }
+                }
+                stage('mac') {
+                    agent { label 'mac' }
+                    options { timeout(time: 5, unit: 'MINUTES') }
+                    steps {
+                        cleanWs()
+                        unstash 'jar'
+                        sh 'java -version; cp desktime_latest.jar "$HOME/Desktop/desktime_latest.jar"'
+                    }
+                }
+                stage('win') {
+                    agent { label 'win' }
+                    options { timeout(time: 5, unit: 'MINUTES') }
+                    steps {
+                        cleanWs()
+                        unstash 'jar'
+                        bat 'java -version && copy /Y desktime_latest.jar "%USERPROFILE%\\Desktop\\desktime_latest.jar"'
+                    }
+                }
+            }
+        }
+    }
+}
