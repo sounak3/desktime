@@ -108,9 +108,15 @@ The pipelines select machines by label. Each node's name and label are the same.
 
 | Label | Host | OS | Connection | Agent root | Used by |
 |---|---|---|---|---|---|
-| `lin` | `dell5558.local` (192.168.1.14, also runs the controller) | Ubuntu 24.04 | Inbound (JNLP). systemd **user** service `jenkins-agent-lin`, secret in `~/jenkins/agent-secret` (mode 600). Lingering is enabled, so it starts at boot. | `/home/sounak/jenkins` | release: Build jar, Ubuntu; dev: Collect jar, lin, Unit tests |
+| `lin` | `dell5558.local` (192.168.1.14, also runs the controller) | Ubuntu 24.04 | Inbound (JNLP). systemd **user** service `jenkins-agent-lin`, secret in `~/jenkins/agent-secret` (mode 600). Before each start it downloads a fresh `agent.jar` from Jenkins. Lingering is enabled, so it starts at boot. | `/home/sounak/jenkins` | release: Build jar, Ubuntu; dev: Collect jar, lin, Unit tests |
 | `mac` | `macos.local` (192.168.1.16) | macOS | SSH from the controller, port 22, user `sounak`, credential *"for mac"* | `/Users/sounak/jenkins` | release: Mac OS; dev: mac |
-| `win` | `winos.local` (192.168.1.17) | Windows 7 (VM) | Inbound (JNLP). Scheduled task `JenkinsWinAgent` (at logon) runs `c:\jenkins\run-agent.bat` in a retry loop. | `c:\jenkins` | release: Windows; dev: win |
+| `win` | `winos.local` (192.168.1.17) | Windows 7 (VM) | Inbound (JNLP). Scheduled task `JenkinsWinAgent` (at logon) runs `c:\jenkins\run-agent.bat` in a retry loop. Each pass of the loop downloads a fresh `agent.jar` with `curl.exe` before starting it. | `c:\jenkins` | release: Windows; dev: win |
+
+A running agent keeps the `agent.jar` it started with, even across Jenkins restarts. **After upgrading Jenkins, restart both inbound agents** so they pick up the matching jar:
+- `lin`: `systemctl --user restart jenkins-agent-lin`
+- `win`: `schtasks /end /tn JenkinsWinAgent` and then `schtasks /run /tn JenkinsWinAgent`
+
+To check, look at the "Remoting version" line in the node's log, which should match the version Jenkins ships.
 
 ### Rotating inbound agent secrets
 
@@ -148,7 +154,7 @@ Install everything with: `sudo apt install openjdk-21-jdk maven git fakeroot unz
 |---|---|
 | JDK 21, with **`JAVA_HOME` set system-wide** | The Windows stages call `"%JAVA_HOME%\bin\jdeps"`, `jlink` and `jpackage` explicitly. Restart the agent after setting it, because it reads the environment at start-up. Alternatively, set `JAVA_HOME` on the node in Jenkins (*Nodes → win → Configure → Environment variables*). |
 | `java` on `PATH` | Starts the agent (`run-agent.bat`); `java -version` in the dev pipeline |
-| **.NET Framework 3.5.1** | Required by WiX Toolset 3.14, which jpackage uses to build the MSI. On Windows 7: *Control Panel → Programs → Turn Windows features on or off → Microsoft .NET Framework 3.5.1*. |
+| **.NET Framework 4.x** (4.8 recommended) | Required by WiX Toolset 3.14, which jpackage uses to build the MSI. Without it, `candle.exe` shows a ".NET Framework Initialization Error (v4.0.30319)" dialog, and the build waits until someone clicks it. .NET 3.5 is not enough. On Windows 7 SP1, use .NET Framework **4.8**, the last version that supports it (4.8.1 doesn't). |
 | Internet access to `github.com` | The release pipeline downloads `wix314-binaries.zip` on every run and adds it to `PATH`. Nothing to install manually. |
 | `%USERPROFILE%\Desktop` | dev pipeline copies the jar there |
 
@@ -158,8 +164,16 @@ To check, run in a command prompt on the VM:
 echo %JAVA_HOME%
 "%JAVA_HOME%\bin\java" -version
 "%JAVA_HOME%\bin\jpackage" --version
-reg query "HKLM\SOFTWARE\Microsoft\NET Framework Setup\NDP\v3.5" /v Install
+reg query "HKLM\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" /v Release
+rem 528040 or higher means .NET Framework 4.8
 ```
+
+> **Comodo Internet Security** runs on the VM and blocks unknown programs and `.bat` files. A Windows step that hangs with no output, or a file that disappears, is usually Comodo. Jenkins writes a new `.bat` file for every build step under `c:\jenkins\workspace\…@tmp\`, and the release downloads fresh WiX executables into the workspace on every run. So allowing single files doesn't last: allow these **folders**:
+> - `c:\jenkins\` (including `workspace`)
+> - `C:\Program Files\Java\jdk-21.0.12\`
+> - `C:\Program Files\Common Files\Oracle\Java\javapath\`
+>
+> Also let `java.exe` and `curl.exe` connect out to `192.168.1.14` on ports 8080 and 50000, and to `github.com` for the WiX download.
 
 > **Windows 7 caveat:** JDK 21 does not officially support Windows 7. It often works, but nobody tests it there or fixes problems specific to it. The MSI it produces is fine: it contains the jar plus a Java 21 runtime, and installs and runs on Windows 10/11, where Java 21 is supported. Testing on Windows 7 tells you little about how the app behaves for Windows 10/11 users (high-DPI scaling, fonts, tray icon). Also, Windows 7 has had no security updates since 2020. Move `win` to a Windows 10/11 VM when you can.
 
