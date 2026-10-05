@@ -223,7 +223,7 @@ A systemd path unit watches the jar and asks Jenkins to start `desktime dev`:
 | File | Role |
 |---|---|
 | `~/.config/systemd/user/desktime-dev-trigger.path` | watches `target/desktime.jar` |
-| `~/.config/systemd/user/desktime-dev-trigger.service` | runs `curl -X POST …/job/desktime%20dev/build`; skipped if the jar doesn't exist, for example right after `mvn clean` |
+| `~/.config/systemd/user/desktime-dev-trigger.service` | runs `curl -X POST …/job/desktime%20dev/buildWithParameters` (a job with parameters rejects plain `/build` with HTTP 400); skipped if the jar doesn't exist, for example right after `mvn clean` |
 | `~/.config/desktime-dev-trigger.env` (mode 600) | `JENKINS_USER` and `JENKINS_TOKEN` (a Jenkins API token) |
 
 To check that it works: `systemctl --user start desktime-dev-trigger.service`, then `journalctl --user -u desktime-dev-trigger.service -n 20`
