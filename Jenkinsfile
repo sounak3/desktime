@@ -43,10 +43,10 @@ pipeline {
                                 unstash 'app'
                                 unstash 'icons'
                                 script {
-                                    def deps = bat(returnStdout: true, script: '@echo off && "%JAVA_HOME%"\\bin\\jdeps --print-module-deps app\\desktime.jar').trim()
+                                    def deps = bat(returnStdout: true, script: '@echo off && "%JAVA_HOME%\\bin\\jdeps" --print-module-deps app\\desktime.jar').trim()
                                     echo "Dependencies: '${deps}'"
                                     withEnv(["DEPENDS=${deps}"]) {
-                                        bat '@echo off && "%JAVA_HOME%"\\bin\\jlink --compress=zip-6 --strip-debug --no-header-files --no-man-pages --add-modules "%DEPENDS%" --output jre'
+                                        bat '@echo off && "%JAVA_HOME%\\bin\\jlink" --compress=zip-6 --strip-debug --no-header-files --no-man-pages --add-modules "%DEPENDS%" --output jre'
                                     }
                                 }
                             }
@@ -60,7 +60,7 @@ pipeline {
                                     ])
                                     def wix = pwd() + '\\wix'
                                     withEnv(["PATH+WIX=${wix}"]) {
-                                        bat '@echo off && "%JAVA_HOME%"\\bin\\jpackage --input app --name DeskStop --description "Clock, Uptime and Pomodoro application" --vendor "Sounak Choudhury" --copyright "Copyright (C) 2024 Sounak Choudhury" --app-version %APP_VERSION% --main-jar desktime.jar --runtime-image jre --type msi --license-file app\\LICENSE.txt --icon extras\\DeskStop.ico --win-dir-chooser --win-menu --win-menu-group DeskStop --win-shortcut'
+                                        bat '@echo off && "%JAVA_HOME%\\bin\\jpackage" --input app --name DeskStop --description "Clock, Uptime and Pomodoro application" --vendor "Sounak Choudhury" --copyright "Copyright (C) 2024 Sounak Choudhury" --app-version %APP_VERSION% --main-jar desktime.jar --runtime-image jre --type msi --license-file app\\LICENSE.txt --icon extras\\DeskStop.ico --win-dir-chooser --win-menu --win-menu-group DeskStop --win-shortcut'
                                     }
                                 }
                             }

@@ -183,6 +183,7 @@ rem 528040 or higher means .NET Framework 4.8
 |---|---|
 | JDK 21 (`java`, `jdeps`, `jlink`, `jpackage`) **on the non-interactive SSH `PATH`** | The SSH launcher runs commands in a non-login shell. Put `PATH` and `JAVA_HOME` in `~/.zshenv`, not `~/.zshrc`. The agent last reported Homebrew OpenJDK 21.0.4. |
 | `hdiutil` | Builds the DMG. Built into macOS. |
+| **No idle system sleep** | macOS doesn't count Jenkins activity over SSH as use. With `sleep 10` the Mac dozes mid-build: the agent drops offline and artifact uploads crawl (seen at about 6 KB/s). Keep the display sleep, but turn system sleep off: `sudo pmset -a sleep 0` (check with `pmset -g`). |
 | SSH enabled (*System Settings → General → Sharing → Remote Login*) | The controller connects to it |
 | `~/Desktop` | dev pipeline copies the jar there |
 
