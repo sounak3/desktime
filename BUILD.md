@@ -191,6 +191,16 @@ To check from dell5558: `ssh -i ~/.ssh/id_ed25519_mac_admin sounak@macos.local '
 
 The DMG's CPU architecture (Apple Silicon or Intel) is the architecture of the JDK installed on the Mac.
 
+`macos.local` is a VMware VM on dell5558 with a `vmxnet3` network card. With TCP segmentation offload (TSO) on, everything the Mac sends crawls, so the DMG upload to Jenkins breaks off. Turn TSO off with `sudo sysctl -w net.inet.tcp.tso=0`. This setting **resets at every reboot**; `pmset` settings persist.
+
+**After a VM snapshot restore or any VM change, run the `mac toolcheck` job.** It:
+- re-adds the admin SSH key if it's missing
+- checks that idle sleep and TSO are both `0`. If either isn't, that stage fails and shows the exact `sudo` command to run on the Mac.
+- checks the JDK, `jpackage`, `jdeps`, `jlink` and `hdiutil`
+- builds a small DMG and uploads it to Jenkins within 2 minutes, which also catches the slow-upload problem
+
+After setting the Mac up, take a fresh VM snapshot, so a restore keeps the settings. The one thing no Jenkins job can repair is Jenkins' own SSH key on the Mac (credential *"for mac"*). If a restore removes it, the agent can't connect at all. The `win toolcheck` job does the same kind of check for the Windows VM.
+
 Checked on 2026-10-04: macOS 13.7.8 on Intel (x86_64), with Homebrew OpenJDK 21.0.4. The JDK is registered with `/usr/libexec/java_home`, so macOS's built-in `/usr/bin` launchers for `java`, `jdeps`, `jlink` and `jpackage` find it without any `PATH` setup. Releases therefore produce an **Intel-only DMG**, which Apple Silicon Macs run through Rosetta.
 
 ## Jenkins configuration
@@ -228,6 +238,8 @@ A systemd path unit watches the jar and asks Jenkins to start `desktime dev`:
 | `~/.config/desktime-dev-trigger.env` (mode 600) | `JENKINS_USER` and `JENKINS_TOKEN` (a Jenkins API token) |
 
 To check that it works: `systemctl --user start desktime-dev-trigger.service`, then `journalctl --user -u desktime-dev-trigger.service -n 20`
+
+Any build that writes `target/desktime.jar` starts the dev pipeline: `mvn package`, `mvn clean package`, `mvn verify`, `mvn install`, or the IDE's build. `mvn compile` and `mvn test` don't create the jar, and `mvn clean` deletes it, so they don't start it. `mvn package` runs the unit tests first, so if a test fails no jar is written and the dev pipeline doesn't start (`-DskipTests` skips the tests). Native installers are built only by the release pipeline: `pom.xml` no longer has the `jpackage-maven-plugin`, so `mvn jpackage:jpackage` doesn't work.
 
 A single Maven build writes the jar more than once (the shade plugin replaces it). The job's 15-second quiet period merges those triggers into one build. Each deploy stage times out after 5 minutes, so a powered-off VM only fails its own branch while the other machines still receive the jar.
 
