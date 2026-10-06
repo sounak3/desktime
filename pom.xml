@@ -45,24 +45,10 @@
           </executions>
         </plugin>
 
-        <!-- Wraps the JDK's jpackage tool. Run per-OS: `mvn jpackage:jpackage` on Windows/Mac/Linux
-             each produce that platform's native installer/binary; jpackage cannot cross-compile. -->
         <plugin>
-          <groupId>org.panteleyev</groupId>
-          <artifactId>jpackage-maven-plugin</artifactId>
-          <version>1.6.5</version>
-          <configuration>
-            <name>DeskTime</name>
-            <appVersion>1.0.0</appVersion>
-            <vendor>sounaks</vendor>
-            <destination>target/dist</destination>
-            <input>target</input>
-            <mainJar>${project.artifactId}.jar</mainJar>
-            <mainClass>${exec.mainClass}</mainClass>
-            <javaOptions>
-              <option>-Dfile.encoding=UTF-8</option>
-            </javaOptions>
-          </configuration>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>3.5.2</version>
         </plugin>
       </plugins>
     </build>
@@ -72,6 +58,12 @@
     <groupId>javazoom</groupId>
     <artifactId>jlayer</artifactId>
     <version>1.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.11.4</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

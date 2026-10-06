@@ -29,9 +29,9 @@
 <p align="center">
   <a href="#dart-about">About</a> &#xa0; | &#xa0; 
   <a href="#sparkles-features">Features</a> &#xa0; | &#xa0;
-  <a href="#rocket-technologies">Technologies</a> &#xa0; | &#xa0;
-  <a href="#white_check_mark-requirements">Requirements</a> &#xa0; | &#xa0;
   <a href="#shopping_cart-download">Download</a> &#xa0; | &#xa0;
+  <a href="#computer-development">Development</a> &#xa0; | &#xa0;
+  <a href="#white_check_mark-requirements">Requirements</a> &#xa0; | &#xa0;
   <a href="#checkered_flag-starting">Starting</a> &#xa0; | &#xa0;
   <a href="#memo-license">License</a> &#xa0; | &#xa0;
   <a href="https://github.com/sounak3" target="_blank">Author</a>
@@ -54,20 +54,6 @@ DeskStop is a versatile, multi-feature clock and timer application designed for 
 :heavy_check_mark: **`Alarms:`** Set one-time or recurring alarms with custom tones for reminders, tasks, or events;\
 :heavy_check_mark: **`Pomodoro Sounds:`** Choose from various sound effects for the Pomodoro timer to suit your work rhythm;
 
-## :computer: Development ##
-
-The following tools were used in this project for development:
-
-<a href="https://git-scm.com/" target="_blank"><img src="https://img.shields.io/badge/GIT-black?style=for-the-badge&logo=GIT&logoColor=F05032"/></a> &nbsp; <a href="https://openjdk.org/" target="_blank"><img src="https://img.shields.io/badge/JAVA-black?style=for-the-badge&logo=openjdk&logoColor=F37626"/></a> &nbsp; <a href="https://maven.apache.org/index.html" target="_blank"><img src="https://img.shields.io/badge/maven-central?style=for-the-badge&logo=apachemaven&logoColor=violet&color=black"/></a> &nbsp; <a href="https://www.gimp.org/" target="_blank"><img src="https://img.shields.io/badge/GIMP-logo?logo=gimp&logoColor=gray&labelColor=white&color=white"/></a> &nbsp; <a href="https://code.visualstudio.com/" target="_blank"><img src="https://img.shields.io/badge/VScode-logo?logo=xing&logoColor=skyblue&labelColor=black&color=black"/></a>
-
-## :white_check_mark: Requirements ##
-
-Before starting :checkered_flag: :
-- Need to have either of Windows / Linux / MacOS GUI desktop environment.
-
-In case you're cloning this repository and running :
-- Need to have [Git](https://git-scm.com) and [Java SDK](https://openjdk.org/install/) installed.
-
 ## :shopping_cart: Download ##
 
 In case you want to install latest release, please download the appropriate OS package and install:
@@ -84,6 +70,20 @@ In case you're cloning this repository:
 $ git clone https://github.com/sounak3/desktime
 
 ```
+
+## :computer: Development ##
+
+The following tools were used in this project for development:
+
+<a href="https://git-scm.com/" target="_blank"><img src="https://img.shields.io/badge/GIT-black?style=for-the-badge&logo=GIT&logoColor=F05032"/></a> &nbsp; <a href="https://openjdk.org/" target="_blank"><img src="https://img.shields.io/badge/JAVA-black?style=for-the-badge&logo=openjdk&logoColor=F37626"/></a> &nbsp; <a href="https://maven.apache.org/index.html" target="_blank"><img src="https://img.shields.io/badge/maven-central?style=for-the-badge&logo=apachemaven&logoColor=violet&color=black"/></a> &nbsp; <a href="https://www.gimp.org/" target="_blank"><img src="https://img.shields.io/badge/GIMP-logo?logo=gimp&logoColor=gray&labelColor=white&color=white"/></a> &nbsp; <a href="https://code.visualstudio.com/" target="_blank"><img src="https://img.shields.io/badge/VScode-logo?logo=xing&logoColor=skyblue&labelColor=black&color=black"/></a>
+
+## :white_check_mark: Requirements ##
+
+Before starting :checkered_flag: :
+- Need to have either of Windows / Linux / MacOS GUI desktop environment.
+
+In case you're cloning this repository and running :
+- Need to have [Git](https://git-scm.com) and [Java SDK](https://openjdk.org/install/) installed.
 
 ## :checkered_flag: Starting ##
 

@@ -476,29 +476,22 @@ public class InitInfo extends Hashtable<String, Object>
 		put(KEY_USING_IMAGE, flag);
 	}
 
+	// Stored paths may come from another machine, OS or an older resources dir, so fall back to the bundled file of the same name.
+	private File resolveBundled(String key, String subDir, String defaultName)
+	{
+		if (get(key) instanceof String path && !path.isEmpty()) {
+			File stored = new File(path);
+			if (stored.isFile()) return stored;
+			String name = path.substring(Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')) + 1);
+			File bundled = new File(defaultsDir.getAbsolutePath() + subDir + name);
+			if (bundled.isFile()) return bundled;
+		}
+		return new File(defaultsDir.getAbsolutePath() + subDir + defaultName);
+	}
+
 	public File getImageFile()
 	{
-		File ff = new File((String)get(KEY_IMAGEFILE));
-		if(ff.exists() &&  ff.isFile())
-		{
-			return ff;
-		}
-		else
-		{
-			String imageName = DEFAULT_BACKGROUND_IMAGE;
-			// check for windows file separator in name and take only the last part after separator
-			if (ff.getName().contains("\\") && !File.separator.contentEquals("\\")) {
-				imageName = ff.getName().substring(ff.getName().lastIndexOf("\\")+1);
-			}
-
-			// check for linux file separator in name and take only the last part after separator
-			if (ff.getName().contains("/") && !File.separator.contentEquals("/")) {
-				imageName = ff.getName().substring(ff.getName().lastIndexOf("/")+1);
-			}
-
-			String debugFile = defaultsDir.getAbsolutePath() + IMAGES_DIR + imageName;
-			return new File(debugFile);
-		}
+		return resolveBundled(KEY_IMAGEFILE, IMAGES_DIR, DEFAULT_BACKGROUND_IMAGE);
 	}
 	
 	public void setGlassEffect(boolean flag)
@@ -548,27 +541,7 @@ public class InitInfo extends Hashtable<String, Object>
 
 	public String getAlarmSound()
 	{
-		File ff = new File((String)get(KEY_ALARM_SOUND));
-		if(ff.exists() &&  ff.isFile())
-		{
-			return ff.getAbsolutePath();
-		}
-		else
-		{
-			String soundName = DEFAULT_ALARM_SOUND;
-			// check for windows file separator in name and take only the last part after separator
-			if (ff.getName().contains("\\") && !File.separator.contentEquals("\\")) {
-				soundName = ff.getName().substring(ff.getName().lastIndexOf("\\")+1);
-			}
-
-			// check for linux file separator in name and take only the last part after separator
-			if (ff.getName().contains("/") && !File.separator.contentEquals("/")) {
-				soundName = ff.getName().substring(ff.getName().lastIndexOf("/")+1);
-			}
-
-			String debugFile = defaultsDir.getAbsolutePath() + SOUNDS_DIR + soundName;
-			return new File(debugFile).getAbsolutePath();
-		}
+		return resolveBundled(KEY_ALARM_SOUND, SOUNDS_DIR, DEFAULT_ALARM_SOUND).getAbsolutePath();
 	}
 
 	public void setAlarmSound(String alarmSound)
@@ -578,27 +551,7 @@ public class InitInfo extends Hashtable<String, Object>
 
 	public String getHourSound()
 	{
-		File ff = new File((String)get(KEY_HOUR_SOUND));
-		if(ff.exists() &&  ff.isFile())
-		{
-			return ff.getAbsolutePath();
-		}
-		else
-		{
-			String soundName = DEFAULT_HOURLY_SOUND;
-			// check for windows file separator in name and take only the last part after separator
-			if (ff.getName().contains("\\") && !File.separator.contentEquals("\\")) {
-				soundName = ff.getName().substring(ff.getName().lastIndexOf("\\")+1);
-			}
-
-			// check for linux file separator in name and take only the last part after separator
-			if (ff.getName().contains("/") && !File.separator.contentEquals("/")) {
-				soundName = ff.getName().substring(ff.getName().lastIndexOf("/")+1);
-			}
-
-			String debugFile = defaultsDir.getAbsolutePath() + SOUNDS_DIR + soundName;
-			return new File(debugFile).getAbsolutePath();
-		}
+		return resolveBundled(KEY_HOUR_SOUND, SOUNDS_DIR, DEFAULT_HOURLY_SOUND).getAbsolutePath();
 	}
 
 	public void setHourSound(String hourSound)
@@ -608,27 +561,7 @@ public class InitInfo extends Hashtable<String, Object>
 
 	public String getUptimeHourSound()
 	{
-		File ff = new File((String)get(KEY_UPTIME_HOUR_SOUND));
-		if(ff.exists() &&  ff.isFile())
-		{
-			return ff.getAbsolutePath();
-		}
-		else
-		{
-			String soundName = DEFAULT_UPTIME_HOUR_SOUND;
-			// check for windows file separator in name and take only the last part after separator
-			if (ff.getName().contains("\\") && !File.separator.contentEquals("\\")) {
-				soundName = ff.getName().substring(ff.getName().lastIndexOf("\\")+1);
-			}
-
-			// check for linux file separator in name and take only the last part after separator
-			if (ff.getName().contains("/") && !File.separator.contentEquals("/")) {
-				soundName = ff.getName().substring(ff.getName().lastIndexOf("/")+1);
-			}
-
-			String debugFile = defaultsDir.getAbsolutePath() + SOUNDS_DIR + soundName;
-			return new File(debugFile).getAbsolutePath();
-		}
+		return resolveBundled(KEY_UPTIME_HOUR_SOUND, SOUNDS_DIR, DEFAULT_UPTIME_HOUR_SOUND).getAbsolutePath();
 	}
 
 	public void setUptimeHourSound(String uptimeHrSound)
@@ -638,27 +571,7 @@ public class InitInfo extends Hashtable<String, Object>
 
 	public String getPomodoroWorkSound()
 	{
-		File ff = new File((String)get(KEY_POMO_WORK_SOUND));
-		if(ff.exists() &&  ff.isFile())
-		{
-			return ff.getAbsolutePath();
-		}
-		else
-		{
-			String soundName = DEFAULT_POMODORO_WORK_SOUND;
-			// check for windows file separator in name and take only the last part after separator
-			if (ff.getName().contains("\\") && !File.separator.contentEquals("\\")) {
-				soundName = ff.getName().substring(ff.getName().lastIndexOf("\\")+1);
-			}
-
-			// check for linux file separator in name and take only the last part after separator
-			if (ff.getName().contains("/") && !File.separator.contentEquals("/")) {
-				soundName = ff.getName().substring(ff.getName().lastIndexOf("/")+1);
-			}
-
-			String debugFile = defaultsDir.getAbsolutePath() + SOUNDS_DIR + soundName;
-			return new File(debugFile).getAbsolutePath();
-		}
+		return resolveBundled(KEY_POMO_WORK_SOUND, SOUNDS_DIR, DEFAULT_POMODORO_WORK_SOUND).getAbsolutePath();
 	}
 
 	public void setPomodoroWorkSound(String pomoWorkSound)
@@ -668,27 +581,7 @@ public class InitInfo extends Hashtable<String, Object>
 
 	public String getPomodoroBreakSound()
 	{
-		File ff = new File((String)get(KEY_POMO_BREAK_SOUND));
-		if(ff.exists() &&  ff.isFile())
-		{
-			return ff.getAbsolutePath();
-		}
-		else
-		{
-			String soundName = DEFAULT_POMODORO_BREAK_SOUND;
-			// check for windows file separator in name and take only the last part after separator
-			if (ff.getName().contains("\\") && !File.separator.contentEquals("\\")) {
-				soundName = ff.getName().substring(ff.getName().lastIndexOf("\\")+1);
-			}
-
-			// check for linux file separator in name and take only the last part after separator
-			if (ff.getName().contains("/") && !File.separator.contentEquals("/")) {
-				soundName = ff.getName().substring(ff.getName().lastIndexOf("/")+1);
-			}
-
-			String debugFile = defaultsDir.getAbsolutePath() + SOUNDS_DIR + soundName;
-			return new File(debugFile).getAbsolutePath();
-		}
+		return resolveBundled(KEY_POMO_BREAK_SOUND, SOUNDS_DIR, DEFAULT_POMODORO_BREAK_SOUND).getAbsolutePath();
 	}
 
 	public void setPomodoroBreakSound(String pomoBreakSound)
@@ -698,27 +591,7 @@ public class InitInfo extends Hashtable<String, Object>
 
 	public String getPomodoroRestSound()
 	{
-		File ff = new File((String)get(KEY_POMO_REST_SOUND));
-		if(ff.exists() &&  ff.isFile())
-		{
-			return ff.getAbsolutePath();
-		}
-		else
-		{
-			String soundName = DEFAULT_POMODORO_REST_SOUND;
-			// check for windows file separator in name and take only the last part after separator
-			if (ff.getName().contains("\\") && !File.separator.contentEquals("\\")) {
-				soundName = ff.getName().substring(ff.getName().lastIndexOf("\\")+1);
-			}
-
-			// check for linux file separator in name and take only the last part after separator
-			if (ff.getName().contains("/") && !File.separator.contentEquals("/")) {
-				soundName = ff.getName().substring(ff.getName().lastIndexOf("/")+1);
-			}
-
-			String debugFile = defaultsDir.getAbsolutePath() + SOUNDS_DIR + soundName;
-			return new File(debugFile).getAbsolutePath();
-		}
+		return resolveBundled(KEY_POMO_REST_SOUND, SOUNDS_DIR, DEFAULT_POMODORO_REST_SOUND).getAbsolutePath();
 	}
 
 	public void setPomodoroRestSound(String pomoRestSound)

@@ -16,10 +16,12 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
 import java.nio.channels.FileLock;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -28,7 +30,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ExUtils
 {
@@ -48,7 +50,7 @@ public class ExUtils
 	public static final String INTERNAL_SETTINGS_FILE = "app/DeskTime.xml";
 	public static final String ALARMS_FILE            = "Alarms.xml";
 	public static final String INTERNAL_ALARMS_FILE   = "app/Alarms.xml";
-	private static File jarDir;
+	static File jarDir;
 
 	public enum ROUND_CORNERS {		
 		SQUARE(0), MINIMAL(1), STANDARD(4), SQUIRCLE(16), CIRCLE(20);
@@ -386,32 +388,49 @@ public class ExUtils
 		return formattedTime.toString();
 	}
 
+	/*
+	 * Bundled images and sounds need real file paths, so they are copied out of the jar once per user and per jar build
+	 * into ~/.deskstop/resources/<jar size>-<jar timestamp>. Folders left by other jar builds are removed.
+	 */
 	public static File getJarExtractedDirectory(File sourceJar)
 	{
-		File destLocation = new File(System.getProperty("java.io.tmpdir") + "/desktime");
+		File resourcesRoot = new File(getDeskStopHomeDir(), "resources");
+		File destLocation  = new File(resourcesRoot, sourceJar.length() + "-" + sourceJar.lastModified());
+		Path completeMarker = new File(destLocation, ".complete").toPath();
+		if (Files.isRegularFile(completeMarker)) {
+			return destLocation;
+		}
 		Path destDir = destLocation.toPath();
 		try (JarFile jarFile = new JarFile(sourceJar)) {
-			Files.createDirectories(destDir);
-			java.util.List<? extends JarEntry> entries = jarFile.stream()
-														.sorted(Comparator.comparing(JarEntry::getName))
-														.collect(Collectors.toList());
-			for (JarEntry entry : entries) {
-				Path outputFile = destDir.resolve(entry.getName());
-				if (entry.isDirectory()) {
-					// Create directories if it's a directory
-					if (!Files.exists(outputFile)) Files.createDirectory(outputFile);
-					continue;
+			for (JarEntry entry : Collections.list(jarFile.entries())) {
+				String name = entry.getName();
+				if (entry.isDirectory() || !(name.startsWith("images/") || name.startsWith("sounds/"))) continue;
+				Path outputFile = destDir.resolve(name);
+				Files.createDirectories(outputFile.getParent());
+				try (InputStream in = jarFile.getInputStream(entry)) {
+					Files.copy(in, outputFile, StandardCopyOption.REPLACE_EXISTING);
 				}
-
-				if (!Files.exists(outputFile))
-					Files.copy(jarFile.getInputStream(entry), outputFile);
 			}
+			Files.write(completeMarker, new byte[0]);
+			deleteOtherDirectories(resourcesRoot, destLocation);
 		} catch (Exception e) {
 			e.printStackTrace();
 			destLocation = new File(System.getProperty(USER_HOME));
 		}
-		// System.out.println(destLocation.getAbsolutePath());
 		return destLocation;
+	}
+
+	private static void deleteOtherDirectories(File parent, File keep)
+	{
+		File[] others = parent.listFiles(f -> f.isDirectory() && !f.equals(keep));
+		if (others == null) return;
+		for (File dir : others) {
+			try (Stream<Path> paths = Files.walk(dir.toPath())) {
+				paths.sorted(Comparator.reverseOrder()).forEach(p -> p.toFile().delete());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public static String toCamelCase(String input) {
@@ -452,7 +471,8 @@ public class ExUtils
 			jarFile = jarFile.getParentFile();
 		}
 
-		return jarFile.getParentFile();
+		jarDir = jarFile.getParentFile();
+		return jarDir;
 	}
 
 	/*
@@ -476,54 +496,96 @@ public class ExUtils
 		}
 	}
 
+	private static File backupOf(File file)
+	{
+		return new File(file.getParentFile(), file.getName() + ".bak");
+	}
+
+	// Decoder warnings (for example a property that no longer exists) are only logged, so older files still load.
+	private static Object readXml(File file) throws IOException
+	{
+		try (XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(file)), null,
+				e -> System.out.println("Warning while reading " + file + ": " + e))) {
+			return decoder.readObject();
+		} catch (RuntimeException e) {
+			throw new IOException("No readable content in " + file, e);
+		}
+	}
+
 	/*
-	 * 1. Check settings exist in user.home and decode XML.
-	 * 2. Else check in JAR dir/app/DeskTime.xml and decode XML.
-	 * 3. Else check in JAR dir/DeskTime.xml and decode XML.
-	 * 4. Load decoded XML into InitInfo objects ArrayList and return the same.
+	 * Returns the first file that decodes to the expected type, trying in order: the user's copy in ~/.deskstop,
+	 * its .bak, then the default copy next to the jar (DeskTime.xml) or in app/ under it. Returns null if none works.
 	 */
+	private static <T> T loadFirst(Class<T> type, String fileName, String internalFileName)
+	{
+		File userFile = new File(getDeskStopHomeDir(), fileName);
+		File[] candidates = { userFile, backupOf(userFile), new File(getJarDir(), fileName), new File(getJarDir(), internalFileName) };
+		for (File candidate : candidates) {
+			if (!candidate.isFile()) continue;
+			try {
+				Object content = readXml(candidate);
+				if (type.isInstance(content)) return type.cast(content);
+				System.out.println("Ignoring " + candidate + ": not a " + type.getSimpleName());
+			} catch (IOException e) {
+				System.out.println("Cannot read " + candidate + ": " + e);
+			}
+		}
+		return null;
+	}
+
+	/*
+	 * Writes to a temp file and swaps it in, so a crash mid-save never leaves a truncated file.
+	 * The previous version is kept as <file>.bak. Nothing is replaced if any object fails to encode.
+	 */
+	static void writeXml(File file, Object content) throws IOException
+	{
+		Path target = file.toPath();
+		Files.createDirectories(target.getParent());
+		Path temp = Files.createTempFile(target.getParent(), file.getName(), ".tmp");
+		try {
+			java.util.List<Exception> errors = new ArrayList<>();
+			try (XMLEncoder encoder = new XMLEncoder(new BufferedOutputStream(Files.newOutputStream(temp)))) {
+				encoder.setExceptionListener(errors::add);
+				encoder.writeObject(content);
+			}
+			if (!errors.isEmpty()) throw new IOException("Could not encode " + file.getName(), errors.get(0));
+			if (Files.exists(target)) Files.copy(target, backupOf(file).toPath(), StandardCopyOption.REPLACE_EXISTING);
+			try {
+				Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+			} catch (AtomicMoveNotSupportedException e) {
+				Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING);
+			}
+		} finally {
+			Files.deleteIfExists(temp);
+		}
+	}
+
+	private static void saveToDeskStopHome(String fileName, Object content)
+	{
+		try {
+			writeXml(new File(getDeskStopHomeDir(), fileName), content);
+		} catch (IOException e) {
+			System.out.println("Exception while saving \"" + fileName + "\": " + e);
+			e.printStackTrace();
+		}
+	}
+
 	public static java.util.List<InitInfo> loadDeskStops()
 	{
 		ArrayList<InitInfo> data = new ArrayList<>();
-		try
-		{
-			XMLDecoder decoder;
-			File parentDir        = getJarDir();
-			File externalSettings = new File(getDeskStopHomeDir(), SETTINGS_FILE);
-			File settingsFile     = new File(parentDir, SETTINGS_FILE);
-			File internalSettings = new File(parentDir, INTERNAL_SETTINGS_FILE);
-			if (externalSettings.exists()) {
-				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(externalSettings)));
-			} else if (!settingsFile.exists() && internalSettings.exists()) {
-				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(internalSettings)));
-			} else {
-				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(settingsFile)));
+		ArrayList<?> content = loadFirst(ArrayList.class, SETTINGS_FILE, INTERNAL_SETTINGS_FILE);
+		if (content != null) {
+			for (Object item : content) {
+				if (item instanceof InitInfo info) data.add(info);
 			}
-
-			Object content = decoder.readObject();
-			decoder.close();
-			if (content instanceof ArrayList) {
-				ArrayList<?> tmpArrayList = (ArrayList<?>)content;
-				for (int cnt = 0; cnt < tmpArrayList.size(); cnt++) {
-					if (tmpArrayList.get(cnt) instanceof InitInfo) data.add((InitInfo)tmpArrayList.get(cnt));
-				}
-			}
-		}
-		catch (Exception exclusive)
-		{// Ignoring missing file...
-			System.out.println("File missing-\"" + SETTINGS_FILE + "\": " + exclusive.toString());
-			exclusive.printStackTrace();
 		}
 		return data;
 	}
-	
+
 	/*
 	 * 1. Checks if @currDeskStops list is empty and adds the @currInitInfo as the 0th element.
 	 * 2. Else finds @currInitInfo ID by iterating through @currDeskStops and sets at that position of ArrayList.
-	 * 3. Get's the JAR directory and hence File objects for apps/DeskTime.xml and ./DeskTime.xml
-	 * 4. Get File object for user.home/DeskTime.xml. If exists then create XML and write settings and close.
-	 * 5. Else check settingsFile and internalSettings as in (3) and copy to user.home/DeskTime.xml.
-	 * 6. Then create XML and write settings and close.
+	 * 3. Saves the list to ~/.deskstop/DeskTime.xml.
 	 */
 	public static void saveDeskStops(InitInfo currInitInfo, java.util.List<InitInfo> currDeskStops)
 	{
@@ -540,159 +602,38 @@ public class ExUtils
 			cnt++;
 		} while (cnt < currDeskStops.size());
 
-		try
-		{
-			XMLEncoder xencode;
-			File parentDir        = getJarDir();
-			File externalSettings = new File(getDeskStopHomeDir(), SETTINGS_FILE);
-			File settingsFile     = new File(parentDir, SETTINGS_FILE);
-			File internalSettings = new File(parentDir, INTERNAL_SETTINGS_FILE);
-			if (externalSettings.exists()) {
-				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(externalSettings)));
-			} else {
-				Path sourcePath;
-				Path destPath = externalSettings.toPath();
-				if (!settingsFile.exists() && internalSettings.exists()) {
-					sourcePath = internalSettings.toPath();
-				} else {
-					sourcePath = settingsFile.toPath();
-				}
-				Files.copy(sourcePath, destPath, StandardCopyOption.REPLACE_EXISTING);
-				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(externalSettings)));
-			}
-			xencode.writeObject(currDeskStops);
-			xencode.close();
-		}
-		catch (Exception fne)
-		{
-			System.out.println("Exception while saving properties file-\"" + SETTINGS_FILE + "\": " + fne.toString());
-			fne.printStackTrace();
-		}
+		saveDeskStops(currDeskStops);
 	}
 
-	/*
-	 * 1. Get's the JAR directory and hence File objects for apps/DeskTime.xml and ./DeskTime.xml
-	 * 2. Get File object for user.home/DeskTime.xml. If exists then create XML and write settings and close.
-	 * 3. Else check settingsFile and internalSettings as in (1) and copy to user.home/DeskTime.xml.
-	 * 4. Then create XML and write settings and close.
-	 */
 	public static void saveDeskStops(java.util.List<InitInfo> currDeskStops)
 	{
-		try
-		{
-			XMLEncoder xencode;
-			File parentDir        = getJarDir();
-			File externalSettings = new File(getDeskStopHomeDir(), SETTINGS_FILE);
-			File settingsFile     = new File(parentDir, SETTINGS_FILE);
-			File internalSettings = new File(parentDir, INTERNAL_SETTINGS_FILE);
-			if (externalSettings.exists()) {
-				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(externalSettings)));
-			} else {
-				Path sourcePath;
-				Path destPath = externalSettings.toPath();
-				if (!settingsFile.exists() && internalSettings.exists()) {
-					sourcePath = internalSettings.toPath();
-				} else {
-					sourcePath = settingsFile.toPath();
-				}
-				Files.copy(sourcePath, destPath, StandardCopyOption.REPLACE_EXISTING);
-				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(externalSettings)));
-			}
-			xencode.writeObject(currDeskStops);
-			xencode.close();
-		}
-		catch (Exception fne)
-		{
-			System.out.println("Exception while saving properties file-\"" + SETTINGS_FILE + "\": " + fne.toString());
-			fne.printStackTrace();
-		}
+		saveToDeskStopHome(SETTINGS_FILE, currDeskStops);
 	}
 
-	/*
-	 * 1. Check alarms exist in user.home and decode XML.
-	 * 2. Else check in JAR dir/app/Alarms.xml and decode XML.
-	 * 3. Else check in JAR dir/Alarms.xml and decode XML.
-	 * 4. Load decoded XML into TimeBean objects Vector and return the same.
-	 */
 	public static Vector<TimeBean> loadAlarms()
 	{
 		Vector<TimeBean> data = new Vector<>();
-		try
-		{
-			XMLDecoder decoder;
-			File parentDir      = getJarDir();
-			File externalAlarms = new File(getDeskStopHomeDir(), ALARMS_FILE);
-			File alarmsFile     = new File(parentDir, ALARMS_FILE);
-			File internalAlarms = new File(parentDir, INTERNAL_ALARMS_FILE);
-			if (externalAlarms.exists()) {
-				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(externalAlarms)));
-			} else if (!alarmsFile.exists() && internalAlarms.exists()) {
-				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(internalAlarms)));
-			} else {
-				decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(alarmsFile)));
+		Vector<?> content = loadFirst(Vector.class, ALARMS_FILE, INTERNAL_ALARMS_FILE);
+		if (content != null) {
+			for (Object item : content) {
+				if (item instanceof TimeBean alarm) data.add(alarm);
 			}
-			Object settingsObj = decoder.readObject();
-			decoder.close();
-			if (settingsObj instanceof Vector) {
-				Vector<?> tmpVec = (Vector<?>)settingsObj;
-				for (int cnt = 0; cnt < tmpVec.size(); cnt++) {
-					if (tmpVec.elementAt(cnt) instanceof TimeBean) data.add((TimeBean)tmpVec.elementAt(cnt));
-				}
-			}
-		}
-		catch (Exception exclusive)
-		{// Ignoring missing file...
-			System.out.println("Exception while loading properties file-\"" + ALARMS_FILE + "\": " + exclusive.getMessage());
-			exclusive.printStackTrace();
 		}
 		return data;
 	}
 
-	/*
-	 * 1. Get's the JAR directory and hence File objects for apps/Alarms.xml and ./Alarms.xml
-	 * 2. Get File object for user.home/Alarms.xml. If exists then create XML and write settings and close.
-	 * 3. Else check alarmsFile and internalAlarms as in (1) and copy to user.home/Alarms.xml.
-	 * 4. Then create XML and write settings and close.
-	 */
 	public static void saveAlarms(Vector <TimeBean>data)
 	{
-		try
-		{
-			XMLEncoder xencode;
-			File parentDir      = getJarDir();
-			File externalAlarms = new File(getDeskStopHomeDir(), ALARMS_FILE);
-			File alarmsFile     = new File(parentDir, ALARMS_FILE);
-			File internalAlarms = new File(parentDir, INTERNAL_ALARMS_FILE);
-			if (externalAlarms.exists()) {
-				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(externalAlarms)));
-			} else {
-				Path sourcePath;
-				Path destPath = externalAlarms.toPath();
-				if (!alarmsFile.exists() && internalAlarms.exists()) {
-					sourcePath = internalAlarms.toPath();
-				} else {
-					sourcePath = alarmsFile.toPath();
-				}
-				Files.copy(sourcePath, destPath, StandardCopyOption.REPLACE_EXISTING);
-				xencode = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(externalAlarms)));
-			}
-			xencode.writeObject(data);
-			xencode.close();
-		}
-		catch (Exception fne)
-		{
-			System.out.println("Exception while saving alarms file \"" + ALARMS_FILE + "\": " + fne.toString());
-			fne.printStackTrace();
-		}
+		saveToDeskStopHome(ALARMS_FILE, data);
 	}
 
+	// The lock lives in the per-user ~/.deskstop so different users on one machine don't block each other.
 	protected static boolean lockInstance()
 	{
-		File tmpLocation = new File(System.getProperty("java.io.tmpdir"));
 		final String lockFile = "DeskStop.lck";
 		try
 		{
-			final File file = new File(tmpLocation, lockFile);
+			final File file = new File(getDeskStopHomeDir(), lockFile);
 			final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
 			final FileLock fileLock = randomAccessFile.getChannel().tryLock();
 			if (fileLock != null)
