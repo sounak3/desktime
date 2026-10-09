@@ -58,11 +58,11 @@ DeskStop is a versatile, multi-feature clock and timer application designed for 
 
 In case you want to install latest release, please download the appropriate OS package and install:
 
-|  OS  | Download file | MD5 hash |
+|  OS  | Download file | SHA-256 |
 | ---  | ------------- | -------- |
-| Windows | [DeskStop-1.0.msi](https://github.com/sounak3/desktime/releases/latest/download/DeskStop-1.0.msi) | 1b258bdd3c937c19e7ce364eaade5422 |
-| Ubuntu / Debian | [deskstop_1.0-release_amd64.deb](https://github.com/sounak3/desktime/releases/latest/download/deskstop_1.0-release_amd64.deb) | e3c96c6069815efa179943b6b3cd5f49 |
-| Mac OS | [DeskStop-1.0.dmg](https://github.com/sounak3/desktime/releases/latest/download/DeskStop-1.0.dmg) | c76b8c515bf5d3b12229d4c6bef311f0 |
+| Windows | [DeskStop-1.1.msi](https://github.com/sounak3/desktime/releases/latest/download/DeskStop-1.1.msi) | `8e832e5bcb61d1330a6e2d4337f20e7b4715ca06e342bff68ccd80c8e6a3d8f3` |
+| Ubuntu / Debian | [deskstop_1.1-release_amd64.deb](https://github.com/sounak3/desktime/releases/latest/download/deskstop_1.1-release_amd64.deb) | `11de580879353c715bb2a57518342a1b9f7ca77fc1cd424b8a35168d166140d4` |
+| Mac OS | [DeskStop-1.1.dmg](https://github.com/sounak3/desktime/releases/latest/download/DeskStop-1.1.dmg) | `aeaa15b699d521d094eb2381c4555f4750579ce556a2142f9e8f910c5a27743f` |
 
 In case you're cloning this repository:
 ```bash
