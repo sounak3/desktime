@@ -38,6 +38,20 @@ Build jar (lin)                         Package (parallel)
 
 Only `lin` checks out the repository. `win` and `mac` receive the jar, default files and icons through `stash`/`unstash`, so they need neither git nor GitHub access. If a unit test fails, the release stops before packaging.
 
+### Release gate
+
+**A release only builds files that have passed `desktime dev`.** Right after checkout, the release looks up the git *tree hash* of the commit, which identifies its exact files, in `/home/sounak/jenkins/release-gate/desktime/` on `lin`. If there's no pass marker for that tree, the release stops within seconds and names the commit to test. *Build Now* stays a single click, and there's no way to skip the check.
+
+Because the gate matches files, not commit IDs, a merge commit whose files are identical to a branch that already passed dev also passes. Anything with different files needs its own dev run.
+
+A dev run writes the marker only when all of these hold:
+- the whole run succeeded: jar copied to all three machines, and all tests passed
+- the working copy had no uncommitted or untracked changes
+- the jar was newer than every file in `src/` and `pom.xml`
+- the working copy didn't change during the run
+
+The build description says when a run doesn't qualify, for example `1a2b3c4 (uncommitted changes: no release pass)`. To release a commit, check it out cleanly and start `desktime dev`, by building in the IDE or with *Build with Parameters*. Once it passes, run `desktime`.
+
 The `app/` folder is jpackage's `--input`, and everything in it ships inside the installer:
 
 | File in installer | Source in repo |
